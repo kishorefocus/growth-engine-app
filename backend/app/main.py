@@ -107,7 +107,7 @@ if settings.frontend_url:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
-    allow_origin_regex=r"^https://([a-zA-Z0-9-]+\.)*vercel\.app$|^http://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origin_regex=r"^https://([a-zA-Z0-9-]+\.)*(vercel\.app|getyourclientsb2b\.com)$|^http://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -116,10 +116,15 @@ app.add_middleware(
 
 # ─── Health endpoints ────────────────────────────────────────────────────────
 
-@app.get("/healthz", include_in_schema=False)
 @app.get("/health", include_in_schema=False)
-async def health_check():
-    """Railway health endpoint."""
+def health_check():
+    """Fast, lightweight health check endpoint for Render and UptimeRobot."""
+    return {"status": "ok"}
+
+
+@app.get("/healthz", include_in_schema=False)
+async def health_detailed():
+    """Detailed health check endpoint reporting database status."""
     db_status = await check_database_connection()
     overall = "healthy" if db_status["connected"] else "degraded"
     return {

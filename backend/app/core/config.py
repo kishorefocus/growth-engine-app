@@ -81,6 +81,8 @@ class Settings(BaseSettings):
     sentry_dsn: str = ""
 
     cors_origins: list[str] = [
+        "https://growth.getyourclientsb2b.com",
+        "https://www.getyourclientsb2b.com",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:3001",
@@ -97,6 +99,33 @@ class Settings(BaseSettings):
                 v = v.replace("postgres://", "postgresql+asyncpg://", 1)
             elif v.startswith("postgresql://") and not v.startswith("postgresql+asyncpg://"):
                 v = v.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+            # Clean query parameters for asyncpg compatibility (e.g. Neon connection strings)
+            from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+            try:
+                parsed = urlparse(v)
+                qs = parse_qs(parsed.query)
+                # asyncpg expects ssl=require rather than sslmode=require
+                if "sslmode" in qs:
+                    ssl_val = qs.pop("sslmode")[0]
+                    if ssl_val in ("require", "verify-ca", "verify-full"):
+                        qs["ssl"] = ["require"]
+                # asyncpg does not accept channel_binding
+                qs.pop("channel_binding", None)
+                new_query = urlencode(qs, doseq=True)
+                v = urlunparse(parsed._replace(query=new_query))
+            except Exception:
+                pass
+        return v
+
+    @field_validator("redis_url", mode="before")
+    @classmethod
+    def assemble_redis_connection(cls, v: Any) -> str:
+        if isinstance(v, str):
+            v = v.strip()
+            # Upstash requires rediss:// (TLS)
+            if "upstash.io" in v and v.startswith("redis://"):
+                v = v.replace("redis://", "rediss://", 1)
         return v
 
     @field_validator("frontend_url", mode="before")
