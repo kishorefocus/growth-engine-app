@@ -30,9 +30,9 @@ class Settings(BaseSettings):
     # Encryption (Fernet key for OAuth tokens)
     encryption_key: str = ""  # generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
-    # Frontend URL
-    frontend_url: str = "https://www.getyourclientsb2b.com"
-    api_url: str = "http://localhost:8000"
+    # Frontend & API URLs
+    frontend_url: str = "https://growth.getyourclientsb2b.com"
+    api_url: str = "https://growth-api.getyourclientsb2b.com"
 
     # Dry run mode (default true — nothing sent until owner flips)
     dry_run: bool = True
@@ -82,6 +82,7 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = [
         "https://growth.getyourclientsb2b.com",
+        "https://growth-api.getyourclientsb2b.com",
         "https://www.getyourclientsb2b.com",
         "http://localhost:3000",
         "http://127.0.0.1:3000",

@@ -100,7 +100,7 @@ export default function HomePage() {
             {loading ? "Checking..." : "Recheck Connection"}
           </button>
           <a
-            href="http://localhost:8000/docs"
+            href={`${process.env.NEXT_PUBLIC_API_URL || "https://growth-api.getyourclientsb2b.com"}/docs`}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg glass-panel text-slate-300 hover:text-white text-sm font-medium hover:border-slate-600 transition-all"

@@ -19,6 +19,8 @@ services:
         sync: false
       - key: FRONTEND_URL
         value: https://growth.getyourclientsb2b.com
+      - key: API_URL
+        value: https://growth-api.getyourclientsb2b.com
       - key: ENCRYPTION_KEY
         sync: false
       - key: JWT_SECRET

@@ -106,6 +106,8 @@ const PLATFORMS: PlatformConfig[] = [
   },
 ];
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://growth-api.getyourclientsb2b.com";
+
 export default function ConnectionsPage() {
   const { data: accounts, isLoading, refetch } = useConnections();
   const connectMockMutation = useConnectMock();
@@ -114,6 +116,7 @@ export default function ConnectionsPage() {
 
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [showMetaGuide, setShowMetaGuide] = useState<boolean>(false);
+  const [activeGuideTab, setActiveGuideTab] = useState<"meta" | "linkedin" | "x" | "youtube">("meta");
   const [copiedUri, setCopiedUri] = useState<string | null>(null);
 
   // Direct connect modal state
@@ -158,7 +161,7 @@ export default function ConnectionsPage() {
       const fbConnected = accounts?.some((a) => a.platform.toLowerCase() === "facebook" && a.status === "active");
       if (fbConnected) {
         try {
-          const syncRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/connections/instagram/sync-from-facebook`, {
+          const syncRes = await fetch(`${API_BASE}/api/v1/connections/instagram/sync-from-facebook`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("gr_access_token") || ""}`,
@@ -187,7 +190,7 @@ export default function ConnectionsPage() {
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/connections/${platformId}/authorize`, {
+      const res = await fetch(`${API_BASE}/api/v1/connections/${platformId}/authorize`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("gr_access_token") || ""}`,
         },
@@ -249,7 +252,7 @@ export default function ConnectionsPage() {
       // If Facebook was connected with a real token, attempt to auto-sync linked Instagram Business account
       if (modalPlatform.id === "facebook" && !directToken.trim().startsWith("mock_")) {
         try {
-          const syncRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/connections/instagram/sync-from-facebook`, {
+          const syncRes = await fetch(`${API_BASE}/api/v1/connections/instagram/sync-from-facebook`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("gr_access_token") || ""}`,
@@ -318,17 +321,17 @@ export default function ConnectionsPage() {
         </div>
       </div>
 
-      {/* Meta OAuth Setup / Troubleshooting Guide */}
+      {/* OAuth Setup & Developer Portal Guide */}
       <div className="rounded-2xl border border-violet-500/20 bg-violet-500/[0.04] p-4 text-xs">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-violet-500/20 text-violet-300 flex items-center justify-center font-bold">
-              M
+              <Share2 className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-semibold text-white text-sm">Meta (Facebook & Instagram) Connection Guide</p>
+              <p className="font-semibold text-white text-sm">OAuth 2.0 Redirect URIs & Setup Guide</p>
               <p className="text-slate-400 text-[11px]">
-                Configured App ID: <span className="font-mono text-violet-300">1125229983597930</span> (GetYourClientsB2B)
+                API Base: <span className="font-mono text-violet-300">{API_BASE}</span>
               </p>
             </div>
           </div>
@@ -336,81 +339,267 @@ export default function ConnectionsPage() {
             onClick={() => setShowMetaGuide(!showMetaGuide)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 transition-all"
           >
-            {showMetaGuide ? "Hide Details" : "Setup & Whitelist URLs"}
+            {showMetaGuide ? "Hide Setup Guide" : "View Whitelist URLs & Developer Setup"}
             {showMetaGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         </div>
 
         {showMetaGuide && (
           <div className="mt-4 pt-3 border-t border-violet-500/15 space-y-3 text-slate-300 leading-relaxed">
-            <p>
-              To connect Facebook & Instagram via the official Meta dialog, ensure these settings in your{" "}
-              <a
-                href="https://developers.facebook.com/apps/1125229983597930/fb-login/settings/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-violet-400 underline hover:text-violet-300 inline-flex items-center gap-0.5"
-              >
-                Meta Developer Console <ExternalLink className="w-3 h-3" />
-              </a>:
-            </p>
-
-            <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] text-slate-400">Facebook Redirect URI:</span>
-                <div className="flex items-center gap-2">
-                  <code className="text-[11px] text-emerald-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
-                    http://localhost:8000/api/v1/connections/facebook/callback
-                  </code>
-                  <button
-                    onClick={() => handleCopyUri("http://localhost:8000/api/v1/connections/facebook/callback")}
-                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
-                    title="Copy URI"
-                  >
-                    {copiedUri === "http://localhost:8000/api/v1/connections/facebook/callback" ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] text-slate-400">Instagram Redirect URI:</span>
-                <div className="flex items-center gap-2">
-                  <code className="text-[11px] text-pink-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
-                    http://localhost:8000/api/v1/connections/instagram/callback
-                  </code>
-                  <button
-                    onClick={() => handleCopyUri("http://localhost:8000/api/v1/connections/instagram/callback")}
-                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
-                    title="Copy URI"
-                  >
-                    {copiedUri === "http://localhost:8000/api/v1/connections/instagram/callback" ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                </div>
-              </div>
+            {/* Guide Tabs */}
+            <div className="flex flex-wrap gap-1.5 border-b border-white/[0.06] pb-2.5">
+              {[
+                { id: "meta", label: "Meta (Facebook & IG)" },
+                { id: "linkedin", label: "LinkedIn" },
+                { id: "x", label: "X (Twitter)" },
+                { id: "youtube", label: "YouTube (Google)" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveGuideTab(tab.id as any)}
+                  className={clsx(
+                    "px-3 py-1 rounded-lg text-xs font-medium transition-all",
+                    activeGuideTab === tab.id
+                      ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
+                      : "bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]"
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-[11px]">
-              <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                <p className="font-semibold text-white mb-1">1. Facebook Page Requirement</p>
-                <p className="text-slate-400">
-                  Meta only allows automated posting to Facebook Pages, not personal profiles. Make sure you have created a Page under your Facebook account.
+            {/* Meta Guide */}
+            {activeGuideTab === "meta" && (
+              <div className="space-y-3">
+                <p className="text-slate-300">
+                  Configure Facebook Login settings in your{" "}
+                  <a
+                    href="https://developers.facebook.com/apps/1125229983597930/fb-login/settings/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-violet-400 underline hover:text-violet-300 inline-flex items-center gap-0.5"
+                  >
+                    Meta Developer Console (App ID 1125229983597930) <ExternalLink className="w-3 h-3" />
+                  </a>:
                 </p>
+
+                <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-[11px] text-slate-400">Facebook Redirect URI:</span>
+                    <div className="flex items-center gap-2">
+                      <code className="text-[11px] text-emerald-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                        {`${API_BASE}/api/v1/connections/facebook/callback`}
+                      </code>
+                      <button
+                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/facebook/callback`)}
+                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
+                        title="Copy URI"
+                      >
+                        {copiedUri === `${API_BASE}/api/v1/connections/facebook/callback` ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-[11px] text-slate-400">Instagram Redirect URI:</span>
+                    <div className="flex items-center gap-2">
+                      <code className="text-[11px] text-pink-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                        {`${API_BASE}/api/v1/connections/instagram/callback`}
+                      </code>
+                      <button
+                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/instagram/callback`)}
+                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
+                        title="Copy URI"
+                      >
+                        {copiedUri === `${API_BASE}/api/v1/connections/instagram/callback` ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <p className="font-semibold text-white mb-1">1. Facebook Page Requirement</p>
+                    <p className="text-slate-400">
+                      Meta only allows automated posting to Facebook Pages, not personal profiles. Make sure you have created a Page under your Facebook account.
+                    </p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                    <p className="font-semibold text-white mb-1">2. Instagram Business Requirement</p>
+                    <p className="text-slate-400">
+                      Instagram accounts must be a Professional/Business account linked to your Facebook Page in Meta Business Suite.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                <p className="font-semibold text-white mb-1">2. Instagram Business Requirement</p>
-                <p className="text-slate-400">
-                  Instagram accounts must be a Professional/Business account linked to your Facebook Page in Meta Business Suite.
+            )}
+
+            {/* LinkedIn Guide */}
+            {activeGuideTab === "linkedin" && (
+              <div className="space-y-3">
+                <p className="text-slate-300">
+                  Configure OAuth settings in your{" "}
+                  <a
+                    href="https://www.linkedin.com/developers/apps/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-400 underline hover:text-blue-300 inline-flex items-center gap-0.5"
+                  >
+                    LinkedIn Developer Portal (Client ID: 779fkl5zbp48jc) <ExternalLink className="w-3 h-3" />
+                  </a>:
                 </p>
+
+                <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-[11px] text-slate-400">Authorized Redirect URL:</span>
+                    <div className="flex items-center gap-2">
+                      <code className="text-[11px] text-blue-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                        {`${API_BASE}/api/v1/connections/linkedin/callback`}
+                      </code>
+                      <button
+                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/linkedin/callback`)}
+                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
+                        title="Copy URI"
+                      >
+                        {copiedUri === `${API_BASE}/api/v1/connections/linkedin/callback` ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-[11px]">
+                  <p className="font-semibold text-white mb-1">LinkedIn App Requirements</p>
+                  <p className="text-slate-400">
+                    Go to <strong>Auth</strong> tab &rarr; <strong>Authorized redirect URLs for your app</strong>, and paste the URL above.
+                    Under the <strong>Products</strong> tab, enable <em>&quot;Share on LinkedIn&quot;</em> and <em>&quot;Sign In with LinkedIn using OpenID Connect&quot;</em>.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* X / Twitter Guide */}
+            {activeGuideTab === "x" && (
+              <div className="space-y-3">
+                <p className="text-slate-300">
+                  Configure User Authentication in your{" "}
+                  <a
+                    href="https://developer.twitter.com/en/portal/dashboard"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-400 underline hover:text-sky-300 inline-flex items-center gap-0.5"
+                  >
+                    X (Twitter) Developer Portal (Client ID: LTQzaGZPMFMxNGdqVHNaNjlkamY6MTpjaQ) <ExternalLink className="w-3 h-3" />
+                  </a>:
+                </p>
+
+                <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-[11px] text-slate-400">Callback / Redirect URI:</span>
+                    <div className="flex items-center gap-2">
+                      <code className="text-[11px] text-sky-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                        {`${API_BASE}/api/v1/connections/x/callback`}
+                      </code>
+                      <button
+                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/x/callback`)}
+                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
+                        title="Copy URI"
+                      >
+                        {copiedUri === `${API_BASE}/api/v1/connections/x/callback` ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-[11px] text-slate-400">Website URL:</span>
+                    <code className="text-[11px] text-slate-300 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                      https://growth.getyourclientsb2b.com
+                    </code>
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-[11px]">
+                  <p className="font-semibold text-white mb-1">X App Authentication Settings</p>
+                  <p className="text-slate-400">
+                    Set <strong>App permissions</strong> to <em>Read and write</em>. Set <strong>Type of App</strong> to <em>Web App, Automated App or Bot</em>. Enter the Callback URI and Website URL as shown above.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* YouTube Guide */}
+            {activeGuideTab === "youtube" && (
+              <div className="space-y-3">
+                <p className="text-slate-300">
+                  Configure OAuth 2.0 Credentials in your{" "}
+                  <a
+                    href="https://console.cloud.google.com/apis/credentials"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-red-400 underline hover:text-red-300 inline-flex items-center gap-0.5"
+                  >
+                    Google Cloud Console <ExternalLink className="w-3 h-3" />
+                  </a>:
+                </p>
+
+                <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-[11px] text-slate-400">Authorized Redirect URI:</span>
+                    <div className="flex items-center gap-2">
+                      <code className="text-[11px] text-red-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                        {`${API_BASE}/api/v1/connections/youtube/callback`}
+                      </code>
+                      <button
+                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/youtube/callback`)}
+                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
+                        title="Copy URI"
+                      >
+                        {copiedUri === `${API_BASE}/api/v1/connections/youtube/callback` ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-[11px] text-slate-400">Authorized JavaScript Origins:</span>
+                    <div className="space-y-1 text-right">
+                      <code className="block text-[11px] text-slate-300 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                        https://growth.getyourclientsb2b.com
+                      </code>
+                      <code className="block text-[11px] text-slate-300 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                        https://growth-api.getyourclientsb2b.com
+                      </code>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-[11px]">
+                  <p className="font-semibold text-white mb-1">Google Cloud Console Requirements</p>
+                  <p className="text-slate-400">
+                    Under <strong>APIs & Services</strong> &rarr; <strong>Library</strong>, ensure <em>YouTube Data API v3</em> is enabled. Under <strong>Credentials</strong> &rarr; Edit your OAuth 2.0 Web Client, add the Authorized Javascript Origins and Authorized Redirect URI shown above.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

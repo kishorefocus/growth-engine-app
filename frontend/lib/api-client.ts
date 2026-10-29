@@ -3,7 +3,7 @@
  * Auto-refreshes tokens via TanStack Query's error boundary.
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://growth-api.getyourclientsb2b.com";
 const API_BASE = `${API_URL}/api/v1`;
 
 // ─── Types ───────────────────────────────────────────────────────────────────
