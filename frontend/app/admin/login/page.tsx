@@ -3,7 +3,8 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLogin } from "@/lib/hooks";
-import { getAccessToken, setTokens } from "@/lib/api-client";
+import { clearTokens, getAccessToken, hasAuthCookie, setTokens } from "@/lib/api-client";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -16,7 +17,7 @@ import {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center text-slate-500">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0f] flex items-center justify-center text-slate-500">Loading...</div>}>
       <LoginForm />
     </Suspense>
   );
@@ -32,12 +33,25 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // If already logged in, redirect immediately to dashboard
+  // Safeguard against infinite redirect loops:
   useEffect(() => {
-    if (getAccessToken()) {
-      window.location.href = next;
+    const isFromMiddleware = searchParams.has("next");
+    const token = getAccessToken();
+    const hasCookie = hasAuthCookie();
+
+    // If redirected here because middleware saw no cookie, clear stale tokens and stay on login
+    if (isFromMiddleware) {
+      if (!hasCookie) {
+        clearTokens();
+      }
+      return;
     }
-  }, [next]);
+
+    // Only redirect if explicitly visiting /admin/login with active token AND valid cookie
+    if (token && hasCookie) {
+      router.replace(next);
+    }
+  }, [next, router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,11 +68,11 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0f] flex transition-colors">
       {/* Left panel — branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12 bg-[#0c0d15] text-white">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-950/60 via-[#0a0a0f] to-[#0a0a0f]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-950/70 via-[#0c0d15] to-[#0c0d15]" />
         <div className="absolute top-20 left-20 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-64 h-64 bg-indigo-600/20 rounded-full blur-3xl" />
 
@@ -69,7 +83,7 @@ function LoginForm() {
             </div>
             <span className="text-white font-bold text-lg tracking-tight">GetyourclientsB2B</span>
           </div>
-          <span className="text-xs font-mono text-violet-400/60 ml-12">Growth Engine</span>
+          <span className="text-xs font-mono text-violet-400/70 ml-12">Growth Engine</span>
         </div>
 
         <div className="relative space-y-6">
@@ -79,7 +93,7 @@ function LoginForm() {
               Every growth channel.
             </span>
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed max-w-sm">
+          <p className="text-slate-300 text-base leading-relaxed max-w-sm">
             Cold email outreach, social content automation, programmatic SEO, video planning, and launch tracking — all in one admin.
           </p>
 
@@ -92,12 +106,12 @@ function LoginForm() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-start gap-3"
+                className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-start gap-3"
               >
                 <span className="text-lg">{item.icon}</span>
                 <div>
                   <p className="text-xs font-semibold text-white">{item.label}</p>
-                  <p className="text-[11px] text-slate-500">{item.desc}</p>
+                  <p className="text-[11px] text-slate-400">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -113,21 +127,26 @@ function LoginForm() {
       </div>
 
       {/* Right panel — login form */}
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex items-center justify-center p-8 relative bg-white dark:bg-[#0a0a0f] transition-colors">
+        {/* Floating Theme Toggle in top right */}
+        <div className="absolute top-6 right-6">
+          <ThemeToggle />
+        </div>
+
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="w-8 h-8 rounded-xl bg-violet-500/20 border border-violet-500/40 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-violet-400" />
+              <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-400" />
             </div>
-            <span className="text-white font-bold">GetyourclientsB2B Growth Engine</span>
+            <span className="text-slate-900 dark:text-white font-bold">GetyourclientsB2B Growth Engine</span>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-1">Sign in</h2>
-            <p className="text-slate-400 text-sm">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Sign in</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">
               Access your growth engine dashboard.{" "}
-              <a href="/admin/register" className="text-violet-400 hover:text-violet-300 transition-colors">
+              <a href="/admin/register" className="text-violet-600 dark:text-violet-400 hover:text-violet-500 transition-colors">
                 First time? Register →
               </a>
             </p>
@@ -135,7 +154,7 @@ function LoginForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Email address
               </label>
               <input
@@ -145,13 +164,13 @@ function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/60 focus:bg-white/[0.06] transition-all"
+                className="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:bg-white dark:focus:bg-white/[0.06] transition-all"
                 placeholder="you@company.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -162,7 +181,7 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/60 focus:bg-white/[0.06] transition-all pr-12"
+                  className="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:bg-white dark:focus:bg-white/[0.06] transition-all pr-12"
                   placeholder="••••••••"
                 />
                 <button

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function PublicLayout({
   children,
@@ -7,40 +8,41 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-600 dark:selection:text-cyan-200 transition-colors">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2.5 group">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
                 G
               </div>
-              <span className="font-semibold text-lg tracking-tight text-white group-hover:text-cyan-400 transition-colors">
+              <span className="font-semibold text-lg tracking-tight text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
                 GlobalReach
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
-              <Link href="/tools/subject-line-grader" className="hover:text-cyan-400 transition-colors">
+            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-400">
+              <Link href="/tools/subject-line-grader" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
                 Subject Line Grader
               </Link>
-              <Link href="/tools/email-verifier" className="hover:text-cyan-400 transition-colors">
+              <Link href="/tools/email-verifier" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
                 Free Email Verifier
               </Link>
-              <Link href="/alternatives/apollo/agencies" className="hover:text-cyan-400 transition-colors">
+              <Link href="/alternatives/apollo/agencies" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
                 Apollo Alternative
               </Link>
-              <Link href="/find-leads/technology/austin" className="hover:text-cyan-400 transition-colors">
+              <Link href="/find-leads/technology/austin" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
                 Find Leads
               </Link>
             </nav>
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link
               href="/admin/login"
-              className="text-xs sm:text-sm font-medium text-slate-400 hover:text-white px-3 py-1.5 transition-colors"
+              className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 transition-colors"
             >
               Sign In
             </Link>
@@ -60,16 +62,16 @@ export default function PublicLayout({
       <main className="flex-1">{children}</main>
 
       {/* Public Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/90 py-12 text-sm text-slate-500">
+      <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950/90 py-12 text-sm text-slate-600 dark:text-slate-500 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center font-bold text-xs text-white">
                 G
               </div>
-              <span className="font-semibold text-white">GlobalReach</span>
+              <span className="font-semibold text-slate-900 dark:text-white">GlobalReach</span>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed mb-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
               Automated B2B client acquisition engine with real-time contact verification, compliant email sequencing, and multi-channel content planning.
             </p>
             <p className="text-xs text-slate-500">

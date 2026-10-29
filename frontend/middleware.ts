@@ -23,10 +23,12 @@ export function middleware(request: NextRequest) {
 
   // Check for auth cookie (set by client after login)
   const token = request.cookies.get("gr_auth")?.value;
-  if (!token) {
+  if (!token || token === "undefined" || token === "null" || token.length < 10) {
     const loginUrl = new URL("/admin/login", request.url);
     loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    response.cookies.delete("gr_auth");
+    return response;
   }
 
   return NextResponse.next();

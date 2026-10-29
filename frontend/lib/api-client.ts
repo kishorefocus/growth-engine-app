@@ -89,7 +89,8 @@ export function setTokens(access: string, refresh: string): void {
     localStorage.setItem(TOKEN_KEY, access);
     localStorage.setItem(REFRESH_KEY, refresh);
     // Write 30-day cookie matching refresh token so Next.js middleware never expires early
-    document.cookie = `gr_auth=${access}; path=/; max-age=${30 * 24 * 3600}; samesite=lax`;
+    const isHttps = window.location.protocol === "https:";
+    document.cookie = `gr_auth=${encodeURIComponent(access)}; path=/; max-age=${30 * 24 * 3600}; samesite=lax${isHttps ? "; secure" : ""}`;
   }
 }
 
@@ -99,6 +100,14 @@ export function clearTokens(): void {
     localStorage.removeItem(REFRESH_KEY);
     document.cookie = `gr_auth=; path=/; max-age=0; samesite=lax`;
   }
+}
+
+export function hasAuthCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.split(";").some((c) => {
+    const trimmed = c.trim();
+    return trimmed.startsWith("gr_auth=") && trimmed.split("=")[1]?.length > 10;
+  });
 }
 
 export function getRefreshToken(): string | null {

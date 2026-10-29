@@ -4,7 +4,7 @@ import { TopBar } from "@/components/top-bar";
 /** Layout for the authenticated admin shell — all sections except login/register */
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-[#0a0a0f]">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-[#0a0a0f] text-slate-900 dark:text-slate-100 transition-colors">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar />
