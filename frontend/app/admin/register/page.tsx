@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useRegister } from "@/lib/hooks";
-import { getAccessToken } from "@/lib/api-client";
+import { getAccessToken, setTokens } from "@/lib/api-client";
 import { toast } from "sonner";
 import { ArrowRight, Eye, EyeOff, Loader2, TrendingUp, ShieldCheck } from "lucide-react";
 
@@ -34,9 +34,9 @@ export default function RegisterPage() {
     }
     try {
       const data = await register.mutateAsync({ email, password });
-      document.cookie = `gr_auth=${data.access_token}; path=/; max-age=${15 * 60}; samesite=strict`;
+      setTokens(data.access_token, data.refresh_token);
       toast.success("Owner account created! Welcome to GetyourclientsB2B Growth Engine.");
-      router.push("/admin/dashboard");
+      window.location.href = "/admin/dashboard";
     } catch (err: any) {
       if (err.status === 403) {
         toast.error("Registration is locked. Contact the owner to invite you.");

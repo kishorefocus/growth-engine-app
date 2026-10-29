@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLogin } from "@/lib/hooks";
-import { getAccessToken } from "@/lib/api-client";
+import { getAccessToken, setTokens } from "@/lib/api-client";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -32,21 +32,22 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // If already logged in, redirect
+  // If already logged in, redirect immediately to dashboard
   useEffect(() => {
     if (getAccessToken()) {
-      router.replace(next);
+      window.location.href = next;
     }
-  }, []);
+  }, [next]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const data = await login.mutateAsync({ email, password });
-      // Set auth cookie for middleware
-      document.cookie = `gr_auth=${data.access_token}; path=/; max-age=${15 * 60}; samesite=strict`;
-      toast.success("Welcome back!");
-      router.push(next);
+      // Ensure tokens and 30-day cookie are firmly set
+      setTokens(data.access_token, data.refresh_token);
+      toast.success("Login successful! Redirecting to dashboard...");
+      // Immediate redirect to dashboard
+      window.location.href = next;
     } catch (err: any) {
       toast.error(err.message || "Login failed. Check your credentials.");
     }

@@ -85,13 +85,20 @@ export function getAccessToken(): string | null {
 }
 
 export function setTokens(access: string, refresh: string): void {
-  localStorage.setItem(TOKEN_KEY, access);
-  localStorage.setItem(REFRESH_KEY, refresh);
+  if (typeof window !== "undefined") {
+    localStorage.setItem(TOKEN_KEY, access);
+    localStorage.setItem(REFRESH_KEY, refresh);
+    // Write 30-day cookie matching refresh token so Next.js middleware never expires early
+    document.cookie = `gr_auth=${access}; path=/; max-age=${30 * 24 * 3600}; samesite=lax`;
+  }
 }
 
 export function clearTokens(): void {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_KEY);
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_KEY);
+    document.cookie = `gr_auth=; path=/; max-age=0; samesite=lax`;
+  }
 }
 
 export function getRefreshToken(): string | null {
@@ -102,26 +109,33 @@ export function getRefreshToken(): string | null {
 // ─── Core fetch helper ───────────────────────────────────────────────────────
 
 let _isRefreshing = false;
-let _refreshQueue: Array<(token: string) => void> = [];
+let _refreshQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (err: any) => void;
+}> = [];
 
-async function refreshAccessToken(): Promise<string> {
+export async function refreshAccessToken(): Promise<string> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) throw new Error("No refresh token available");
 
-  const res = await fetch(`${API_BASE}/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
+  try {
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
 
-  if (!res.ok) {
-    clearTokens();
-    throw new Error("Session expired. Please log in again.");
+    if (!res.ok) {
+      clearTokens();
+      throw new Error("Session expired. Please log in again.");
+    }
+
+    const data: TokenResponse = await res.json();
+    setTokens(data.access_token, data.refresh_token);
+    return data.access_token;
+  } catch (err) {
+    throw err;
   }
-
-  const data: TokenResponse = await res.json();
-  setTokens(data.access_token, data.refresh_token);
-  return data.access_token;
 }
 
 export async function apiFetch<T>(
@@ -143,23 +157,31 @@ export async function apiFetch<T>(
 
   let response = await fetch(url, { ...fetchOptions, headers });
 
-  // Auto-refresh on 401
+  // Auto-refresh on 401 without logging out
   if (response.status === 401 && !skipAuth) {
     if (_isRefreshing) {
-      // Wait for current refresh
-      const newToken = await new Promise<string>((resolve) => {
-        _refreshQueue.push(resolve);
-      });
-      headers["Authorization"] = `Bearer ${newToken}`;
-      response = await fetch(url, { ...fetchOptions, headers });
+      // Wait for in-flight refresh
+      try {
+        const newToken = await new Promise<string>((resolve, reject) => {
+          _refreshQueue.push({ resolve, reject });
+        });
+        headers["Authorization"] = `Bearer ${newToken}`;
+        response = await fetch(url, { ...fetchOptions, headers });
+      } catch (waitErr) {
+        throw waitErr;
+      }
     } else {
       _isRefreshing = true;
       try {
         const newToken = await refreshAccessToken();
-        _refreshQueue.forEach((cb) => cb(newToken));
+        _refreshQueue.forEach(({ resolve }) => resolve(newToken));
         _refreshQueue = [];
         headers["Authorization"] = `Bearer ${newToken}`;
         response = await fetch(url, { ...fetchOptions, headers });
+      } catch (refreshErr) {
+        _refreshQueue.forEach(({ reject }) => reject(refreshErr));
+        _refreshQueue = [];
+        throw refreshErr;
       } finally {
         _isRefreshing = false;
       }

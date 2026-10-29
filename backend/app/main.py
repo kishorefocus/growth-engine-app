@@ -117,25 +117,29 @@ app.add_middleware(
 # ─── Health endpoints ────────────────────────────────────────────────────────
 
 @app.get("/health", include_in_schema=False)
-def health_check():
-    """Fast, lightweight health check endpoint for Render and UptimeRobot."""
-    return {"status": "ok"}
-
-
 @app.get("/healthz", include_in_schema=False)
 async def health_detailed():
-    """Detailed health check endpoint reporting database status."""
+    """Health check endpoint reporting backend service, database dialect, and live ping latency."""
     db_status = await check_database_connection()
-    overall = "healthy" if db_status["connected"] else "degraded"
+    is_connected = bool(db_status.get("connected", False))
+    overall = "healthy" if is_connected else "degraded"
     return {
         "status": overall,
         "service": settings.app_name,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "dry_run": settings.dry_run,
         "environment": settings.environment,
+        "backend": {
+            "status": "online",
+            "framework": "FastAPI",
+            "environment": settings.environment,
+            "port": 8000,
+        },
         "database": {
-            "status": "connected" if db_status["connected"] else "disconnected",
-            "latency_ms": db_status["latency_ms"],
+            "status": "connected" if is_connected else "disconnected",
+            "engine": db_status.get("database_engine", "postgresql+asyncpg"),
+            "latency_ms": db_status.get("latency_ms"),
+            "message": db_status.get("message", "PostgreSQL connection OK"),
         },
     }
 

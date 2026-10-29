@@ -5,6 +5,8 @@ import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 import { Toaster } from "sonner";
 
+import { AuthSessionWatcher } from "@/components/auth-session-watcher";
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -24,6 +26,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        <AuthSessionWatcher />
         {children}
         <Toaster richColors position="top-right" />
       </ThemeProvider>

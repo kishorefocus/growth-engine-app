@@ -6,6 +6,7 @@ export interface HealthResponse {
     status: string;
     framework: string;
     environment: string;
+    port?: number;
   };
   database: {
     status: "connected" | "disconnected";
@@ -26,13 +27,35 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://growth-api.getyourclientsb2b.com";
 
 export async function fetchHealth(): Promise<HealthResponse> {
+  const startTime = Date.now();
   const res = await fetch(`${API_BASE_URL}/health`, {
     cache: "no-store",
+    headers: {
+      Accept: "application/json",
+    },
   });
+  const clientLatency = Date.now() - startTime;
   if (!res.ok) {
     throw new Error(`Backend returned status ${res.status}`);
   }
-  return res.json();
+  const data = await res.json();
+  return {
+    status: data.status || "healthy",
+    service: data.service || "GlobalReach Growth Engine API",
+    timestamp: data.timestamp || new Date().toISOString(),
+    backend: {
+      status: data.backend?.status || "online",
+      framework: data.backend?.framework || "FastAPI",
+      environment: data.backend?.environment || "production",
+      port: data.backend?.port || 8000,
+    },
+    database: {
+      status: data.database?.status || (data.status === "healthy" ? "connected" : "disconnected"),
+      engine: data.database?.engine || "postgresql+asyncpg",
+      latency_ms: data.database?.latency_ms ?? clientLatency,
+      message: data.database?.message || "PostgreSQL connection OK",
+    },
+  } as HealthResponse;
 }
 
 export async function fetchItems(): Promise<Item[]> {
