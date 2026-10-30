@@ -42,13 +42,13 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const gradient = PAGE_GRADIENTS[pathname] || "from-blue-500 to-violet-500";
 
   return (
-    <header className="h-14 px-3 sm:px-6 flex items-center justify-between border-b border-blue-100/70 dark:border-white/[0.06] bg-white/90 dark:bg-[#0a0a0f]/90 backdrop-blur-xl sticky top-0 z-10 transition-colors shadow-sm shadow-blue-100/40 dark:shadow-none">
+    <header className="h-14 px-3 sm:px-6 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c0e17] backdrop-blur-xl sticky top-0 z-10 transition-colors shadow-sm shadow-slate-200/50 dark:shadow-none">
 
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Hamburger — mobile only */}
         <button
           onClick={onMenuClick}
-          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-white/[0.06] border border-transparent hover:border-blue-100 dark:hover:border-white/[0.1] transition-all active:scale-95"
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-all active:scale-95 shadow-sm"
           aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" />
@@ -63,16 +63,16 @@ export function TopBar({ onMenuClick }: TopBarProps) {
 
       <div className="flex items-center gap-1.5 sm:gap-2.5">
         {/* DRY_RUN badge — hidden on very small screens */}
-        <div className="hidden xs:flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/20 shadow-sm">
-          <Zap className="w-3 h-3 text-yellow-500" />
-          <span className="text-[10px] sm:text-[11px] font-mono font-bold text-yellow-600 dark:text-yellow-400 hidden sm:block">DRY_RUN</span>
+        <div className="hidden xs:flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/25 shadow-sm">
+          <Zap className="w-3 h-3 text-amber-500" />
+          <span className="text-[10px] sm:text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400 hidden sm:block">DRY_RUN</span>
         </div>
 
         <ThemeToggle />
 
-        <button className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-white/[0.05] border border-transparent hover:border-blue-100 dark:hover:border-white/[0.08] transition-all relative group active:scale-95">
+        <button className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-all relative group active:scale-95 shadow-sm">
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 dark:bg-red-400 border-2 border-white dark:border-[#0a0a0f] group-hover:scale-110 transition-transform animate-pulse" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 dark:bg-red-400 border-2 border-white dark:border-[#0c0e17] group-hover:scale-110 transition-transform animate-pulse" />
         </button>
       </div>
     </header>

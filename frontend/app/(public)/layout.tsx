@@ -50,7 +50,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       </div>
 
       {/* ── Top Navbar ─────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 w-full border-b border-blue-100/60 dark:border-white/[0.07] bg-white/90 dark:bg-[#06080f]/90 backdrop-blur-xl transition-colors shadow-sm shadow-blue-100/30 dark:shadow-none">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#06080f] backdrop-blur-xl transition-colors shadow-sm shadow-slate-200/50 dark:shadow-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 
           {/* Left: Logo + Desktop Nav */}
@@ -71,7 +71,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 transition-all ${COLOR_MAP[link.color]}`}
+                  className={`px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 font-semibold transition-all ${COLOR_MAP[link.color]}`}
                 >
                   {link.label}
                 </Link>
@@ -84,7 +84,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             <ThemeToggle />
             <Link
               href="/admin/login"
-              className="hidden sm:block text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 px-3 py-1.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all"
+              className="hidden sm:block text-sm font-bold text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 px-3 py-1.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all"
             >
               Sign In
             </Link>
@@ -101,7 +101,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 border border-transparent hover:border-blue-100 dark:hover:border-white/10 transition-all active:scale-95"
+              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-all active:scale-95 shadow-sm"
               aria-label="Toggle mobile menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -111,14 +111,14 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
         {/* ── Mobile Nav Dropdown ────────────────────────────────────── */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-blue-100/60 dark:border-white/[0.06] bg-white/95 dark:bg-[#06080f]/95 backdrop-blur-xl animate-fade-down">
+          <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#06080f] shadow-2xl animate-fade-down">
             <div className="max-w-7xl mx-auto px-4 py-3 space-y-1">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${MOBILE_COLOR_MAP[link.color]}`}
+                  className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold transition-all ${MOBILE_COLOR_MAP[link.color]}`}
                 >
                   <span className={`w-6 h-6 rounded-lg bg-gradient-to-br ${MOBILE_ICON_GRADIENTS[link.color]} flex items-center justify-center shrink-0`}>
                     <ChevronRight className="w-3 h-3 text-white" />
@@ -126,11 +126,11 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-2 pb-1 border-t border-blue-100/50 dark:border-white/[0.05]">
+              <div className="pt-2 pb-1 border-t border-slate-200 dark:border-slate-800">
                 <Link
                   href="/admin/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all"
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all"
                 >
                   <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-400 flex items-center justify-center shrink-0">
                     <ChevronRight className="w-3 h-3 text-white" />

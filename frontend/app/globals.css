@@ -378,5 +378,82 @@ body {
   .xs\:hidden { display: none; }
 }
 
+/* ─── Light mode text visibility & contrast enhancements ────────────── */
+html:not(.dark) body {
+  color: #090d1a;
+}
+
+/* Headings in light mode: bold, crisp, highly visible */
+html:not(.dark) h1,
+html:not(.dark) h2,
+html:not(.dark) h3,
+html:not(.dark) h4,
+html:not(.dark) h5,
+html:not(.dark) h6 {
+  color: #090d1a !important;
+}
+
+/* Preserve gradient text */
+html:not(.dark) .grad-text,
+html:not(.dark) .animate-grad-text,
+html:not(.dark) [class*="bg-clip-text"] {
+  color: transparent !important;
+}
+
+/* Convert dark-glass containers to crisp white cards in light mode */
+html:not(.dark) [class*="bg-white\/[0.02]"],
+html:not(.dark) [class*="bg-white\/[0.03]"],
+html:not(.dark) [class*="bg-white\/[0.04]"],
+html:not(.dark) [class*="bg-white\/[0.05]"],
+html:not(.dark) [class*="bg-white\/[0.06]"],
+html:not(.dark) [class*="bg-white\/[0.08]"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Convert text-white to bold dark text in light mode, except on solid buttons/badges */
+html:not(.dark) .text-white:not(button):not([class*="bg-gradient"]):not([class*="bg-violet-6"]):not([class*="bg-blue-6"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]):not([class*="bg-pink-"]):not([class*="bg-indigo-6"]):not([class*="badge"]) {
+  color: #090d1a !important;
+}
+
+/* Ensure all slate text is dark and easily readable in light mode */
+html:not(.dark) .text-slate-400 {
+  color: #334155 !important; /* slate-700 */
+}
+html:not(.dark) .text-slate-500 {
+  color: #1e293b !important; /* slate-800 */
+}
+html:not(.dark) .text-slate-600 {
+  color: #0f172a !important; /* slate-900 */
+}
+html:not(.dark) .text-slate-300 {
+  color: #334155 !important; /* slate-700 */
+}
+
+/* Clean border styling in light mode */
+html:not(.dark) [class*="border-white\/"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Light mode alerts & callout banners */
+html:not(.dark) .bg-violet-500\/10 {
+  background-color: #f5f3ff !important;
+  border-color: #ddd6fe !important;
+}
+html:not(.dark) .text-violet-200,
+html:not(.dark) .text-violet-200\/80 {
+  color: #4c1d95 !important;
+}
+html:not(.dark) .bg-amber-500\/10 {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+}
+html:not(.dark) .text-amber-200,
+html:not(.dark) .text-amber-300,
+html:not(.dark) .text-amber-200\/80 {
+  color: #78350f !important;
+}
+
 /* ─── Smooth transitions ───────────────────────────────────────────── */
 * { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
