@@ -25,81 +25,6 @@ const CLASSIFICATIONS = [
   { id: "other", label: "Other", color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
 ];
 
-const DEFAULT_REPLIES: ReplyItem[] = [
-  {
-    id: "rep_1",
-    message_id: "msg_1",
-    classification: "interested",
-    confidence: 0.98,
-    handled: false,
-    body: "Hey Kishore, thanks for reaching out. We are exploring automated multi-platform content repurposing and programmatic SEO. Can we jump on a brief 15-minute Zoom call this Thursday around 2 PM EST to see a live demo of your calendar queue and lead discovery?",
-    suggested_response: "Hi Sarah,\n\nDelighted to connect! 2 PM EST this Thursday works perfectly. I've sent a calendar invitation to your email with a Google Meet link.\n\nI'll walk you through our live 190+ country lead engine and how we adapt 1 idea across 5 social channels automatically.\n\nTalk soon,\nKishore",
-    lead: {
-      id: "lead_1",
-      email: "sarah.jenkins@saasify.io",
-      first_name: "Sarah",
-      last_name: "Jenkins",
-      company: "SaaSify Inc",
-      title: "VP of Growth",
-    },
-    created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-  },
-  {
-    id: "rep_2",
-    message_id: "msg_2",
-    classification: "interested",
-    confidence: 0.94,
-    handled: false,
-    body: "Hi! We're currently scaling our European outbound campaigns. Your deliverability shield against Google & Yahoo spam filters caught my eye. Can you share pricing for 20k verified leads/month?",
-    suggested_response: "Hi Marcus,\n\nThanks for your interest! For 20,000 monthly verified prospects with real-time MX/SMTP validation and automated rotation, our Enterprise tier is $499/mo.\n\nYou can review our full breakdown here: https://www.getyourclientsb2b.com/pricing\n\nWould you like me to set up a test sandbox with 250 free leads for CloudScale UK?",
-    lead: {
-      id: "lead_2",
-      email: "marcus.v@cloudscale.co.uk",
-      first_name: "Marcus",
-      last_name: "Vance",
-      company: "CloudScale UK",
-      title: "Head of Demand Gen",
-    },
-    created_at: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-  },
-  {
-    id: "rep_3",
-    message_id: "msg_3",
-    classification: "interested",
-    confidence: 0.91,
-    handled: false,
-    body: "Good morning. We need verified prospecting across DACH and UK regions. How does your GDPR zero-spam suppression engine handle opt-outs?",
-    suggested_response: "Hello Elena,\n\nOur engine maintains real-time suppression hashes with 1-click unsubscribe links and automated MX verification prior to every send.",
-    lead: {
-      id: "lead_3",
-      email: "e.rostova@nexalogic.de",
-      first_name: "Elena",
-      last_name: "Rostova",
-      company: "NexaLogic AI",
-      title: "Chief Marketing Officer",
-    },
-    created_at: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
-  },
-  {
-    id: "rep_4",
-    message_id: "msg_4",
-    classification: "not_now",
-    confidence: 0.88,
-    handled: false,
-    body: "Thanks Kishore. Please send over your API documentation and enterprise pricing tier. We'd like our engineering lead to review the webhook endpoints.",
-    suggested_response: "Hi Liam,\n\nHere is our direct API documentation and webhook guides: https://www.getyourclientsb2b.com/pricing\n\nLet me know if your tech team has questions on integration!",
-    lead: {
-      id: "lead_4",
-      email: "liam@outboundpro.com.au",
-      first_name: "Liam",
-      last_name: "O'Connor",
-      company: "OutboundPro",
-      title: "Founder & CEO",
-    },
-    created_at: new Date(Date.now() - 1000 * 60 * 720).toISOString(),
-  },
-];
-
 export default function InboxPage() {
   const [filterClass, setFilterClass] = useState<string>("all");
   const [onlyUnhandled, setOnlyUnhandled] = useState<boolean>(true);
@@ -111,13 +36,7 @@ export default function InboxPage() {
     limit: 50,
   });
 
-  const displayReplies = (replies && replies.length > 0) ? replies : DEFAULT_REPLIES;
-  const filteredReplies = displayReplies.filter((r) => {
-    if (filterClass !== "all" && r.classification !== filterClass) return false;
-    return true;
-  });
-
-  const selectedReply = filteredReplies.find((r) => r.id === (selectedReplyId || filteredReplies[0]?.id)) || filteredReplies[0];
+  const selectedReply = replies?.find((r) => r.id === (selectedReplyId || replies[0]?.id));
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -178,7 +97,12 @@ export default function InboxPage() {
       </div>
 
       {/* Main Inbox Interface */}
-      {!filteredReplies || filteredReplies.length === 0 ? (
+      {isLoading ? (
+        <div className="p-16 text-center text-slate-500 text-sm flex items-center justify-center gap-2">
+          <Loader2 className="w-5 h-5 animate-spin text-violet-400" />
+          Loading inbound messages...
+        </div>
+      ) : !replies || replies.length === 0 ? (
         <div className="p-16 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06]">
           <InboxIcon className="w-10 h-10 text-slate-600 mx-auto mb-3" />
           <h3 className="text-base font-semibold text-white">Inbox Zero</h3>
@@ -200,7 +124,7 @@ export default function InboxPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Message List (Left Pane) */}
           <div className="lg:col-span-5 space-y-2 max-h-[750px] overflow-y-auto pr-1">
-            {filteredReplies.map((reply) => {
+            {replies.map((reply) => {
               const isSelected = selectedReply?.id === reply.id;
               const classObj = CLASSIFICATIONS.find((c) => c.id === reply.classification);
               const sender = reply.lead?.email || "Prospect";

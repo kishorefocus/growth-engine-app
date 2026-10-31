@@ -163,68 +163,16 @@ export default function DashboardPage() {
   const { data: launchTasks } = useLaunchTasks();
   const { data: publishedSeoPages } = useSEOPages({ status: "published" });
 
-  const DEFAULT_ANALYTICS = {
-    overview: {
-      total_visits: 14820,
-      total_signups: 1420,
-      conversion_rate_pct: 9.6,
-    },
-    email: {
-      total_scheduled: 42000,
-      sent: 38450,
-      reply_rate_pct: 18.4,
-      bounce_rate_pct: 0.4,
-    },
-    channels: {
-      linkedin: 4120,
-      seo: 3240,
-      facebook: 2840,
-      x: 2450,
-      instagram: 1980,
-      youtube: 1650,
-      tools: 1180,
-      product_hunt: 860,
-      reddit: 490,
-    },
-    signups_by_channel: {
-      linkedin: 430,
-      seo: 310,
-      x: 240,
-      facebook: 190,
-      youtube: 110,
-      instagram: 80,
-      tools: 60,
-    },
-    top_posts: [
-      { id: "1", platform: "linkedin", body_preview: "How we scaled to 500+ verified B2B leads using programmatic SEO & multi-channel automation...", published_at: new Date().toISOString() },
-      { id: "2", platform: "x", body_preview: "5 outreach mistakes killing your cold email deliverability (and the 3-step fix)...", published_at: new Date().toISOString() },
-      { id: "3", platform: "facebook", body_preview: "Inside our automated content engine: adapting 1 growth win across 5 platforms with AI...", published_at: new Date().toISOString() },
-    ],
-    top_seo_pages: [
-      { id: "1", slug: "find-leads/technology/austin", title: "Find Technology Leads in Austin", quality_score: 96 },
-      { id: "2", slug: "alternatives/apollo/agencies", title: "Apollo.io Alternative for Agencies", quality_score: 98 },
-      { id: "3", slug: "use-cases/b2b-saas-lead-generation", title: "B2B SaaS Lead Generation Blueprint", quality_score: 95 },
-    ],
-  };
+  const pendingCount = pendingPosts?.length || 0;
 
-  const activeData = (data && data.overview.total_visits > 500) ? data : DEFAULT_ANALYTICS;
+  const totalLaunch = launchTasks?.length || 0;
+  const completedLaunch = launchTasks?.filter((t) => t.status === "done").length || 0;
+  const launchProgressPct = totalLaunch > 0 ? Math.round((completedLaunch / totalLaunch) * 100) : 0;
 
-  const pendingCount = pendingPosts?.length || 12;
-
-  const totalLaunch = launchTasks?.length || 12;
-  const completedLaunch = launchTasks?.filter((t) => t.status === "done").length || 10;
-  const launchProgressPct = totalLaunch > 0 ? Math.round((completedLaunch / totalLaunch) * 100) : 85;
-
-  const channelData: ChannelData[] = Object.entries(activeData.channels || {}).map(([channel, visits]) => ({
+  const channelData: ChannelData[] = Object.entries(data?.channels || {}).map(([channel, visits]) => ({
     channel,
     visits: visits as number,
   }));
-
-  const effectiveTools = (toolsOverview && toolsOverview.total_runs > 0) ? toolsOverview : {
-    total_runs: 1280,
-    emails_captured: 340,
-    conversion_rate_pct: 26.5,
-  };
 
   // Detect campaign health alerts
   const pausedCampaigns = campaigns?.filter((c) => c.status === "paused") || [];
@@ -291,28 +239,35 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Error state */}
+      {error && !isLoading && (
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm">
+          Could not load analytics. Is the backend running?
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <KpiCard
           label="Total Visits"
-          value={activeData.overview.total_visits.toLocaleString()}
+          value={data?.overview.total_visits.toLocaleString() ?? "—"}
           icon={<MousePointer className="w-4 h-4" />}
           color="bg-violet-500/15 text-violet-400"
-          loading={false}
+          loading={isLoading}
         />
         <KpiCard
           label="Signups"
-          value={activeData.overview.total_signups.toLocaleString()}
+          value={data?.overview.total_signups.toLocaleString() ?? "—"}
           icon={<Users className="w-4 h-4" />}
           color="bg-emerald-500/15 text-emerald-400"
-          loading={false}
+          loading={isLoading}
         />
         <KpiCard
           label="Conversion Rate"
-          value={`${activeData.overview.conversion_rate_pct}%`}
+          value={data ? `${data.overview.conversion_rate_pct}%` : "—"}
           icon={<TrendingUp className="w-4 h-4" />}
           color="bg-blue-500/15 text-blue-400"
-          loading={false}
+          loading={isLoading}
         />
         <KpiCard
           label="Awaiting Approval"
@@ -320,15 +275,15 @@ export default function DashboardPage() {
           subLabel="Social review queue"
           icon={<CheckSquare className="w-4 h-4" />}
           color="bg-purple-500/15 text-purple-400"
-          loading={false}
+          loading={isLoading}
         />
         <KpiCard
           label="Emails Sent"
-          value={activeData.email.sent.toLocaleString()}
-          subLabel={`Reply ${activeData.email.reply_rate_pct}% · Bounce ${activeData.email.bounce_rate_pct}%`}
+          value={data?.email.sent.toLocaleString() ?? "—"}
+          subLabel={data ? `Reply ${data.email.reply_rate_pct}% · Bounce ${data.email.bounce_rate_pct}%` : undefined}
           icon={<Mail className="w-4 h-4" />}
           color="bg-amber-500/15 text-amber-400"
-          loading={false}
+          loading={isLoading}
         />
       </div>
 
@@ -341,7 +296,7 @@ export default function DashboardPage() {
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">Channel Attribution (Visits)</h3>
               <span className="text-xs font-medium text-slate-600 dark:text-slate-400">UTM source attribution</span>
             </div>
-            <ChannelChart data={channelData} loading={false} />
+            <ChannelChart data={channelData} loading={isLoading} />
           </div>
 
           {/* Channel Breakdown Rows (Social, SEO, Free Tools, Launch) */}
@@ -358,7 +313,7 @@ export default function DashboardPage() {
               { id: "product_hunt", label: "PH" },
               { id: "reddit", label: "Reddit" },
             ].map((ch) => {
-              const visits = (activeData.channels as any)?.[ch.id] || 0;
+              const visits = data?.channels?.[ch.id] || 0;
               return (
                 <div key={ch.id} className="flex items-center gap-1.5">
                   <span
@@ -389,25 +344,28 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-600 dark:text-slate-400 font-medium">Total Sent</span>
                 <span className="font-mono text-slate-900 dark:text-white font-bold">
-                  {activeData.email.sent.toLocaleString()}
+                  {data?.email.sent.toLocaleString() ?? 0}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-600 dark:text-slate-400 font-medium">Total Scheduled</span>
                 <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                  {activeData.email.total_scheduled.toLocaleString()}
+                  {data?.email.total_scheduled.toLocaleString() ?? 0}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-600 dark:text-slate-400 font-medium">Reply Rate</span>
                 <span className="font-mono text-slate-900 dark:text-white font-bold">
-                  {activeData.email.reply_rate_pct}%
+                  {data?.email.reply_rate_pct ?? 0}%
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-600 dark:text-slate-400 font-medium">Bounce Rate</span>
-                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                  {activeData.email.bounce_rate_pct}%
+                <span className={clsx(
+                  "font-mono font-bold",
+                  (data?.email.bounce_rate_pct ?? 0) > 5 ? "text-rose-600 dark:text-rose-400" : "text-slate-800 dark:text-slate-300"
+                )}>
+                  {data?.email.bounce_rate_pct ?? 0}%
                 </span>
               </div>
             </div>
@@ -436,7 +394,7 @@ export default function DashboardPage() {
                 Free Lead-Magnet Tools
               </h3>
               <span className="text-xs text-cyan-600 dark:text-cyan-400 font-bold font-mono">
-                {effectiveTools.conversion_rate_pct}% conversion
+                {toolsOverview?.conversion_rate_pct ?? 0}% conversion
               </span>
             </div>
 
@@ -444,13 +402,13 @@ export default function DashboardPage() {
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.04]">
                 <div className="text-[10px] font-medium text-slate-600 dark:text-slate-400">Total Tool Runs</div>
                 <div className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-                  {effectiveTools.total_runs}
+                  {toolsOverview?.total_runs ?? 0}
                 </div>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.04]">
                 <div className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">Emails Captured</div>
                 <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  {effectiveTools.emails_captured}
+                  {toolsOverview?.emails_captured ?? 0}
                 </div>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.04]">
@@ -541,16 +499,26 @@ export default function DashboardPage() {
               Calendar
             </Link>
           </div>
-          <div className="space-y-2">
-            {(activeData.top_posts && activeData.top_posts.length > 0 ? activeData.top_posts : DEFAULT_ANALYTICS.top_posts).map((post) => (
-              <div key={post.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.04]">
-                <span className="text-xs font-mono font-bold bg-blue-100 dark:bg-white/[0.06] text-blue-800 dark:text-slate-300 px-2 py-0.5 rounded capitalize shrink-0">
-                  {post.platform}
-                </span>
-                <p className="text-xs text-slate-700 dark:text-slate-300 truncate font-medium">{post.body_preview}</p>
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12" />)}
+            </div>
+          ) : data?.top_posts.length === 0 ? (
+            <div className="text-center py-8 text-slate-500 text-sm">
+              No published posts yet. Schedule and approve in the Content Studio.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {data?.top_posts.map((post) => (
+                <div key={post.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.04]">
+                  <span className="text-xs font-mono font-bold bg-blue-100 dark:bg-white/[0.06] text-blue-800 dark:text-slate-300 px-2 py-0.5 rounded capitalize shrink-0">
+                    {post.platform}
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-300 truncate font-medium">{post.body_preview}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Top SEO pages */}
@@ -564,28 +532,38 @@ export default function DashboardPage() {
               SEO Manager
             </Link>
           </div>
-          <div className="space-y-2">
-            {(activeData.top_seo_pages && activeData.top_seo_pages.length > 0 ? activeData.top_seo_pages : DEFAULT_ANALYTICS.top_seo_pages).map((page: any) => (
-              <div key={page.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.04] transition-colors">
-                <div className="min-w-0 pr-2">
-                  <p className="text-xs font-bold text-slate-900 dark:text-slate-200 truncate">{page.title || page.slug}</p>
-                  <a
-                    href={`/${page.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] font-semibold text-blue-600 dark:text-cyan-400 hover:underline truncate block"
-                  >
-                    /{page.slug}
-                  </a>
+          {isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12" />)}
+            </div>
+          ) : (data?.top_seo_pages.length === 0 && (!publishedSeoPages || publishedSeoPages.length === 0)) ? (
+            <div className="text-center py-8 text-slate-500 text-sm">
+              No published SEO pages yet. Generate and publish in the SEO Manager.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {(data?.top_seo_pages.length ? data.top_seo_pages : publishedSeoPages?.slice(0, 5) || []).map((page: any) => (
+                <div key={page.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.04] transition-colors">
+                  <div className="min-w-0 pr-2">
+                    <p className="text-xs font-bold text-slate-900 dark:text-slate-200 truncate">{page.title || page.slug}</p>
+                    <a
+                      href={`/${page.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-semibold text-blue-600 dark:text-cyan-400 hover:underline truncate block"
+                    >
+                      /{page.slug}
+                    </a>
+                  </div>
+                  {page.quality_score != null && (
+                    <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 shrink-0 ml-2 px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                      Score: {page.quality_score}
+                    </span>
+                  )}
                 </div>
-                {page.quality_score != null && (
-                  <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 shrink-0 ml-2 px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
-                    Score: {page.quality_score}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

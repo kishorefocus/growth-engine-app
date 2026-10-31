@@ -406,7 +406,7 @@ export default function CalendarPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {calendarData.items.filter((item) => item.status !== "failed").map((item) => {
+              {calendarData.items.map((item) => {
                 const platConf = PLATFORMS.find((p) => p.id === item.platform.toLowerCase()) || {
                   name: item.platform,
                   bg: "bg-slate-800 text-slate-400 border-white/[0.06]",

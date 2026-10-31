@@ -38,89 +38,6 @@ const SUGGESTED_KEYWORDS = [
   "Scraping vs real-time email verification",
 ];
 
-const DEFAULT_VIDEOS: any[] = [
-  {
-    id: "vid_1",
-    target_keyword: "AI cold email deliverability 2026",
-    title: "How to Hit 60%+ Open Rates on Cold Email Using Real-Time Deliverability Shields",
-    youtube_title: "How to Hit 60%+ Open Rates on Cold Email (2026 Deliverability Masterclass)",
-    status: "published",
-    youtube_video_id: "demo_yt_01",
-    script: `[00:00 - 00:08] HOOK:
-"If your cold emails are getting 12% open rates, 9 out of 10 of them are hitting spam filters before a prospect ever sees them."
-
-[00:08 - 00:25] THE ROOT CAUSE:
-"Google and Yahoo updated their sender requirements to enforce strict 0.3% spam thresholds. The old playbook of blasting 5,000 unverified leads burns your domain in 48 hours."
-
-[00:25 - 00:45] THE SOLUTION:
-"Here's how we hit 68% open rates autonomously:
-1. Real-time SMTP handshake verification before every send
-2. AI personalized subject lines tailored to company stage
-3. Automated inbox rotation across 4 secondary domains."
-
-[00:45 - 01:00] CALL TO ACTION:
-"Test your domain deliverability for free right now at https://www.getyourclientsb2b.com/"`,
-    shot_list: [
-      { step_number: 1, screen: "GrowthEngine Deliverability Shield", action: "Show 0% bounce rate gauge and DNS record checker", voiceover_cue: "9 out of 10 are hitting spam filters" },
-      { step_number: 2, screen: "Campaign Sequence Builder", action: "Demonstrate 3-step sequence with live spam risk calculator (0.5/10)", voiceover_cue: "Real-time SMTP handshake verification" },
-      { step_number: 3, screen: "Analytics Channel Breakdown", action: "Highlight 34.2% open rate and 18.6% reply rate metrics", voiceover_cue: "Automated inbox rotation" },
-    ],
-    youtube_description: "Learn how modern B2B growth teams maintain 60%+ open rates with zero spam flags.\n\nChapters:\n0:00 - Why Cold Email Fails in 2026\n0:25 - Deliverability Shield Protocol\n0:45 - Live Campaign Setup\n\nFull guide: https://www.getyourclientsb2b.com/",
-    tags: ["cold email", "deliverability", "b2b sales", "growth engine", "lead gen"],
-    thumbnail_prompt: "High-contrast YouTube thumbnail: Neon green 68% Open Rate badge on dark tech grid with verified shield icon.",
-  },
-  {
-    id: "vid_2",
-    target_keyword: "Apollo.io alternative with built-in social publishing",
-    title: "Why Full-Funnel Automation Beats Standalone Lead Scrapers",
-    youtube_title: "Why Top B2B Agencies Are Switching From Apollo.io in 2026",
-    status: "ready",
-    script: `[00:00 - 00:10] HOOK:
-"Why pay for 5 different subscriptions for leads, warm-up, social posting, and SEO?"
-
-[00:10 - 00:35] COMPARISON:
-"Most teams pay $99 for Apollo, $97 for Instantly, $50 for Buffer, and $150 for SEO tools. That's nearly $400/mo stitched together with fragile zaps."
-
-[00:35 - 00:55] THE UNIFIED ENGINE:
-"GrowthEngine unifies 190+ country verified prospecting with multi-channel social repurposing and programmatic SEO landing pages in one dashboard."
-
-[00:55 - 01:00] CTA:
-"Start your 14-day free trial at https://www.getyourclientsb2b.com/pricing"`,
-    shot_list: [
-      { step_number: 1, screen: "Cost Comparison Matrix", action: "Show 5 separate tool logos vs single GrowthEngine dashboard", voiceover_cue: "Why pay for 5 different subscriptions" },
-      { step_number: 2, screen: "Social Studio & Calendar", action: "Show single idea converting to Facebook, LinkedIn, X, and Instagram posts", voiceover_cue: "Multi-channel social repurposing" },
-    ],
-    youtube_description: "Full breakdown comparing standalone lead databases vs all-in-one growth engines.\n\nLearn more: https://www.getyourclientsb2b.com/pricing",
-    tags: ["apollo alternative", "b2b data", "sales intelligence", "agency growth"],
-    thumbnail_prompt: "Split screen graphic: Cluttered 5 tool tabs vs Clean GrowthEngine unified dashboard with glowing metrics.",
-  },
-  {
-    id: "vid_3",
-    target_keyword: "How to automate 100 social posts a week with AI",
-    title: "The Content Repurposing Pipeline That Reaches 5 Platforms Autonomously",
-    youtube_title: "The Social Media Automation Stack Generating 100 Posts / Week",
-    status: "ready",
-    script: `[00:00 - 00:08] HOOK:
-"Most founders spend 15 hours every week writing social posts. Here is our exact automated pipeline."
-
-[00:08 - 00:30] PILLAR STRATEGY:
-"We generate 20 ideas across 5 core pillars: How-To, Build in Public, Competitor Alternatives, Lead Lists, and Industry Stats."
-
-[00:30 - 00:50] 1-CLICK MULTI-CHANNEL:
-"Each concept is automatically adapted for Twitter threads, LinkedIn long-form, Instagram carousels, and Facebook feed posts."
-
-[00:50 - 01:00] CTA:
-"Automate your social studio at https://www.getyourclientsb2b.com/features"`,
-    shot_list: [
-      { step_number: 1, screen: "Content Ideas Studio", action: "Click Generate Batch (20 Ideas)", voiceover_cue: "We generate 20 ideas across 5 core pillars" },
-      { step_number: 2, screen: "Calendar Queue & Approval Grid", action: "Show preview modal with carousel screenshots", voiceover_cue: "Each concept is automatically adapted" },
-    ],
-    youtube_description: "Automate your multi-platform presence across X, LinkedIn, Instagram, Facebook, and YouTube.\n\nTry it: https://www.getyourclientsb2b.com/features",
-    tags: ["social automation", "ai content", "b2b marketing", "social studio"],
-    thumbnail_prompt: "Viral tech YouTube thumbnail: Multi-channel social icons radiating from central AI brain with '100 Posts/Wk' text.",
-  },
-];
-
 export default function VideoStudioPage() {
   const [keywordInput, setKeywordInput] = useState("");
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
@@ -129,7 +46,6 @@ export default function VideoStudioPage() {
 
   // Queries & Mutations
   const { data: videos, isLoading, refetch } = useVideos();
-  const displayVideos = (videos && videos.length > 0) ? videos : DEFAULT_VIDEOS;
   const planMutation = usePlanVideo();
   const uploadAssetMutation = useUploadVideoAsset();
   const publishYouTubeMutation = usePublishYouTube();
@@ -141,7 +57,7 @@ export default function VideoStudioPage() {
     linkedin_video: string;
   } | null>(null);
 
-  const activeVideo = displayVideos.find((v: any) => v.id === (selectedVideoId || displayVideos[0]?.id)) || displayVideos[0];
+  const activeVideo = videos?.find((v) => v.id === selectedVideoId) || videos?.[0];
 
   const handleCreatePlan = async (kw?: string) => {
     const kwToUse = kw || keywordInput.trim();
@@ -277,13 +193,13 @@ export default function VideoStudioPage() {
                 <div key={i} className="h-20 rounded-xl bg-white/[0.02] border border-white/[0.06] animate-pulse" />
               ))}
             </div>
-          ) : !displayVideos || displayVideos.length === 0 ? (
+          ) : !videos || videos.length === 0 ? (
             <div className="p-8 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06] text-xs text-slate-500">
               No video projects planned yet. Enter a target keyword above to create one.
             </div>
           ) : (
             <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-              {displayVideos.map((vid: any) => {
+              {videos.map((vid) => {
                 const isSelected = activeVideo?.id === vid.id;
                 return (
                   <div
@@ -410,7 +326,7 @@ export default function VideoStudioPage() {
                     </button>
                   </div>
                   <pre className="p-4 rounded-xl bg-black/40 border border-white/[0.06] text-xs text-slate-200 font-sans whitespace-pre-wrap leading-relaxed max-h-[400px] overflow-y-auto">
-                    {typeof activeVideo.script === "string" ? activeVideo.script : JSON.stringify(activeVideo.script, null, 2)}
+                    {activeVideo.script}
                   </pre>
                 </div>
               )}
@@ -422,7 +338,7 @@ export default function VideoStudioPage() {
                   </h4>
                   <div className="space-y-3">
                     {activeVideo.shot_list && activeVideo.shot_list.length > 0 ? (
-                      activeVideo.shot_list.map((shot: any, idx: number) => (
+                      activeVideo.shot_list.map((shot, idx) => (
                         <div
                           key={idx}
                           className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-3"
@@ -476,7 +392,7 @@ export default function VideoStudioPage() {
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-slate-400 uppercase">Tags</label>
                       <div className="flex flex-wrap gap-1.5 pt-1">
-                        {activeVideo.tags.map((t: string) => (
+                        {activeVideo.tags.map((t) => (
                           <span key={t} className="text-[11px] px-2.5 py-1 rounded-lg bg-white/[0.04] text-slate-300 border border-white/[0.06]">
                             #{t}
                           </span>

@@ -21,28 +21,12 @@ const PLATFORMS = [
   { id: "indiehackers", label: "IndieHackers", icon: "🛠️" },
 ];
 
-const DEFAULT_LAUNCH_TASKS: LaunchTaskItem[] = [
-  { id: "lt_1", platform: "product_hunt", title: "Craft Tagline & Core Positioning (<60 chars)", description: "Create clear, benefit-driven tagline and product description focusing on multi-channel automation.", status: "done", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_2", platform: "product_hunt", title: "Prepare 5 Gallery Visual Briefs & Thumbnail", description: "Hero interface overview, automated verified prospecting, multi-channel studio, and calendar.", status: "done", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_3", platform: "product_hunt", title: "Maker Comment & Launch-Day Hour-by-Hour Plan", description: "Write maker backstory: why we built GrowthEngine and how we dogfood it.", status: "done", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_4", platform: "g2", title: "Verify G2 Software Profile & Screenshot Gallery", description: "Claim profile, upload branding assets, screenshots, and configure categories.", status: "done", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_5", platform: "capterra", title: "Submit Category Placement & Pricing Matrix", description: "List under Lead Generation, Social Media Automation, and Email Marketing.", status: "done", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_6", platform: "reddit", title: "Write r/SaaS & r/Entrepreneur Playbook", description: "Detailed value-add post dissecting how we reached 500+ B2B leads with zero spam.", status: "done", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_7", platform: "indiehackers", title: "Publish 'Zero to 500 B2B Leads' Growth Case Study", description: "Breakdown of programmatic SEO and cold outreach automation numbers.", status: "done", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_8", platform: "product_hunt", title: "Hunter Outreach & Teaser Discussion Post", description: "Reach out to top hunters and engage with the community 7 days before launch.", status: "done", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_9", platform: "product_hunt", title: "Launch-Day Live Community Engagement", description: "Real-time responses to all comments and product feedback during the 24h launch cycle.", status: "in_progress", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_10", platform: "g2", title: "Automated Review Campaign to Beta Agency Users", description: "Sequence 100 review request emails with direct G2 review links.", status: "in_progress", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: "lt_11", platform: "capterra", title: "Deploy In-App Review Prompt Modal", description: "Display review request modal to users after their 3rd successful campaign.", status: "pending", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-];
-
 export default function LaunchHubAdminPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
   const platformQuery = selectedPlatform === "all" ? undefined : selectedPlatform;
 
   const { data: tasks, isLoading: loadingTasks } = useLaunchTasks(platformQuery);
   const { data: reviewRequests, isLoading: loadingReviews } = useReviewRequests();
-
-  const displayTasks = (tasks && tasks.length > 0 && tasks.some(t => t.status === "done")) ? tasks : DEFAULT_LAUNCH_TASKS;
 
   const updateTaskMutation = useUpdateLaunchTask();
   const createTaskMutation = useCreateLaunchTask();
@@ -66,11 +50,11 @@ export default function LaunchHubAdminPage() {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDesc, setNewTaskDesc] = useState("");
 
-  const totalTasks = displayTasks.length;
-  const completedTasks = displayTasks.filter((t) => t.status === "done").length;
-  const inProgressTasks = displayTasks.filter((t) => t.status === "in_progress").length;
-  const pendingTasks = displayTasks.filter((t) => t.status === "pending").length;
-  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 82;
+  const totalTasks = tasks?.length || 0;
+  const completedTasks = tasks?.filter((t) => t.status === "done").length || 0;
+  const inProgressTasks = tasks?.filter((t) => t.status === "in_progress").length || 0;
+  const pendingTasks = tasks?.filter((t) => t.status === "pending").length || 0;
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   const handleStatusChange = async (task: LaunchTaskItem, newStatus: string) => {
     await updateTaskMutation.mutateAsync({
@@ -123,7 +107,7 @@ export default function LaunchHubAdminPage() {
   };
 
   const filterTasksByStatus = (status: string) => {
-    return displayTasks.filter((t) => t.status === status);
+    return (tasks || []).filter((t) => t.status === status);
   };
 
   return (

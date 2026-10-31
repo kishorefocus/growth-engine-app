@@ -11,86 +11,6 @@ import {
 } from "@/lib/hooks";
 import { SEOPageItem, SEOTemplate } from "@/lib/api-client";
 
-const DEFAULT_SEO_PAGES: any[] = [
-  {
-    id: "page_1",
-    slug: "find-leads/technology/austin",
-    title: "Find Verified Technology Leads in Austin | GrowthEngine",
-    h1: "Find Verified Technology Leads in Austin",
-    variables: { industry: "Technology", city: "Austin" },
-    status: "published",
-    quality_score: 96,
-    template_id: "tpl_1",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "page_2",
-    slug: "alternatives/apollo/agencies",
-    title: "Apollo.io Alternative for B2B Agencies | GrowthEngine",
-    h1: "Why High-Growth Agencies Choose GrowthEngine Over Apollo",
-    variables: { competitor: "apollo", niche: "agencies" },
-    status: "published",
-    quality_score: 98,
-    template_id: "tpl_2",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "page_3",
-    slug: "find-leads/real-estate/miami",
-    title: "Find Verified Real Estate Leads in Miami | GrowthEngine",
-    h1: "Find Verified Real Estate Leads in Miami",
-    variables: { industry: "Real Estate", city: "Miami" },
-    status: "published",
-    quality_score: 94,
-    template_id: "tpl_1",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "page_4",
-    slug: "use-cases/b2b-saas-lead-generation",
-    title: "B2B SaaS Lead Generation Blueprint | GrowthEngine",
-    h1: "The Complete Playbook for Scaling B2B SaaS Pipeline",
-    variables: { use_case: "B2B SaaS Lead Generation" },
-    status: "published",
-    quality_score: 97,
-    template_id: "tpl_3",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "page_5",
-    slug: "alternatives/instantly/b2b-startups",
-    title: "Instantly Alternative for High-Growth Startups | GrowthEngine",
-    h1: "Scalable Cold Outreach Without Burned Domains",
-    variables: { competitor: "instantly", niche: "b2b-startups" },
-    status: "published",
-    quality_score: 95,
-    template_id: "tpl_2",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "page_6",
-    slug: "find-leads/healthcare/boston",
-    title: "Find Verified Healthcare Leads in Boston | GrowthEngine",
-    h1: "Find Verified Healthcare Leads in Boston",
-    variables: { industry: "Healthcare", city: "Boston" },
-    status: "draft",
-    quality_score: 93,
-    template_id: "tpl_1",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "page_7",
-    slug: "use-cases/agency-client-acquisition",
-    title: "Agency Client Acquisition Workflow | GrowthEngine",
-    h1: "How Digital Agencies Sign 5-10 High-Ticket Retainers Monthly",
-    variables: { use_case: "Agency Client Acquisition" },
-    status: "draft",
-    quality_score: 96,
-    template_id: "tpl_3",
-    created_at: new Date().toISOString(),
-  },
-];
-
 export default function SEOAdminPage() {
   const { data: templates, isLoading: loadingTemplates } = useSEOTemplates();
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
@@ -102,8 +22,6 @@ export default function SEOAdminPage() {
     status: statusFilter || undefined,
     min_quality_score: minQuality,
   });
-
-  const displayPages = (pages && pages.length > 0) ? pages : DEFAULT_SEO_PAGES;
 
   const generateMutation = useGenerateSEOPages();
   const batchPublishMutation = useBatchPublishSEOPages();
@@ -140,10 +58,13 @@ export default function SEOAdminPage() {
   const [newH1Pattern, setNewH1Pattern] = useState("Find Verified {industry} Leads in {city}");
   const [newBodyPrompt, setNewBodyPrompt] = useState("Write actionable lead gen strategies for {industry} in {city}.");
 
-  const totalPages = pages && pages.length > 0 ? pages.length : 1480;
-  const publishedPages = pages && pages.length > 0 ? pages.filter((p) => p.status === "published").length : 1240;
-  const draftPages = pages && pages.length > 0 ? pages.filter((p) => p.status === "draft").length : 240;
-  const avgQuality = 95;
+  const totalPages = pages?.length || 0;
+  const publishedPages = pages?.filter((p) => p.status === "published").length || 0;
+  const draftPages = pages?.filter((p) => p.status === "draft").length || 0;
+  const avgQuality =
+    totalPages > 0
+      ? Math.round((pages?.reduce((acc, p) => acc + (p.quality_score || 0), 0) || 0) / totalPages)
+      : 0;
 
   const handleToggleSelectPage = (id: string) => {
     setSelectedPageIds((prev) =>
@@ -317,7 +238,9 @@ export default function SEOAdminPage() {
 
       {/* Pages Table */}
       <div className="rounded-xl border border-slate-800 bg-slate-900/30 overflow-hidden">
-        {displayPages && displayPages.length > 0 ? (
+        {loadingPages ? (
+          <div className="p-8 text-center text-xs text-slate-400">Loading SEO pages...</div>
+        ) : pages && pages.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
@@ -325,10 +248,10 @@ export default function SEOAdminPage() {
                   <th className="py-3 px-4 w-10">
                     <input
                       type="checkbox"
-                      checked={selectedPageIds.length > 0 && selectedPageIds.length === displayPages.length}
+                      checked={selectedPageIds.length > 0 && selectedPageIds.length === pages.length}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedPageIds(displayPages.map((p) => p.id));
+                          setSelectedPageIds(pages.map((p) => p.id));
                         } else {
                           setSelectedPageIds([]);
                         }
@@ -343,7 +266,7 @@ export default function SEOAdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {displayPages.map((p) => {
+                {pages.map((p) => {
                   const isSelected = selectedPageIds.includes(p.id);
                   const isHighQuality = (p.quality_score || 0) >= 70;
                   return (

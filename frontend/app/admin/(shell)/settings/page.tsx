@@ -63,13 +63,13 @@ export default function SettingsPage() {
   const update = useUpdateBrandProfile();
 
   const [form, setForm] = useState({
-    product_name: "GrowthEngine B2B",
-    one_liner: "Full-Funnel Autonomous B2B Lead Generation & SEO Growth Engine",
-    tone: "Authoritative, data-backed, high-converting B2B SaaS tone",
-    value_props: "Verified 0% bounce deliverability shields\nAutonomous multi-channel social posting\nProgrammatic high-intent SEO pages\nAI-powered inbound inbox triage",
-    banned_phrases: "synergy\ngame-changer\nrevolutionary\nrockstar",
-    website_url: "https://www.getyourclientsb2b.com",
-    physical_address: "San Francisco, CA & Global Operations",
+    product_name: "",
+    one_liner: "",
+    tone: "",
+    value_props: "",
+    banned_phrases: "",
+    website_url: "",
+    physical_address: "",
   });
 
   const [checkDomain, setCheckDomain] = useState("getyourclientsb2b.com");
