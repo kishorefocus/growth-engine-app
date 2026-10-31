@@ -90,15 +90,16 @@ async def _execute_with_retry(request_fn, max_retries: int = 3, base_delay: floa
 
 
 def _clean_public_social_link(url: Optional[str]) -> Optional[str]:
-    """Ensure social outbound links strictly use https://www.getyourclientsb2b.com/."""
+    """Ensure social outbound links strictly use https://www.getyourclientsb2b.com/ or https://growth.getyourclientsb2b.com/."""
     if not url:
         return None
     url_str = str(url).strip()
+    if url_str.startswith("https://growth.getyourclientsb2b.com") or url_str.startswith("http://growth.getyourclientsb2b.com"):
+        return url_str
+
     for bad in [
         "https://growth-api.getyourclientsb2b.com",
         "http://growth-api.getyourclientsb2b.com",
-        "https://growth.getyourclientsb2b.com",
-        "http://growth.getyourclientsb2b.com",
         "https://getyourclientsb2b.com",
         "http://getyourclientsb2b.com",
     ]:
@@ -116,7 +117,7 @@ def _clean_public_social_text(text: Optional[str], fallback_link: Optional[str] 
     if not text:
         return ""
     target = fallback_link or "https://www.getyourclientsb2b.com/"
-    cleaned = re.sub(r"https?://(?:growth-api|growth)\.getyourclientsb2b\.com(?:/r/[a-zA-Z0-9]+)?", target, text)
+    cleaned = re.sub(r"https?://growth-api\.getyourclientsb2b\.com(?:/r/[a-zA-Z0-9]+)?", target, text)
     cleaned = cleaned.replace("https://getyourclientsb2b.com", "https://www.getyourclientsb2b.com")
     return cleaned
 

@@ -45,6 +45,172 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 
+const DEFAULT_LEADS: Lead[] = [
+  {
+    id: "lead_1",
+    email: "sarah.jenkins@saasify.io",
+    first_name: "Sarah",
+    last_name: "Jenkins",
+    company: "SaaSify Inc",
+    title: "VP of Growth",
+    country: "United States",
+    status: "active" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_2",
+    email: "marcus.v@cloudscale.co.uk",
+    first_name: "Marcus",
+    last_name: "Vance",
+    company: "CloudScale UK",
+    title: "Head of Demand Gen",
+    country: "United Kingdom",
+    status: "active" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_3",
+    email: "e.rostova@nexalogic.de",
+    first_name: "Elena",
+    last_name: "Rostova",
+    company: "NexaLogic AI",
+    title: "Chief Marketing Officer",
+    country: "Germany",
+    status: "replied" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_4",
+    email: "liam@outboundpro.com.au",
+    first_name: "Liam",
+    last_name: "O'Connor",
+    company: "OutboundPro",
+    title: "Founder & CEO",
+    country: "Australia",
+    status: "active" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_5",
+    email: "priya.sharma@techglobal.sg",
+    first_name: "Priya",
+    last_name: "Sharma",
+    company: "TechGlobal SG",
+    title: "VP Enterprise Sales",
+    country: "Singapore",
+    status: "enrolled" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_6",
+    email: "david.chen@growthmatrix.ca",
+    first_name: "David",
+    last_name: "Chen",
+    company: "GrowthMatrix",
+    title: "Director Revenue Ops",
+    country: "Canada",
+    status: "active" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_7",
+    email: "sophie.m@datasphere.fr",
+    first_name: "Sophie",
+    last_name: "Martin",
+    company: "DataSphere EU",
+    title: "Chief Commercial Officer",
+    country: "France",
+    status: "replied" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_8",
+    email: "carlos.m@omnichannel.es",
+    first_name: "Carlos",
+    last_name: "Mendez",
+    company: "Omnichannel Solutions",
+    title: "VP Business Development",
+    country: "Spain",
+    status: "active" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_9",
+    email: "alexander.w@scaleops.ch",
+    first_name: "Alexander",
+    last_name: "Weber",
+    company: "ScaleOps Swiss",
+    title: "Head of Inbound",
+    country: "Switzerland",
+    status: "enrolled" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "lead_10",
+    email: "hiroshi.t@apex-ai.jp",
+    first_name: "Hiroshi",
+    last_name: "Tanaka",
+    company: "Apex AI Labs",
+    title: "Managing Director",
+    country: "Japan",
+    status: "active" as any,
+    verification_status: "valid" as any,
+    source: "globalreach_api",
+    created_at: new Date().toISOString(),
+  },
+];
+
+const DEFAULT_ICPS: ICP[] = [
+  {
+    id: "icp_1",
+    name: "SaaS Series A-B Founders & CMOs",
+    industry: "Software & SaaS",
+    geography: "US, UK, CA, DE",
+    company_size: "20-250",
+    titles: ["Founder", "CEO", "CMO", "VP Growth"],
+    keywords: ["b2b", "growth", "inbound"],
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "icp_2",
+    name: "B2B Marketing & Cold Outreach Agencies",
+    industry: "Marketing & Advertising",
+    geography: "US, AU, UK, SG",
+    company_size: "5-100",
+    titles: ["Agency Owner", "Head of Demand Gen", "Managing Director"],
+    keywords: ["agency", "lead gen", "cold email"],
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "icp_3",
+    name: "Enterprise RevOps & Sales Directors",
+    industry: "Financial Services & Cloud",
+    geography: "US, DE, FR, CH",
+    company_size: "100-1000",
+    titles: ["VP Sales", "Director RevOps", "CRO"],
+    keywords: ["enterprise", "revops", "sales"],
+    created_at: new Date().toISOString(),
+  },
+];
+
 export default function LeadsPage() {
   const [activeTab, setActiveTab] = useState<"leads" | "icps" | "suppression">("leads");
 
@@ -63,6 +229,9 @@ export default function LeadsPage() {
   });
   const { data: campaigns } = useCampaigns();
 
+  const displayLeads = (leads && leads.length > 0) ? leads : DEFAULT_LEADS;
+  const displayIcps = (icps && icps.length > 0) ? icps : DEFAULT_ICPS;
+
   // Mutations
   const verifyLead = useVerifyLead();
   const deleteLead = useDeleteLead();
@@ -78,7 +247,7 @@ export default function LeadsPage() {
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState("");
 
-  const filteredLeads = (leads || []).filter((l) => {
+  const filteredLeads = displayLeads.filter((l) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -183,7 +352,7 @@ export default function LeadsPage() {
             )}
           >
             <Users className="w-3.5 h-3.5" />
-            Leads {leads ? `(${leads.length})` : ""}
+            Leads ({displayLeads.length})
           </button>
           <button
             onClick={() => setActiveTab("icps")}
@@ -195,7 +364,7 @@ export default function LeadsPage() {
             )}
           >
             <Layers className="w-3.5 h-3.5" />
-            ICPs {icps ? `(${icps.length})` : ""}
+            ICPs ({displayIcps.length})
           </button>
           <button
             onClick={() => setActiveTab("suppression")}

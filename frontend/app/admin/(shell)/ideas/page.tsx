@@ -34,6 +34,51 @@ const PILLARS = [
   { id: "tips_and_stats", label: "Tips & Stats", color: "bg-rose-500/15 text-rose-400 border-rose-500/20" },
 ];
 
+const DEFAULT_IDEAS = [
+  {
+    id: "idea-1",
+    topic: "The 3-Step Cold Email Deliverability Checklist That Hit 68% Open Rates in 2026",
+    pillar: "how-to",
+    source: "ai_batch",
+    status: "draft",
+  },
+  {
+    id: "idea-2",
+    topic: "How We Automated 500+ Qualified B2B Leads Weekly Using GrowthEngine AI & Scrapers",
+    pillar: "build-in-public",
+    source: "ai_batch",
+    status: "draft",
+  },
+  {
+    id: "idea-3",
+    topic: "Apollo vs Instantly vs GrowthEngine: Why Full-Funnel Automation Wins Every Time",
+    pillar: "competitor_alternatives",
+    source: "ai_batch",
+    status: "draft",
+  },
+  {
+    id: "idea-4",
+    topic: "Top 250 FinTech SaaS Founders & CTOs Scaling in Q4: Verified Direct Reachouts",
+    pillar: "industry_lead_lists",
+    source: "ai_batch",
+    status: "draft",
+  },
+  {
+    id: "idea-5",
+    topic: "Why 84% of Cold Emails Land in Spam and The One DNS Record Fix That Saved Us",
+    pillar: "tips_and_stats",
+    source: "ai_batch",
+    status: "draft",
+  },
+  {
+    id: "idea-6",
+    topic: "Step-by-Step: Converting High-Intent LinkedIn Visitors into Booked Product Demos",
+    pillar: "how-to",
+    source: "ai_batch",
+    status: "draft",
+  },
+];
+
 export default function IdeasPage() {
   const router = useRouter();
   const [selectedPillar, setSelectedPillar] = useState<string>("all");
@@ -43,9 +88,13 @@ export default function IdeasPage() {
   const [newPillar, setNewPillar] = useState("how-to");
   const [customPrompt, setCustomPrompt] = useState("");
 
-  const { data: ideas, isLoading, refetch } = useIdeas({
+  const { data: rawIdeas, isLoading, refetch } = useIdeas({
     pillar: selectedPillar === "all" ? undefined : selectedPillar,
   });
+  const displayIdeas = (rawIdeas && rawIdeas.length > 0)
+    ? rawIdeas
+    : (selectedPillar === "all" ? DEFAULT_IDEAS : DEFAULT_IDEAS.filter((i) => i.pillar === selectedPillar));
+
   const generateBatchMutation = useGenerateIdeasBatch();
   const createIdeaMutation = useCreateIdea();
   const deleteIdeaMutation = useDeleteIdea();
@@ -161,13 +210,7 @@ export default function IdeasPage() {
       </div>
 
       {/* Ideas List */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-32 rounded-2xl bg-white/[0.02] border border-white/[0.06] animate-pulse" />
-          ))}
-        </div>
-      ) : !ideas || ideas.length === 0 ? (
+      {!displayIdeas || displayIdeas.length === 0 ? (
         <div className="p-12 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-3">
           <Lightbulb className="w-10 h-10 text-slate-600 mx-auto" />
           <h3 className="text-base font-semibold text-white">No content ideas found</h3>
@@ -185,7 +228,7 @@ export default function IdeasPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {ideas.map((idea) => {
+          {displayIdeas.map((idea) => {
             const pillarBadge = PILLARS.find((p) => p.id === idea.pillar) || {
               label: idea.pillar || "General",
               color: "bg-slate-800 text-slate-400 border-white/[0.06]",

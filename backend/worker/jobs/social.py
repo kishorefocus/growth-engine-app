@@ -46,7 +46,7 @@ async def publish_single_post(session: AsyncSession, post: Post) -> PublishResul
     # Sanitize post.body to replace any backend API domain (growth-api.getyourclientsb2b.com) with clean_link
     clean_body = post.body or ""
     import re
-    clean_body = re.sub(r"https?://(?:growth-api|growth)\.getyourclientsb2b\.com(?:/r/[a-zA-Z0-9]+)?", clean_link, clean_body)
+    clean_body = re.sub(r"https?://growth-api\.getyourclientsb2b\.com(?:/r/[a-zA-Z0-9]+)?", clean_link, clean_body)
     clean_body = clean_body.replace("https://getyourclientsb2b.com", "https://www.getyourclientsb2b.com")
     post.body = clean_body
 

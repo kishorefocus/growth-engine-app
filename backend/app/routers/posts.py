@@ -80,9 +80,17 @@ class _SocialAdaptSchema(BaseModel):
 
 
 BASE_WEBSITE_URL = "https://www.getyourclientsb2b.com"
+GROWTH_APP_URL = "https://growth.getyourclientsb2b.com"
 
 TARGET_ROUTES = [
     "https://www.getyourclientsb2b.com/",
+    "https://growth.getyourclientsb2b.com/admin/ideas",
+    "https://growth.getyourclientsb2b.com/admin/seo",
+    "https://growth.getyourclientsb2b.com/admin/video",
+    "https://growth.getyourclientsb2b.com/admin/calendar",
+    "https://growth.getyourclientsb2b.com/admin/dashboard",
+    "https://growth.getyourclientsb2b.com/admin/campaigns",
+    "https://growth.getyourclientsb2b.com/admin/leads",
     "https://www.getyourclientsb2b.com/#overview",
     "https://www.getyourclientsb2b.com/#product",
     "https://www.getyourclientsb2b.com/#how-it-works",
@@ -111,9 +119,31 @@ ROUTE_SCREENSHOT_MAP = {
     "https://www.getyourclientsb2b.com/pricing": "/screenshots/pricing.png",
     "https://www.getyourclientsb2b.com/contact": "/screenshots/contact.png",
     "https://www.getyourclientsb2b.com/signup": "/screenshots/home.png",
+    "https://growth.getyourclientsb2b.com/admin/dashboard": "/screenshots/growth_dashboard.png",
+    "https://growth.getyourclientsb2b.com/admin/ideas": "/screenshots/growth_social_ideas.png",
+    "https://growth.getyourclientsb2b.com/admin/calendar": "/screenshots/growth_calendar.png",
+    "https://growth.getyourclientsb2b.com/admin/campaigns": "/screenshots/growth_campaigns.png",
+    "https://growth.getyourclientsb2b.com/admin/leads": "/screenshots/growth_leads.png",
+    "https://growth.getyourclientsb2b.com/admin/inbox": "/screenshots/growth_inbox.png",
+    "https://growth.getyourclientsb2b.com/admin/video": "/screenshots/growth_video_studio.png",
+    "https://growth.getyourclientsb2b.com/admin/seo": "/screenshots/growth_seo_manager.png",
+    "https://growth.getyourclientsb2b.com/admin/connections": "/screenshots/growth_connections.png",
+    "https://growth.getyourclientsb2b.com/admin/settings": "/screenshots/growth_settings.png",
+    "https://growth.getyourclientsb2b.com/admin/launch": "/screenshots/growth_launch.png",
 }
 
 ALL_FOLDER_SCREENSHOTS = [
+    "/screenshots/growth_dashboard.png",
+    "/screenshots/growth_social_ideas.png",
+    "/screenshots/growth_calendar.png",
+    "/screenshots/growth_seo_manager.png",
+    "/screenshots/growth_video_studio.png",
+    "/screenshots/growth_campaigns.png",
+    "/screenshots/growth_leads.png",
+    "/screenshots/growth_inbox.png",
+    "/screenshots/growth_connections.png",
+    "/screenshots/growth_settings.png",
+    "/screenshots/growth_launch.png",
     "/screenshots/home.png",
     "/screenshots/overview.png",
     "/screenshots/discovery.png",
@@ -133,9 +163,10 @@ ALL_FOLDER_SCREENSHOTS = [
 
 def ensure_website_url(url: Optional[str] = None, default_route: str = "/") -> str:
     """
-    Ensure the URL strictly uses the base website https://www.getyourclientsb2b.com/
-    and never leaks backend/API domains like growth-api.getyourclientsb2b.com or localhost.
-    Preserves routes/hashes/queries on www.getyourclientsb2b.com.
+    Ensure the URL strictly uses the public website https://www.getyourclientsb2b.com/
+    or the GrowthEngine app https://growth.getyourclientsb2b.com/
+    and never leaks backend API domains like growth-api.getyourclientsb2b.com or localhost.
+    Preserves routes/hashes/queries on www.getyourclientsb2b.com and growth.getyourclientsb2b.com.
     """
     base = BASE_WEBSITE_URL
     if not url:
@@ -143,11 +174,18 @@ def ensure_website_url(url: Optional[str] = None, default_route: str = "/") -> s
         return f"{base}{route}"
 
     url_str = str(url).strip()
+
+    # Specifically permit the growth web app
+    if url_str.startswith("https://growth.getyourclientsb2b.com") or url_str.startswith("http://growth.getyourclientsb2b.com"):
+        remainder = url_str.split("getyourclientsb2b.com", 1)[1]
+        if remainder.startswith("/r/"):
+            remainder = default_route
+        route = remainder if (remainder.startswith("/") or remainder.startswith("#")) else (f"/{remainder}" if remainder else "/")
+        return f"{GROWTH_APP_URL}{route}"
+
     for bad_prefix in [
         "https://growth-api.getyourclientsb2b.com",
         "http://growth-api.getyourclientsb2b.com",
-        "https://growth.getyourclientsb2b.com",
-        "http://growth.getyourclientsb2b.com",
         "https://getyourclientsb2b.com",
         "http://getyourclientsb2b.com",
         "http://localhost:8000",
@@ -162,6 +200,9 @@ def ensure_website_url(url: Optional[str] = None, default_route: str = "/") -> s
             route = remainder if (remainder.startswith("/") or remainder.startswith("#")) else (f"/{remainder}" if remainder else "/")
             return f"{base}{route}"
 
+    if url_str.startswith("/admin/"):
+        return f"{GROWTH_APP_URL}{url_str}"
+
     if url_str.startswith("/"):
         return f"{base}{url_str}"
     if not url_str.startswith("http"):
@@ -170,15 +211,37 @@ def ensure_website_url(url: Optional[str] = None, default_route: str = "/") -> s
 
 
 def get_screenshot_for_route(route: str) -> str:
-    """Return local screenshot path for a given route on https://www.getyourclientsb2b.com."""
+    """Return local screenshot path for a given route on getyourclientsb2b."""
     if not route:
-        return "/screenshots/home.png"
+        return "/screenshots/growth_dashboard.png"
     clean_route = route.rstrip("/").replace("://getyourclientsb2b.com", "://www.getyourclientsb2b.com")
     for target, screenshot in ROUTE_SCREENSHOT_MAP.items():
         clean_target = target.rstrip("/")
-        if clean_target == clean_route or (clean_target != "https://www.getyourclientsb2b.com" and clean_target in clean_route):
+        if clean_target == clean_route or (clean_target not in ("https://www.getyourclientsb2b.com", "https://growth.getyourclientsb2b.com") and clean_target in clean_route):
             return screenshot
     lower = route.lower()
+    if "seo" in lower or "ranking" in lower or "keyword" in lower:
+        return "/screenshots/growth_seo_manager.png"
+    if "social" in lower or "idea" in lower or "content" in lower:
+        return "/screenshots/growth_social_ideas.png"
+    if "calendar" in lower or "schedule" in lower or "approval" in lower:
+        return "/screenshots/growth_calendar.png"
+    if "video" in lower or "shorts" in lower or "youtube" in lower:
+        return "/screenshots/growth_video_studio.png"
+    if "campaign" in lower or "outreach" in lower:
+        return "/screenshots/growth_campaigns.png"
+    if "lead" in lower or "prospect" in lower:
+        return "/screenshots/growth_leads.png"
+    if "inbox" in lower or "reply" in lower:
+        return "/screenshots/growth_inbox.png"
+    if "connection" in lower or "oauth" in lower:
+        return "/screenshots/growth_connections.png"
+    if "setting" in lower:
+        return "/screenshots/growth_settings.png"
+    if "launch" in lower:
+        return "/screenshots/growth_launch.png"
+    if "dashboard" in lower:
+        return "/screenshots/growth_dashboard.png"
     if "pricing" in lower:
         return "/screenshots/pricing.png"
     if "contact" in lower:
@@ -187,12 +250,10 @@ def get_screenshot_for_route(route: str) -> str:
         return "/screenshots/how-it-works.png"
     if "industr" in lower:
         return "/screenshots/industries.png"
-    if "discovery" in lower or "leads" in lower:
+    if "discovery" in lower:
         return "/screenshots/discovery.png"
-    if "pipeline" in lower or "campaign" in lower:
+    if "pipeline" in lower:
         return "/screenshots/pipeline.png"
-    if "inbox" in lower:
-        return "/screenshots/inbox.png"
     if "call" in lower:
         return "/screenshots/calls.png"
     if "analytic" in lower:
