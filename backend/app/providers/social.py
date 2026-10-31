@@ -89,6 +89,38 @@ async def _execute_with_retry(request_fn, max_retries: int = 3, base_delay: floa
     return last_response
 
 
+def _clean_public_social_link(url: Optional[str]) -> Optional[str]:
+    """Ensure social outbound links strictly use https://www.getyourclientsb2b.com/."""
+    if not url:
+        return None
+    url_str = str(url).strip()
+    for bad in [
+        "https://growth-api.getyourclientsb2b.com",
+        "http://growth-api.getyourclientsb2b.com",
+        "https://growth.getyourclientsb2b.com",
+        "http://growth.getyourclientsb2b.com",
+        "https://getyourclientsb2b.com",
+        "http://getyourclientsb2b.com",
+    ]:
+        if url_str.startswith(bad):
+            remainder = url_str[len(bad):]
+            if remainder.startswith("/r/"):
+                remainder = "/"
+            route = remainder if (remainder.startswith("/") or remainder.startswith("#")) else (f"/{remainder}" if remainder else "/")
+            return f"https://www.getyourclientsb2b.com{route}"
+    return url_str
+
+
+def _clean_public_social_text(text: Optional[str], fallback_link: Optional[str] = None) -> str:
+    """Ensure no backend growth-api links leak into public post bodies or captions."""
+    if not text:
+        return ""
+    target = fallback_link or "https://www.getyourclientsb2b.com/"
+    cleaned = re.sub(r"https?://(?:growth-api|growth)\.getyourclientsb2b\.com(?:/r/[a-zA-Z0-9]+)?", target, text)
+    cleaned = cleaned.replace("https://getyourclientsb2b.com", "https://www.getyourclientsb2b.com")
+    return cleaned
+
+
 class XPublisher(SocialPublisher):
     """
     X (Twitter) API v2 publisher.
@@ -101,10 +133,13 @@ class XPublisher(SocialPublisher):
             if not post.access_token:
                 return PublishResult(external_post_id="", success=False, error="No access token provided for X")
 
+            # Clean body to ensure public domain is used
+            body_text = _clean_public_social_text(post.body, _clean_public_social_link(post.link_url))
+
             # Check for thread delimiter
-            tweets = [t.strip() for t in post.body.split("---") if t.strip()]
+            tweets = [t.strip() for t in body_text.split("---") if t.strip()]
             if not tweets:
-                tweets = [post.body.strip()]
+                tweets = [body_text.strip()]
 
             url = "https://api.twitter.com/2/tweets"
             headers = {
@@ -281,9 +316,10 @@ class LinkedInPublisher(SocialPublisher):
             version = self._get_api_version()
             url = "https://api.linkedin.com/rest/posts"
 
-            commentary_text = post.body or ""
-            if post.link_url and post.link_url not in commentary_text:
-                commentary_text = f"{commentary_text}\n\n{post.link_url}".strip()
+            clean_link = _clean_public_social_link(post.link_url)
+            commentary_text = _clean_public_social_text(post.body or "", clean_link)
+            if clean_link and clean_link not in commentary_text:
+                commentary_text = f"{commentary_text}\n\n{clean_link}".strip()
 
             payload = {
                 "author": author_urn,
@@ -414,7 +450,7 @@ class InstagramPublisher(SocialPublisher):
                 container_url = f"https://graph.facebook.com/v19.0/{post.account_id}/media"
                 params = {
                     "image_url": media_url,
-                    "caption": post.body,
+                    "caption": _clean_public_social_text(post.body, _clean_public_social_link(post.link_url)),
                     "access_token": post.access_token,
                 }
                 container_res = await _execute_with_retry(
@@ -484,16 +520,17 @@ class FacebookPublisher(SocialPublisher):
                 )
 
             url = f"https://graph.facebook.com/v19.0/{post.account_id}/feed"
-            message_text = post.body or ""
+            clean_link = _clean_public_social_link(post.link_url)
+            message_text = _clean_public_social_text(post.body or "", clean_link)
 
             # Check if link can be provided in the 'link' parameter (Open Graph link card).
             # Meta Graph API strictly rejects localhost / loopback IPs in 'link' with:
             # code 1500, error_subcode 1611248 ("The url you supplied is invalid").
             # For local URLs, we append the link to the message text instead.
             is_public_link = False
-            if post.link_url:
+            if clean_link:
                 try:
-                    parsed = urllib.parse.urlparse(post.link_url)
+                    parsed = urllib.parse.urlparse(clean_link)
                     hostname = (parsed.hostname or "").lower()
                     if (
                         hostname
@@ -505,8 +542,8 @@ class FacebookPublisher(SocialPublisher):
                 except Exception:
                     is_public_link = False
 
-                if not is_public_link and post.link_url not in message_text:
-                    message_text = f"{message_text}\n\n{post.link_url}".strip()
+                if not is_public_link and clean_link not in message_text:
+                    message_text = f"{message_text}\n\n{clean_link}".strip()
 
             # If media screenshot is attached, verify it returns a valid image before attempting photo post
             image_url = post.media_urls[0] if (post.media_urls and post.media_urls[0]) else None
@@ -556,7 +593,7 @@ class FacebookPublisher(SocialPublisher):
                         "access_token": effective_token,
                     }
                     if is_public_link:
-                        payload["link"] = post.link_url
+                        payload["link"] = clean_link
 
                 response = await _execute_with_retry(
                     lambda: client.post(url, data=payload)
@@ -599,10 +636,15 @@ class YouTubePublisher(SocialPublisher):
                 "Authorization": f"Bearer {post.access_token}",
                 "Content-Type": "application/json",
             }
+            clean_link = _clean_public_social_link(post.link_url)
+            desc = _clean_public_social_text(post.body or "", clean_link)
+            if clean_link and "getyourclientsb2b.com" not in desc:
+                desc = f"{desc}\n\n🚀 Explore live platform: {clean_link}".strip()
+
             body = {
                 "snippet": {
-                    "title": post.title or (post.body[:60] if post.body else "GlobalReach Video"),
-                    "description": post.body or "",
+                    "title": post.title or (desc[:60] if desc else "GlobalReach Video"),
+                    "description": desc,
                     "tags": post.tags or ["b2b", "lead generation"],
                     "categoryId": "27",  # Education
                 },

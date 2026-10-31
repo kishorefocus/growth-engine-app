@@ -108,8 +108,8 @@ async def create_video_plan(
     # Brand context
     brand_res = await db.execute(select(BrandProfile).limit(1))
     brand = brand_res.scalar_one_or_none()
-
-    destination_url = (brand.website_url if brand else "https://www.getyourclientsb2b.com")
+    from app.routers.posts import ensure_website_url, get_varied_destination_url
+    destination_url = ensure_website_url(get_varied_destination_url(payload.target_keyword, "youtube"))
     brand_context = {
         "product_name": brand.product_name if brand else "GlobalReach",
         "one_liner": brand.one_liner if brand else "B2B client acquisition engine with verified leads and automated outreach",

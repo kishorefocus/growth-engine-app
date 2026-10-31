@@ -67,12 +67,19 @@ class _FacebookAdapted(BaseModel):
     body: str
 
 
+class _YouTubeAdapted(BaseModel):
+    body: str
+
+
 class _SocialAdaptSchema(BaseModel):
     x: _XAdapted
     linkedin: _LinkedInAdapted
     instagram: _InstagramAdapted
     facebook: _FacebookAdapted
+    youtube: Optional[_YouTubeAdapted] = None
 
+
+BASE_WEBSITE_URL = "https://www.getyourclientsb2b.com"
 
 TARGET_ROUTES = [
     "https://www.getyourclientsb2b.com/",
@@ -87,6 +94,7 @@ TARGET_ROUTES = [
     "https://www.getyourclientsb2b.com/#analytics",
     "https://www.getyourclientsb2b.com/pricing",
     "https://www.getyourclientsb2b.com/contact",
+    "https://www.getyourclientsb2b.com/signup",
 ]
 
 ROUTE_SCREENSHOT_MAP = {
@@ -102,6 +110,7 @@ ROUTE_SCREENSHOT_MAP = {
     "https://www.getyourclientsb2b.com/#analytics": "/screenshots/analytics.png",
     "https://www.getyourclientsb2b.com/pricing": "/screenshots/pricing.png",
     "https://www.getyourclientsb2b.com/contact": "/screenshots/contact.png",
+    "https://www.getyourclientsb2b.com/signup": "/screenshots/home.png",
 }
 
 ALL_FOLDER_SCREENSHOTS = [
@@ -120,6 +129,44 @@ ALL_FOLDER_SCREENSHOTS = [
     "/screenshots/pricing.png",
     "/screenshots/contact.png",
 ]
+
+
+def ensure_website_url(url: Optional[str] = None, default_route: str = "/") -> str:
+    """
+    Ensure the URL strictly uses the base website https://www.getyourclientsb2b.com/
+    and never leaks backend/API domains like growth-api.getyourclientsb2b.com or localhost.
+    Preserves routes/hashes/queries on www.getyourclientsb2b.com.
+    """
+    base = BASE_WEBSITE_URL
+    if not url:
+        route = default_route if (default_route.startswith("/") or default_route.startswith("#")) else f"/{default_route}"
+        return f"{base}{route}"
+
+    url_str = str(url).strip()
+    for bad_prefix in [
+        "https://growth-api.getyourclientsb2b.com",
+        "http://growth-api.getyourclientsb2b.com",
+        "https://growth.getyourclientsb2b.com",
+        "http://growth.getyourclientsb2b.com",
+        "https://getyourclientsb2b.com",
+        "http://getyourclientsb2b.com",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]:
+        if url_str.startswith(bad_prefix):
+            remainder = url_str[len(bad_prefix):]
+            if remainder.startswith("/r/"):
+                remainder = default_route
+            route = remainder if (remainder.startswith("/") or remainder.startswith("#")) else (f"/{remainder}" if remainder else "/")
+            return f"{base}{route}"
+
+    if url_str.startswith("/"):
+        return f"{base}{url_str}"
+    if not url_str.startswith("http"):
+        return f"{base}/{url_str.lstrip('/')}"
+    return url_str
 
 
 def get_screenshot_for_route(route: str) -> str:
@@ -197,11 +244,13 @@ def get_varied_destination_url(topic_or_pillar: str = "", platform: str = "", se
     """
     Select an appropriate destination route on https://www.getyourclientsb2b.com
     rotating across varied real routes (/, /#overview, /#product, /#how-it-works, /#industries,
-    /#discovery, /#pipeline, /#inbox, /#calls, /#analytics, /pricing, /contact).
-    Guarantees every platform in a batch and every new post gets a different route.
+    /#discovery, /#pipeline, /#inbox, /#calls, /#analytics, /pricing, /contact, /signup).
+    Guarantees every platform in a batch and every new post gets a different route,
+    while the base URL is always strictly https://www.getyourclientsb2b.com/.
     """
     platform_offset = {
         "x": 0,          # https://www.getyourclientsb2b.com/
+        "twitter": 0,    # https://www.getyourclientsb2b.com/
         "linkedin": 2,   # https://www.getyourclientsb2b.com/#product
         "facebook": 3,   # https://www.getyourclientsb2b.com/#how-it-works
         "instagram": 4,  # https://www.getyourclientsb2b.com/#industries
@@ -214,13 +263,16 @@ def get_varied_destination_url(topic_or_pillar: str = "", platform: str = "", se
             base_idx = (base_idx + seed_hash) % len(TARGET_ROUTES)
         except Exception:
             pass
-    return TARGET_ROUTES[base_idx]
+    return ensure_website_url(TARGET_ROUTES[base_idx])
 
 
 def _wrap_utm_link(platform: str, pillar: str, post_id: str, base_url: str) -> tuple[str, dict]:
     """
     Wrap destination URL with UTM tags and register short link /r/{code}.
     Format: utm_source={platform}&utm_medium=social&utm_campaign={pillar}&utm_content={post_id}
+    CRITICAL: Posts for Facebook, Instagram, YouTube, LinkedIn, and Twitter/X must ALWAYS
+    be posted with the public website https://www.getyourclientsb2b.com/ with varied routes,
+    and NEVER post with growth-api.getyourclientsb2b.com.
     """
     short_code = uuid.uuid4().hex[:8]
     pillar_clean = (pillar or "social").lower().replace(" ", "_").replace("-", "_")
@@ -230,15 +282,11 @@ def _wrap_utm_link(platform: str, pillar: str, post_id: str, base_url: str) -> t
         campaign=pillar_clean,
         content=post_id,
     )
-    register_short_link(short_code, base_url, utm_data)
+    clean_base = ensure_website_url(base_url)
+    register_short_link(short_code, clean_base, utm_data)
 
-    # In social media posts, use the live public getyourclientsb2b.com route directly
-    # instead of http://localhost:8000/r/{short_code}.
-    if not settings.api_url or "localhost" in settings.api_url or "127.0.0.1" in settings.api_url:
-        return base_url, utm_data
-
-    short_link = f"{settings.api_url}/r/{short_code}"
-    return short_link, utm_data
+    # Base URL must ALWAYS be https://www.getyourclientsb2b.com/
+    return clean_base, utm_data
 
 
 @router.get("/posts", response_model=list[PostResponse])
@@ -288,10 +336,8 @@ async def create_post(
         check_claims(payload.body)
 
     post_uuid = uuid.uuid4()
-    short_url = payload.link_url
-    utm_data = None
-    if payload.link_url:
-        short_url, utm_data = _wrap_utm_link(payload.platform, "manual", str(post_uuid), payload.link_url)
+    target_link = payload.link_url or get_varied_destination_url(payload.body or "", payload.platform, str(post_uuid))
+    short_url, utm_data = _wrap_utm_link(payload.platform, "manual", str(post_uuid), target_link)
 
     post = Post(
         id=post_uuid,
@@ -337,10 +383,12 @@ async def generate_platform_posts(
         "value_props": json.dumps(brand.value_props) if (brand and brand.value_props) else '["Interactive global map discovery", "Verified B2B emails & contacts", "Cold outreach CRM & automated sequences"]',
         "topic": idea.topic,
         "pillar": idea.pillar or "how-to",
-        "link_url": payload.link_url or (brand.website_url if brand else "https://getyourclientsb2b.com"),
+        "link_url": ensure_website_url(payload.link_url or (brand.website_url if brand else "https://www.getyourclientsb2b.com")),
     }
 
     platforms = payload.platforms or ["x", "linkedin", "instagram", "facebook"]
+    # Normalize platform names (e.g. twitter -> x)
+    platforms = ["x" if p.lower() == "twitter" else p.lower() for p in platforms]
     destination_url = brand_context["link_url"]
 
     adapted_data = None
@@ -362,6 +410,7 @@ async def generate_platform_posts(
     li_dest = get_varied_destination_url(clean_topic, "linkedin", str(idea.id))
     ig_dest = get_varied_destination_url(clean_topic, "instagram", str(idea.id))
     fb_dest = get_varied_destination_url(clean_topic, "facebook", str(idea.id))
+    yt_dest = get_varied_destination_url(clean_topic, "youtube", str(idea.id))
 
     if not adapted_data:
         # Deterministic compliant fallback matching all platform constraints with varied routes
@@ -395,7 +444,24 @@ async def generate_platform_posts(
             facebook=_FacebookAdapted(
                 body=f"Struggling with {clean_topic}? Here is our complete step-by-step breakdown on scaling verified client acquisition with GetyourclientsB2B: {fb_dest}"
             ),
+            youtube=_YouTubeAdapted(
+                body=(
+                    f"How to solve {clean_topic} in 5 minutes (Step-by-Step Tutorial).\n\n"
+                    f"🚀 Explore live platform and verified tools: {yt_dest}\n\n"
+                    "Timestamps:\n"
+                    "0:00 - Introduction\n"
+                    "1:15 - Core Outbound Strategy\n"
+                    "3:00 - Live Workflow & Deliverability\n"
+                    "5:00 - Summary & Free Checklist"
+                )
+            ),
         )
+
+    yt_body = (
+        adapted_data.youtube.body
+        if (getattr(adapted_data, "youtube", None) and getattr(adapted_data.youtube, "body", None))
+        else f"Mastering {clean_topic} with verified outreach workflows.\n\nFull guide: {yt_dest}"
+    )
 
     # Schedule suggestions (stagger posts across next few days)
     base_time = payload.schedule_start or (datetime.now(timezone.utc) + timedelta(days=1, hours=9))
@@ -406,6 +472,7 @@ async def generate_platform_posts(
         ("linkedin", adapted_data.linkedin.body, get_all_screenshots_for_content(li_dest), base_time + timedelta(hours=2), li_dest),
         ("instagram", adapted_data.instagram.caption, get_all_screenshots_for_content(ig_dest), base_time + timedelta(hours=4), ig_dest),
         ("facebook", adapted_data.facebook.body, get_all_screenshots_for_content(fb_dest), base_time + timedelta(hours=6), fb_dest),
+        ("youtube", yt_body, get_all_screenshots_for_content(yt_dest), base_time + timedelta(hours=8), yt_dest),
     ]
 
     for plat, body_text, media_urls, sched_time, plat_dest_url in platform_configs:
@@ -443,7 +510,7 @@ async def generate_platform_posts(
         elif live_link not in body_with_link and plat_dest_url not in body_with_link:
             if plat in ("facebook", "x"):
                 body_with_link += f" {live_link}"
-            elif plat == "linkedin":
+            elif plat in ("linkedin", "youtube"):
                 body_with_link += f"\n\n{live_link}"
             elif plat == "instagram":
                 body_with_link += f"\n\n🔗 {live_link}"
@@ -647,7 +714,7 @@ async def update_post(
     if payload.media_urls is not None:
         post.media_urls = payload.media_urls
     if payload.link_url is not None:
-        post.link_url = payload.link_url
+        post.link_url = ensure_website_url(payload.link_url)
     if payload.scheduled_at is not None:
         post.scheduled_at = payload.scheduled_at
     if payload.status is not None:

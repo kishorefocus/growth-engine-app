@@ -22,7 +22,7 @@ from app.models.auth import BrandProfile, SocialAccount
 from app.models.social import ContentIdea, Post
 from app.providers.social import PostPayload, PublishResult, get_social_publisher
 from app.routers.analytics import register_short_link
-from app.routers.posts import get_all_screenshots_for_content, get_varied_destination_url
+from app.routers.posts import ensure_website_url, get_all_screenshots_for_content, get_varied_destination_url
 from app.services.audit import write_audit_log
 from app.services.crypto import decrypt_token, encrypt_token
 from app.services.utm import utm_dict
@@ -34,7 +34,22 @@ async def publish_single_post(session: AsyncSession, post: Post) -> PublishResul
     """
     Publish a single post immediately using its connected platform account.
     Updates post.status, post.published_at, post.external_post_id, post.error, and audit log.
+    Guarantees the link posted is strictly https://www.getyourclientsb2b.com/ with varied routes
+    and never growth-api.getyourclientsb2b.com.
     """
+    # Clean & ensure post.link_url strictly uses https://www.getyourclientsb2b.com/
+    clean_link = ensure_website_url(
+        post.link_url or get_varied_destination_url(post.body or "", post.platform, str(post.id))
+    )
+    post.link_url = clean_link
+
+    # Sanitize post.body to replace any backend API domain (growth-api.getyourclientsb2b.com) with clean_link
+    clean_body = post.body or ""
+    import re
+    clean_body = re.sub(r"https?://(?:growth-api|growth)\.getyourclientsb2b\.com(?:/r/[a-zA-Z0-9]+)?", clean_link, clean_body)
+    clean_body = clean_body.replace("https://getyourclientsb2b.com", "https://www.getyourclientsb2b.com")
+    post.body = clean_body
+
     acc_res = await session.execute(
         select(SocialAccount).where(SocialAccount.platform == post.platform)
     )
@@ -171,14 +186,22 @@ async def generate_weekly_content_batch(ctx: Optional[dict] = None, db: Optional
 
         for idx, idea in enumerate(ideas):
             sched_time = base_time + timedelta(days=idx)
-            for plat in ["x", "linkedin", "facebook", "instagram"]:
+            for plat in ["x", "linkedin", "facebook", "instagram", "youtube"]:
                 short_code = uuid.uuid4().hex[:8]
-                dest_url = get_varied_destination_url(idea.topic, plat, f"{idea.id}_{idx}")
+                dest_url = ensure_website_url(get_varied_destination_url(idea.topic, plat, f"{idea.id}_{idx}"))
                 utm = utm_dict(source=plat, medium="social", campaign=idea.pillar or "batch", content=str(idea.id))
                 register_short_link(short_code, dest_url, utm)
-                link_to_use = dest_url if (not settings.api_url or "localhost" in settings.api_url or "127.0.0.1" in settings.api_url) else f"{settings.api_url}/r/{short_code}"
+                link_to_use = dest_url
 
-                body = f"{idea.topic}\n\nFull guide and verified workflows: {link_to_use}"
+                if plat == "youtube":
+                    body = (
+                        f"How to solve {idea.topic} in 5 minutes (Step-by-Step Tutorial).\n\n"
+                        f"🚀 Explore live platform and verified tools: {link_to_use}\n\n"
+                        "Timestamps:\n0:00 - Introduction\n1:15 - Core Strategy\n3:00 - Live Workflow\n5:00 - Summary"
+                    )
+                else:
+                    body = f"{idea.topic}\n\nFull guide and verified workflows: {link_to_use}"
+
                 media_urls = get_all_screenshots_for_content(dest_url)
                 post = Post(
                     idea_id=idea.id,
