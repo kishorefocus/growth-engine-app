@@ -649,16 +649,47 @@ class YouTubePublisher(SocialPublisher):
                 logger.info("YouTube sandbox publish successful. Generated simulated video ID: %s", sim_id)
                 return PublishResult(external_post_id=sim_id, success=True)
 
-            # In production, uses video metadata insert or resumable upload
-            url = "https://www.googleapis.com/youtube/v3/videos?part=snippet,status"
-            headers = {
+            # YouTube strictly requires a video media file binary for video uploads
+            media_url = post.media_urls[0] if (post.media_urls and post.media_urls[0]) else None
+            if not media_url:
+                return PublishResult(
+                    external_post_id="",
+                    success=False,
+                    error="Cannot publish to YouTube: No video media file attached. YouTube Data API requires a video file (MP4) to upload.",
+                )
+
+            # Retrieve video media binary
+            video_bytes = b""
+            content_type = "video/mp4"
+            async with httpx.AsyncClient(timeout=120.0) as fetch_client:
+                try:
+                    media_resp = await fetch_client.get(media_url)
+                    if media_resp.status_code == 200:
+                        video_bytes = media_resp.content
+                        content_type = media_resp.headers.get("content-type", "video/mp4")
+                except Exception as exc:
+                    logger.warning("Could not fetch remote media from %s: %s", media_url, exc)
+
+            if not video_bytes:
+                # If remote asset is not reachable or dummy asset in staging/preview
+                return PublishResult(
+                    external_post_id="",
+                    success=False,
+                    error=f"Could not load video asset file from '{media_url}'. Ensure the video file is publicly accessible.",
+                )
+
+            # Initiate YouTube Resumable Upload Session
+            init_url = "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status"
+            init_headers = {
                 "Authorization": f"Bearer {post.access_token}",
-                "Content-Type": "application/json",
+                "Content-Type": "application/json; charset=UTF-8",
+                "X-Upload-Content-Type": content_type,
+                "X-Upload-Content-Length": str(len(video_bytes)),
             }
 
             body = {
                 "snippet": {
-                    "title": post.title or (desc[:60] if desc else "GetYourClients B2B Video"),
+                    "title": (post.title or (desc[:60] if desc else "GetYourClients B2B Video"))[:100],
                     "description": desc,
                     "tags": post.tags or ["b2b", "lead generation", "sales prospecting", "cold email"],
                     "categoryId": "27",  # Education
@@ -669,16 +700,51 @@ class YouTubePublisher(SocialPublisher):
                 },
             }
 
-            async with httpx.AsyncClient(timeout=45.0) as client:
-                response = await _execute_with_retry(
-                    lambda: client.post(url, json=body, headers=headers)
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                # Step 1: Initialize upload session
+                init_response = await _execute_with_retry(
+                    lambda: client.post(init_url, json=body, headers=init_headers)
                 )
-                if response.status_code not in (200, 201):
-                    err_text = response.text
-                    logger.error("YouTube Data API error %d: %s", response.status_code, err_text)
-                    return PublishResult(external_post_id="", success=False, error=f"YouTube API error ({response.status_code}): {err_text}")
+                if init_response.status_code not in (200, 201):
+                    err_text = init_response.text
+                    logger.error("YouTube Resumable Upload Init error %d: %s", init_response.status_code, err_text)
+                    return PublishResult(
+                        external_post_id="",
+                        success=False,
+                        error=f"YouTube API error ({init_response.status_code}): {err_text}",
+                    )
 
-                video_id = response.json().get("id", f"yt_{uuid.uuid4().hex[:11]}")
+                upload_session_url = init_response.headers.get("Location")
+                if not upload_session_url:
+                    return PublishResult(
+                        external_post_id="",
+                        success=False,
+                        error="YouTube did not provide a resumable upload session URL in Location header.",
+                    )
+
+                # Step 2: Upload binary bytes to the session URL
+                upload_headers = {
+                    "Content-Type": content_type,
+                    "Content-Length": str(len(video_bytes)),
+                }
+                upload_response = await client.put(upload_session_url, content=video_bytes, headers=upload_headers)
+                if upload_response.status_code not in (200, 201):
+                    err_text = upload_response.text
+                    logger.error("YouTube Upload transfer error %d: %s", upload_response.status_code, err_text)
+                    return PublishResult(
+                        external_post_id="",
+                        success=False,
+                        error=f"YouTube video transfer failed ({upload_response.status_code}): {err_text}",
+                    )
+
+                video_id = upload_response.json().get("id")
+                if not video_id:
+                    return PublishResult(
+                        external_post_id="",
+                        success=False,
+                        error=f"YouTube upload succeeded but no video ID was returned: {upload_response.text}",
+                    )
+
                 return PublishResult(external_post_id=video_id, success=True)
 
         return await dry_run_guard(

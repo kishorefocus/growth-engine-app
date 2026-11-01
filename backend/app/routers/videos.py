@@ -368,6 +368,12 @@ async def publish_video_to_youtube(
         clean_desc = f"{clean_desc}\n\n🚀 Explore GetYourClients B2B: https://www.getyourclientsb2b.com/?utm_source=youtube&utm_medium=video&utm_campaign=video_studio".strip()
     project.youtube_description = clean_desc
 
+    if not project.asset_url:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot publish to YouTube: No video file (asset_url) attached. Please upload an MP4 video asset first before publishing.",
+        )
+
     publisher = get_social_publisher("youtube")
     result = await publisher.publish(
         PostPayload(
@@ -377,6 +383,7 @@ async def publish_video_to_youtube(
             link_url="https://www.getyourclientsb2b.com/",
             access_token=access_token,
             tags=project.tags if isinstance(project.tags, list) else None,
+            media_urls=[project.asset_url] if project.asset_url else None,
         )
     )
 
