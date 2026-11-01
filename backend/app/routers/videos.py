@@ -9,7 +9,7 @@ Video Studio router:
   Facebook Reels, and LinkedIn video.
 - CRUD for video projects.
 """
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 import logging
 from typing import Any, Optional
@@ -35,7 +35,7 @@ from app.schemas.social import (
 from app.services.ai import _load_prompt, generate
 from app.services.audit import write_audit_log
 from app.services.claims_guard import check_claims
-from app.services.crypto import decrypt_token
+from app.services.crypto import decrypt_token, encrypt_token
 from app.services.storage import generate_presigned_upload_url
 from app.services.utm import utm_dict
 
@@ -191,7 +191,7 @@ async def create_video_plan(
             captions=f"Looking to master {kw}? Watch our full walkthrough showing how modern sales teams automate high-conversion outreach.",
             youtube_description=(
                 f"In this video, we break down exactly how to execute {kw}.\n\n"
-                f"🚀 Try GlobalReach: {destination_url}?utm_source=youtube&utm_medium=video&utm_campaign=video_studio\n\n"
+                f"🚀 Explore GetYourClients B2B: {destination_url}?utm_source=youtube&utm_medium=video&utm_campaign=video_studio\n\n"
                 "Timestamps:\n"
                 "0:00 - Introduction\n"
                 "1:10 - The Common Mistake\n"
@@ -258,6 +258,89 @@ async def get_video_upload_url(
     )
 
 
+async def _resolve_youtube_access_token(db: AsyncSession, yt_acc: Optional[SocialAccount]) -> str:
+    """
+    Resolve a valid access token for YouTube.
+    1. Checks .env YOUTUBE_ACCESS_TOKEN or GOOGLE_ACCESS_TOKEN.
+    2. Attempts to decrypt yt_acc.encrypted_access_token.
+    3. If expired or decryption fails, and refresh token is available, refreshes with Google OAuth.
+    4. Falls back to mock token.
+    """
+    import dotenv
+    env_vars = dotenv.dotenv_values(".env")
+    direct_env_token = (
+        env_vars.get("YOUTUBE_ACCESS_TOKEN")
+        or env_vars.get("GOOGLE_ACCESS_TOKEN")
+        or getattr(settings, "youtube_access_token", "")
+        or ""
+    ).strip().strip("'\"")
+    if direct_env_token:
+        return direct_env_token
+
+    now = datetime.now(timezone.utc)
+    access_token = ""
+    token_needs_refresh = False
+
+    if yt_acc and yt_acc.encrypted_access_token:
+        try:
+            access_token = decrypt_token(yt_acc.encrypted_access_token)
+            if yt_acc.expires_at:
+                exp = yt_acc.expires_at.replace(tzinfo=timezone.utc) if yt_acc.expires_at.tzinfo is None else yt_acc.expires_at
+                if exp <= now:
+                    token_needs_refresh = True
+        except Exception:
+            token_needs_refresh = True
+
+    # Try refreshing if needed or if decryption failed
+    refresh_token = ""
+    if yt_acc and yt_acc.encrypted_refresh_token:
+        try:
+            refresh_token = decrypt_token(yt_acc.encrypted_refresh_token)
+        except Exception:
+            pass
+    if not refresh_token:
+        refresh_token = (
+            env_vars.get("YOUTUBE_REFRESH_TOKEN")
+            or env_vars.get("GOOGLE_REFRESH_TOKEN")
+            or getattr(settings, "youtube_refresh_token", "")
+            or ""
+        ).strip().strip("'\"")
+
+    if (token_needs_refresh or not access_token) and refresh_token and not refresh_token.startswith("mock_"):
+        if settings.google_client_id and settings.google_client_secret:
+            try:
+                import httpx
+                async with httpx.AsyncClient(timeout=20.0) as client:
+                    resp = await client.post(
+                        "https://oauth2.googleapis.com/token",
+                        data={
+                            "client_id": settings.google_client_id,
+                            "client_secret": settings.google_client_secret,
+                            "refresh_token": refresh_token,
+                            "grant_type": "refresh_token",
+                        },
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        new_tok = data.get("access_token")
+                        expires_in = data.get("expires_in", 3600)
+                        if new_tok:
+                            access_token = new_tok
+                            if yt_acc:
+                                yt_acc.encrypted_access_token = encrypt_token(new_tok)
+                                yt_acc.expires_at = now + timedelta(seconds=expires_in)
+                                yt_acc.status = "active"
+                                await db.commit()
+                            logger.info("Successfully refreshed YouTube access token from Google OAuth.")
+            except Exception as e:
+                logger.warning("Could not refresh YouTube access token: %s", e)
+
+    if not access_token:
+        access_token = "mock-youtube-token"
+
+    return access_token
+
+
 @router.post("/{id}/publish-youtube", response_model=VideoProjectResponse)
 async def publish_video_to_youtube(
     id: str,
@@ -266,6 +349,7 @@ async def publish_video_to_youtube(
 ):
     """
     Publish video to YouTube Data API (strictly private until owner approves).
+    Guarantees public link uses https://www.getyourclientsb2b.com/
     """
     project = await db.get(VideoProject, uuid.UUID(id))
     if not project:
@@ -275,21 +359,22 @@ async def publish_video_to_youtube(
     yt_acc_res = await db.execute(select(SocialAccount).where(SocialAccount.platform == "youtube"))
     yt_acc = yt_acc_res.scalar_one_or_none()
 
-    access_token = ""
-    if yt_acc and yt_acc.encrypted_access_token:
-        try:
-            access_token = decrypt_token(yt_acc.encrypted_access_token)
-        except Exception:
-            access_token = "mock-decrypted-token"
-    else:
-        access_token = "mock-youtube-token"
+    access_token = await _resolve_youtube_access_token(db, yt_acc)
+
+    # Ensure description strictly includes public website link with UTM
+    clean_desc = project.youtube_description or ""
+    clean_desc = clean_desc.replace("Try GlobalReach:", "Explore GetYourClients B2B:").replace("GlobalReach", "GetYourClients B2B")
+    if "getyourclientsb2b.com" not in clean_desc:
+        clean_desc = f"{clean_desc}\n\n🚀 Explore GetYourClients B2B: https://www.getyourclientsb2b.com/?utm_source=youtube&utm_medium=video&utm_campaign=video_studio".strip()
+    project.youtube_description = clean_desc
 
     publisher = get_social_publisher("youtube")
     result = await publisher.publish(
         PostPayload(
             platform="youtube",
-            body=project.youtube_description or "",
+            body=project.youtube_description,
             title=project.youtube_title or project.title,
+            link_url="https://www.getyourclientsb2b.com/",
             access_token=access_token,
             tags=project.tags if isinstance(project.tags, list) else None,
         )

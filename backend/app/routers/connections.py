@@ -217,6 +217,61 @@ async def list_connections(
             li_acc.status = "active"
             await db.commit()
 
+    # Direct YouTube Access/Refresh Token auto-sync from .env
+    yt_token = (
+        env_vars.get("YOUTUBE_ACCESS_TOKEN")
+        or env_vars.get("GOOGLE_ACCESS_TOKEN")
+        or getattr(settings, "youtube_access_token", "")
+        or ""
+    ).strip().strip("'\"")
+    yt_refresh = (
+        env_vars.get("YOUTUBE_REFRESH_TOKEN")
+        or env_vars.get("GOOGLE_REFRESH_TOKEN")
+        or getattr(settings, "youtube_refresh_token", "")
+        or ""
+    ).strip().strip("'\"")
+
+    if yt_token:
+        yt_handle = "GetYourClients B2B"
+        yt_external_id = "channel_getyourclientsb2b"
+        if not yt_token.startswith("mock_"):
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    ch_res = await client.get(
+                        "https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true",
+                        headers={"Authorization": f"Bearer {yt_token}"},
+                    )
+                    if ch_res.status_code == 200:
+                        items = ch_res.json().get("items", [])
+                        if items:
+                            yt_handle = items[0].get("snippet", {}).get("title", yt_handle)
+                            yt_external_id = items[0].get("id", yt_external_id)
+            except Exception as e:
+                logger.warning("Could not auto-verify YouTube token with Google: %s", e)
+
+        yt_res = await db.execute(select(SocialAccount).where(SocialAccount.platform == "youtube"))
+        yt_acc = yt_res.scalar_one_or_none()
+        if not yt_acc:
+            yt_acc = SocialAccount(
+                platform="youtube",
+                handle=yt_handle,
+                external_id=yt_external_id,
+                encrypted_access_token=encrypt_token(yt_token),
+                encrypted_refresh_token=encrypt_token(yt_refresh) if yt_refresh else None,
+                expires_at=datetime.now(timezone.utc) + timedelta(days=60),
+                status="active",
+            )
+            db.add(yt_acc)
+            await db.commit()
+        else:
+            yt_acc.handle = yt_handle
+            yt_acc.external_id = yt_external_id
+            yt_acc.encrypted_access_token = encrypt_token(yt_token)
+            if yt_refresh:
+                yt_acc.encrypted_refresh_token = encrypt_token(yt_refresh)
+            yt_acc.status = "active"
+            await db.commit()
+
     result = await db.execute(select(SocialAccount).order_by(SocialAccount.created_at.desc()))
     accounts = result.scalars().all()
 
@@ -1120,6 +1175,31 @@ async def direct_connect_account(
                     logger.warning("Meta Graph API returned %d for Instagram: %s", res.status_code, res.text)
             except Exception as e:
                 logger.warning("Meta Graph API check error: %s", e)
+
+    elif platform == "youtube" and not access_token.startswith("mock_"):
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            try:
+                ch_res = await client.get(
+                    "https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                )
+                if ch_res.status_code == 200:
+                    items = ch_res.json().get("items", [])
+                    if items:
+                        snippet = items[0].get("snippet", {})
+                        handle = snippet.get("title", handle or "YouTube Channel")
+                        external_id = items[0].get("id", external_id)
+                        logger.info("Google API verified YouTube Channel: %s (%s)", handle, external_id)
+                else:
+                    logger.warning("Google API returned %d for YouTube: %s", ch_res.status_code, ch_res.text)
+            except Exception as e:
+                logger.warning("Google API YouTube check error: %s", e)
+
+        try:
+            import dotenv
+            dotenv.set_key(".env", "YOUTUBE_ACCESS_TOKEN", access_token)
+        except Exception:
+            pass
 
     # Sensible defaults for handle and numeric external_id if still blank
     if not handle:

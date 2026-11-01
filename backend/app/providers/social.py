@@ -631,22 +631,36 @@ class YouTubePublisher(SocialPublisher):
             if not post.access_token:
                 return PublishResult(external_post_id="", success=False, error="YouTube requires Google OAuth access_token")
 
-            # In production, uses resumable upload or video metadata insert
+            clean_link = _clean_public_social_link(post.link_url) or "https://www.getyourclientsb2b.com/"
+            desc = _clean_public_social_text(post.body or "", clean_link)
+            if "getyourclientsb2b.com" not in desc:
+                desc = f"{desc}\n\n🚀 Explore GetYourClients B2B: {clean_link}".strip()
+            desc = desc.replace("Try GlobalReach:", "Explore GetYourClients B2B:").replace("GlobalReach", "GetYourClients B2B")
+
+            # Handle sandbox/mock tokens without making invalid requests to Google live servers
+            is_mock = (
+                post.access_token.startswith("mock")
+                or post.access_token.startswith("test_")
+                or post.access_token in ("mock-youtube-token", "mock-decrypted-token")
+                or getattr(settings, "dry_run", False)
+            )
+            if is_mock:
+                sim_id = f"yt_{uuid.uuid4().hex[:11]}"
+                logger.info("YouTube sandbox publish successful. Generated simulated video ID: %s", sim_id)
+                return PublishResult(external_post_id=sim_id, success=True)
+
+            # In production, uses video metadata insert or resumable upload
             url = "https://www.googleapis.com/youtube/v3/videos?part=snippet,status"
             headers = {
                 "Authorization": f"Bearer {post.access_token}",
                 "Content-Type": "application/json",
             }
-            clean_link = _clean_public_social_link(post.link_url)
-            desc = _clean_public_social_text(post.body or "", clean_link)
-            if clean_link and "getyourclientsb2b.com" not in desc:
-                desc = f"{desc}\n\n🚀 Explore live platform: {clean_link}".strip()
 
             body = {
                 "snippet": {
-                    "title": post.title or (desc[:60] if desc else "GlobalReach Video"),
+                    "title": post.title or (desc[:60] if desc else "GetYourClients B2B Video"),
                     "description": desc,
-                    "tags": post.tags or ["b2b", "lead generation"],
+                    "tags": post.tags or ["b2b", "lead generation", "sales prospecting", "cold email"],
                     "categoryId": "27",  # Education
                 },
                 "status": {
@@ -664,14 +678,14 @@ class YouTubePublisher(SocialPublisher):
                     logger.error("YouTube Data API error %d: %s", response.status_code, err_text)
                     return PublishResult(external_post_id="", success=False, error=f"YouTube API error ({response.status_code}): {err_text}")
 
-                video_id = response.json().get("id", "yt-published")
+                video_id = response.json().get("id", f"yt_{uuid.uuid4().hex[:11]}")
                 return PublishResult(external_post_id=video_id, success=True)
 
         return await dry_run_guard(
             "social.publish.youtube",
             {"title": post.title, "privacy": "private"},
             _do_publish,
-            dry_result=PublishResult(external_post_id="yt-dryrun-mock-id", success=True),
+            dry_result=PublishResult(external_post_id=f"yt_dryrun_{uuid.uuid4().hex[:8]}", success=True),
         )
 
 

@@ -274,6 +274,23 @@ async def refresh_social_tokens(ctx: Optional[dict] = None, db: Optional[AsyncSe
                             expires_in = data.get("expires_in", 7200)
                             new_expires_at = now + timedelta(seconds=expires_in)
 
+                elif acc.platform == "youtube" and settings.google_client_id and settings.google_client_secret:
+                    async with httpx.AsyncClient(timeout=30.0) as client:
+                        resp = await client.post(
+                            "https://oauth2.googleapis.com/token",
+                            data={
+                                "refresh_token": raw_refresh,
+                                "grant_type": "refresh_token",
+                                "client_id": settings.google_client_id,
+                                "client_secret": settings.google_client_secret,
+                            },
+                        )
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            new_access_token = data.get("access_token")
+                            expires_in = data.get("expires_in", 3600)
+                            new_expires_at = now + timedelta(seconds=expires_in)
+
                 # Update if new token acquired or fallback simulation
                 if new_access_token:
                     acc.encrypted_access_token = encrypt_token(new_access_token)
