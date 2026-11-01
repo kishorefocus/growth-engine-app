@@ -12,10 +12,11 @@ Video Studio router:
 from datetime import datetime, timedelta, timezone
 import json
 import logging
+import os
 from typing import Any, Optional
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -256,6 +257,39 @@ async def get_video_upload_url(
         public_url=upload_info["public_url"],
         key=upload_info["key"],
     )
+
+
+@router.post("/{id}/upload-direct", response_model=VideoProjectResponse)
+async def upload_video_file_direct(
+    id: str,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """
+    Direct video file upload endpoint for environments without external S3/R2.
+    Saves the video to static/videos and assigns asset_url.
+    """
+    project = await db.get(VideoProject, uuid.UUID(id))
+    if not project:
+        raise HTTPException(status_code=404, detail="Video project not found")
+
+    static_videos_dir = os.path.join(os.path.dirname(__file__), "..", "static", "videos")
+    os.makedirs(static_videos_dir, exist_ok=True)
+
+    clean_filename = f"{uuid.uuid4().hex[:12]}_{file.filename or 'video.mp4'}"
+    file_path = os.path.join(static_videos_dir, clean_filename)
+
+    contents = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    fallback_base = settings.api_url.rstrip("/")
+    project.asset_url = f"{fallback_base}/static/videos/{clean_filename}"
+    await db.commit()
+    await db.refresh(project)
+
+    return _to_video_response(project)
 
 
 async def _resolve_youtube_access_token(db: AsyncSession, yt_acc: Optional[SocialAccount]) -> str:

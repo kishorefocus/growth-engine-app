@@ -691,9 +691,24 @@ export function usePlanVideo() {
 }
 
 export function useUploadVideoAsset() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, filename }: { id: string; filename?: string }) =>
       videoApi.getUploadUrl(id, filename),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["videos"] });
+    },
+  });
+}
+
+export function useUploadVideoDirect() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      videoApi.uploadDirect(id, file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["videos"] });
+    },
   });
 }
 

@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   useVideos,
   usePlanVideo,
   useUploadVideoAsset,
+  useUploadVideoDirect,
   usePublishYouTube,
   useCrossPostCaptions,
 } from "@/lib/hooks";
@@ -48,8 +49,10 @@ export default function VideoStudioPage() {
   const { data: videos, isLoading, refetch } = useVideos();
   const planMutation = usePlanVideo();
   const uploadAssetMutation = useUploadVideoAsset();
+  const uploadDirectMutation = useUploadVideoDirect();
   const publishYouTubeMutation = usePublishYouTube();
   const crossPostMutation = useCrossPostCaptions();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [crossPostData, setCrossPostData] = useState<{
     instagram_reels: string;
@@ -86,16 +89,31 @@ export default function VideoStudioPage() {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const handleSimulateUpload = async (videoId: string) => {
+  const handleUseDemoVideo = async (videoId: string) => {
     try {
       const res = await uploadAssetMutation.mutateAsync({
         id: videoId,
         filename: "demo_walkthrough.mp4",
       });
-      toast.success("Asset uploaded successfully! Signed URL generated.");
+      toast.success("Attached demo walkthrough video! Ready to publish to YouTube.");
       refetch();
     } catch (err: any) {
-      toast.error(`Upload error: ${err.message}`);
+      toast.error(`Could not attach demo video: ${err.message}`);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, videoId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      toast.info(`Uploading "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB)...`);
+      await uploadDirectMutation.mutateAsync({ id: videoId, file });
+      toast.success("Video file uploaded successfully! Ready to publish to YouTube.");
+      refetch();
+    } catch (err: any) {
+      toast.error(`Upload failed: ${err.message}`);
+    } finally {
+      if (e.target) e.target.value = "";
     }
   };
 
@@ -488,13 +506,31 @@ export default function VideoStudioPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleSimulateUpload(activeVideo.id)}
-                  disabled={uploadAssetMutation.isPending}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-all"
-                >
-                  {uploadAssetMutation.isPending ? "Generating..." : "Upload Asset"}
-                </button>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="video/mp4,video/quicktime,video/*"
+                    className="hidden"
+                    onChange={(e) => handleFileChange(e, activeVideo.id)}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadDirectMutation.isPending}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-sm shadow-violet-600/30 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    {uploadDirectMutation.isPending ? "Uploading..." : "Upload MP4"}
+                  </button>
+                  <button
+                    onClick={() => handleUseDemoVideo(activeVideo.id)}
+                    disabled={uploadAssetMutation.isPending}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-all disabled:opacity-50"
+                    title="Attach the included demo video asset to test publishing immediately"
+                  >
+                    {uploadAssetMutation.isPending ? "Attaching..." : "Use Demo Video"}
+                  </button>
+                </div>
               </div>
             </div>
           ) : (

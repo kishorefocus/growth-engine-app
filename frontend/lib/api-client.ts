@@ -159,6 +159,10 @@ export async function apiFetch<T>(
     ...(fetchOptions.headers as Record<string, string>),
   };
 
+  if (fetchOptions.body instanceof FormData) {
+    delete headers["Content-Type"];
+  }
+
   if (!skipAuth) {
     const token = getAccessToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -687,6 +691,14 @@ export const videoApi = {
       `/videos/${id}/upload-url?filename=${encodeURIComponent(filename)}`,
       { method: "POST" }
     ),
+  uploadDirect: (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiFetch<VideoProject>(`/videos/${id}/upload-direct`, {
+      method: "POST",
+      body: formData,
+    });
+  },
   publishYouTube: (id: string) =>
     apiFetch<VideoProject>(`/videos/${id}/publish-youtube`, { method: "POST" }),
   crossPostCaptions: (id: string) =>

@@ -77,8 +77,14 @@ def generate_presigned_upload_url(
 
     # Fallback / local dev simulation
     fallback_base = settings.api_url.rstrip("/")
+    # If using demo walkthrough without S3, point directly to the static demo video
+    if "demo" in filename.lower() or "walkthrough" in filename.lower():
+        public_url = f"{fallback_base}/static/videos/demo_walkthrough.mp4"
+    else:
+        public_url = f"{fallback_base}/static/{key}"
+
     return {
         "upload_url": f"{fallback_base}/api/v1/videos/upload-direct?key={key}",
-        "public_url": f"{fallback_base}/static/{key}",
+        "public_url": public_url,
         "key": key,
     }
