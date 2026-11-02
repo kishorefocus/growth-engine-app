@@ -20,6 +20,7 @@ import os
 import re
 import urllib.parse
 import uuid
+import json
 import dotenv
 import httpx
 
@@ -120,6 +121,63 @@ def _clean_public_social_text(text: Optional[str], fallback_link: Optional[str] 
     cleaned = re.sub(r"https?://growth-api\.getyourclientsb2b\.com(?:/r/[a-zA-Z0-9]+)?", target, text)
     cleaned = cleaned.replace("https://getyourclientsb2b.com", "https://www.getyourclientsb2b.com")
     return cleaned
+
+
+def find_local_screenshot_path(media_path: str) -> Optional[str]:
+    """Find local file on disk if available for direct upload."""
+    if not media_path:
+        return None
+    fname = os.path.basename(media_path.strip().split("?")[0])
+    candidates = [
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "frontend", "public", "screenshots", fname)),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "screenshots", fname)),
+        os.path.abspath(os.path.join(r"d:\Company\Website\GrowthEngine2\growthengine\frontend\public\screenshots", fname)),
+        os.path.abspath(os.path.join(r"d:\Company\Website\GrowthEngine2\growthengine\backend\app\static\screenshots", fname)),
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    return None
+
+
+def resolve_public_media_url(media_path: str) -> str:
+    """
+    Ensure media URL is a publicly accessible HTTPS image URL for Meta (Instagram & Facebook).
+    If it is a local screenshot path (e.g. /screenshots/xxx.png or frontend/public/screenshots/xxx.png),
+    converts to public GitHub raw asset from our verified repository.
+    """
+    if not media_path:
+        return "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1080&q=80"
+    clean = media_path.strip()
+    if clean.startswith("/screenshots/") or clean.startswith("screenshots/") or "/screenshots/" in clean:
+        fname = os.path.basename(clean.split("?")[0])
+        return f"https://raw.githubusercontent.com/kishoregrowth/growthengine/main/frontend/public/screenshots/{fname}"
+    if clean.startswith(("http://", "https://")) and not any(h in clean for h in ("localhost", "127.0.0.1")):
+        return clean
+    if clean.startswith("/"):
+        fname = os.path.basename(clean.split("?")[0])
+        return f"https://raw.githubusercontent.com/kishoregrowth/growthengine/main/frontend/public/screenshots/{fname}"
+    return clean
+
+
+def collect_media_urls(media_urls: Optional[list[str]], link_url: Optional[str] = None) -> list[str]:
+    """Extract and deduplicate candidate media URLs, filtering out non-image links."""
+    urls: list[str] = []
+    if media_urls:
+        for u in media_urls:
+            if not u:
+                continue
+            u_str = str(u).strip()
+            if (
+                u_str.endswith((".png", ".jpg", ".jpeg", ".webp"))
+                or "/screenshots/" in u_str
+                or "screenshots" in u_str
+                or u_str.startswith("http")
+            ):
+                if u_str not in urls:
+                    urls.append(u_str)
+    return urls
+
 
 
 class XPublisher(SocialPublisher):
@@ -401,9 +459,11 @@ class LinkedInPublisher(SocialPublisher):
 class InstagramPublisher(SocialPublisher):
     """
     Instagram Graph API publisher.
-    Flow:
-    1. POST /{ig_user_id}/media with image_url/video_url & caption -> returns creation_id
-    2. POST /{ig_user_id}/media_publish with creation_id -> returns published media id
+    Supports Single Photo Posts and Multi-Photo Carousel Posts (2 or 3+ images from /screenshots).
+    Flow for Multi-Photo Carousel:
+    1. For each image (up to 10): POST /{ig_user_id}/media with image_url & is_carousel_item=true -> returns item_id
+    2. POST /{ig_user_id}/media with media_type=CAROUSEL, children=id1,id2..., caption -> returns creation_id
+    3. POST /{ig_user_id}/media_publish with creation_id -> returns published media id
     """
 
     async def publish(self, post: PostPayload) -> PublishResult:
@@ -426,32 +486,73 @@ class InstagramPublisher(SocialPublisher):
                     ),
                 )
 
-            # Instagram publishing requires a public image or video URL
-            media_url = "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1080&q=80"
-            raw_url = (post.media_urls[0] if post.media_urls else None) or post.link_url
-            if raw_url:
-                candidate_url = raw_url
-                if candidate_url.startswith("/"):
-                    candidate_url = f"https://www.getyourclientsb2b.com{candidate_url}"
-                if candidate_url.startswith(("http://", "https://")) and not any(h in candidate_url for h in ("localhost", "127.0.0.1")):
-                    # Validate that this URL actually exists and returns an image (not a 404 HTML page)
-                    try:
-                        async with httpx.AsyncClient(timeout=4.0, follow_redirects=True) as check_client:
-                            head_res = await check_client.get(candidate_url, headers={"Range": "bytes=0-10"})
-                            ct = head_res.headers.get("content-type", "").lower()
-                            if head_res.status_code in (200, 206) and ("image/" in ct or "video/" in ct):
-                                media_url = str(head_res.url)
-                            else:
-                                logger.info("Candidate media %s returned %d (%s), falling back to verified public image.", candidate_url, head_res.status_code, ct)
-                    except Exception as e:
-                        logger.warning("Could not pre-verify image %s: %s", candidate_url, e)
+            # Gather and resolve public media URLs
+            raw_media_list = collect_media_urls(post.media_urls, post.link_url)
+            resolved_urls: list[str] = [resolve_public_media_url(u) for u in raw_media_list]
+            if not resolved_urls:
+                resolved_urls = ["https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1080&q=80"]
 
-            async with httpx.AsyncClient(timeout=45.0) as client:
-                # 1. Create media container
-                container_url = f"https://graph.facebook.com/v19.0/{post.account_id}/media"
+            caption_clean = _clean_public_social_text(post.body, _clean_public_social_link(post.link_url))
+            container_url = f"https://graph.facebook.com/v19.0/{post.account_id}/media"
+            publish_url = f"https://graph.facebook.com/v19.0/{post.account_id}/media_publish"
+
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                # ── MULTI-PHOTO CAROUSEL (2 to 10 images) ──────────────────
+                if len(resolved_urls) >= 2:
+                    item_ids: list[str] = []
+                    # Instagram Carousel supports between 2 and 10 items
+                    for img_url in resolved_urls[:10]:
+                        item_params = {
+                            "image_url": img_url,
+                            "is_carousel_item": "true",
+                            "access_token": post.access_token,
+                        }
+                        item_res = await _execute_with_retry(
+                            lambda p=item_params: client.post(container_url, params=p)
+                        )
+                        if item_res.status_code in (200, 201):
+                            cid = item_res.json().get("id")
+                            if cid:
+                                item_ids.append(cid)
+                        else:
+                            logger.warning("Instagram carousel item container failed: %s", item_res.text)
+
+                    if len(item_ids) >= 2:
+                        # Allow Meta to process individual child containers
+                        await asyncio.sleep(3)
+
+                        carousel_params = {
+                            "media_type": "CAROUSEL",
+                            "children": ",".join(item_ids),
+                            "caption": caption_clean,
+                            "access_token": post.access_token,
+                        }
+                        car_res = await _execute_with_retry(
+                            lambda: client.post(container_url, params=carousel_params)
+                        )
+                        if car_res.status_code in (200, 201):
+                            creation_id = car_res.json().get("id")
+                            if creation_id:
+                                # Wait for Meta carousel container finalization
+                                await asyncio.sleep(4)
+                                pub_res = await _execute_with_retry(
+                                    lambda: client.post(publish_url, params={"creation_id": creation_id, "access_token": post.access_token})
+                                )
+                                if pub_res.status_code in (200, 201):
+                                    published_id = pub_res.json().get("id", creation_id)
+                                    logger.info("Published Instagram carousel %s (children=%d): %s", published_id, len(item_ids), caption_clean[:50])
+                                    return PublishResult(external_post_id=published_id, success=True)
+                                else:
+                                    logger.error("Instagram carousel publish error: %s", pub_res.text)
+                                    return PublishResult(external_post_id="", success=False, error=f"Instagram carousel publish error: {pub_res.text}")
+                        else:
+                            logger.warning("Instagram carousel parent container error: %s. Falling back to single image.", car_res.text)
+
+                # ── SINGLE PHOTO POST ───────────────────────────────────────
+                single_img = resolved_urls[0]
                 params = {
-                    "image_url": media_url,
-                    "caption": _clean_public_social_text(post.body, _clean_public_social_link(post.link_url)),
+                    "image_url": single_img,
+                    "caption": caption_clean,
                     "access_token": post.access_token,
                 }
                 container_res = await _execute_with_retry(
@@ -466,17 +567,10 @@ class InstagramPublisher(SocialPublisher):
                 if not creation_id:
                     return PublishResult(external_post_id="", success=False, error="Instagram did not return creation_id")
 
-                # Short sleep to allow Meta container processing
-                await asyncio.sleep(2)
+                await asyncio.sleep(3)
 
-                # 2. Publish media container
-                publish_url = f"https://graph.facebook.com/v19.0/{post.account_id}/media_publish"
-                pub_params = {
-                    "creation_id": creation_id,
-                    "access_token": post.access_token,
-                }
                 pub_res = await _execute_with_retry(
-                    lambda: client.post(publish_url, params=pub_params)
+                    lambda: client.post(publish_url, params={"creation_id": creation_id, "access_token": post.access_token})
                 )
                 if pub_res.status_code not in (200, 201):
                     err_msg = pub_res.text
@@ -497,7 +591,10 @@ class InstagramPublisher(SocialPublisher):
 class FacebookPublisher(SocialPublisher):
     """
     Facebook Page Feed API publisher.
-    Endpoint: POST https://graph.facebook.com/v19.0/{page_id}/feed
+    Supports:
+    - Multi-photo gallery posts (2 or 3+ images from /screenshots) via attached_media
+    - Single photo posts via /{page_id}/photos
+    - Link & text posts via /{page_id}/feed
     """
 
     async def publish(self, post: PostPayload) -> PublishResult:
@@ -520,14 +617,9 @@ class FacebookPublisher(SocialPublisher):
                     ),
                 )
 
-            url = f"https://graph.facebook.com/v19.0/{post.account_id}/feed"
             clean_link = _clean_public_social_link(post.link_url)
             message_text = _clean_public_social_text(post.body or "", clean_link)
 
-            # Check if link can be provided in the 'link' parameter (Open Graph link card).
-            # Meta Graph API strictly rejects localhost / loopback IPs in 'link' with:
-            # code 1500, error_subcode 1611248 ("The url you supplied is invalid").
-            # For local URLs, we append the link to the message text instead.
             is_public_link = False
             if clean_link:
                 try:
@@ -546,27 +638,10 @@ class FacebookPublisher(SocialPublisher):
                 if not is_public_link and clean_link not in message_text:
                     message_text = f"{message_text}\n\n{clean_link}".strip()
 
-            # If media screenshot is attached, verify it returns a valid image before attempting photo post
-            image_url = post.media_urls[0] if (post.media_urls and post.media_urls[0]) else None
-            valid_image_url = None
-            if image_url:
-                candidate_img = image_url
-                if candidate_img.startswith("/"):
-                    candidate_img = f"https://www.getyourclientsb2b.com{candidate_img}"
-                if candidate_img.startswith(("http://", "https://")) and not any(h in candidate_img for h in ("localhost", "127.0.0.1")):
-                    try:
-                        async with httpx.AsyncClient(timeout=4.0, follow_redirects=True) as check_client:
-                            head_res = await check_client.get(candidate_img, headers={"Range": "bytes=0-10"})
-                            ct = head_res.headers.get("content-type", "").lower()
-                            if head_res.status_code in (200, 206) and "image/" in ct:
-                                valid_image_url = str(head_res.url)
-                    except Exception:
-                        pass
+            raw_media_list = collect_media_urls(post.media_urls, post.link_url)
 
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                # Meta Graph API strictly requires a Page Access Token (not a User or System User token)
-                # when publishing to a Page feed. If a User/System User token was passed, query /{page_id}?fields=access_token
-                # to get the exact Page token.
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                # Ensure Page access token
                 effective_token = post.access_token
                 try:
                     tok_res = await client.get(
@@ -580,26 +655,111 @@ class FacebookPublisher(SocialPublisher):
                 except Exception as tok_err:
                     logger.debug("Page token auto-resolution check skipped: %s", tok_err)
 
-                if valid_image_url:
-                    url = f"https://graph.facebook.com/v19.0/{post.account_id}/photos"
-                    payload = {
-                        "url": valid_image_url,
-                        "caption": message_text,
-                        "access_token": effective_token,
-                    }
-                else:
-                    url = f"https://graph.facebook.com/v19.0/{post.account_id}/feed"
-                    payload = {
-                        "message": message_text,
-                        "access_token": effective_token,
-                    }
-                    if is_public_link:
-                        payload["link"] = clean_link
+                # ── MULTI-PHOTO POST (2 or 3+ images) ──────────────────────
+                if len(raw_media_list) >= 2:
+                    photo_ids: list[str] = []
+                    photos_url = f"https://graph.facebook.com/v19.0/{post.account_id}/photos"
+
+                    for media_item in raw_media_list[:10]:
+                        local_path = find_local_screenshot_path(media_item)
+                        p_res = None
+                        if local_path and os.path.isfile(local_path):
+                            try:
+                                with open(local_path, "rb") as f_img:
+                                    img_content = f_img.read()
+                                fname = os.path.basename(local_path)
+                                upload_data = {"published": "false", "access_token": effective_token}
+                                upload_files = {"source": (fname, img_content, "image/png")}
+                                p_res = await _execute_with_retry(
+                                    lambda d=upload_data, f=upload_files: client.post(photos_url, data=d, files=f)
+                                )
+                            except Exception as up_err:
+                                logger.warning("Facebook local photo upload exception for %s: %s", local_path, up_err)
+                                p_res = None
+
+                        if not p_res or p_res.status_code not in (200, 201):
+                            pub_url = resolve_public_media_url(media_item)
+                            p_res = await _execute_with_retry(
+                                lambda u=pub_url: client.post(photos_url, data={"url": u, "published": "false", "access_token": effective_token})
+                            )
+
+                        if p_res and p_res.status_code in (200, 201):
+                            pid = p_res.json().get("id")
+                            if pid:
+                                photo_ids.append(str(pid))
+                        else:
+                            logger.warning("Facebook photo upload failed for %s: %s", media_item, p_res.text if p_res else "No response")
+
+                    if len(photo_ids) >= 2:
+                        feed_url = f"https://graph.facebook.com/v19.0/{post.account_id}/feed"
+                        feed_data = {
+                            "message": message_text,
+                            "access_token": effective_token,
+                            "attached_media": json.dumps([{"media_fbid": pid} for pid in photo_ids]),
+                        }
+                        for idx, pid in enumerate(photo_ids):
+                            feed_data[f"attached_media[{idx}]"] = json.dumps({"media_fbid": pid})
+
+                        feed_res = await _execute_with_retry(
+                            lambda: client.post(feed_url, data=feed_data)
+                        )
+                        if feed_res.status_code in (200, 201):
+                            fb_post_id = feed_res.json().get("id", "fb-published")
+                            logger.info("Published Facebook multi-photo post %s (%d photos)", fb_post_id, len(photo_ids))
+                            return PublishResult(external_post_id=fb_post_id, success=True)
+                        else:
+                            logger.error("Facebook multi-photo feed error %d: %s", feed_res.status_code, feed_res.text)
+                            return PublishResult(external_post_id="", success=False, error=f"Facebook API error ({feed_res.status_code}): {feed_res.text}")
+
+                # ── SINGLE PHOTO POST ───────────────────────────────────────
+                if raw_media_list:
+                    photos_url = f"https://graph.facebook.com/v19.0/{post.account_id}/photos"
+                    single_media = raw_media_list[0]
+                    local_path = find_local_screenshot_path(single_media)
+                    p_res = None
+                    if local_path and os.path.isfile(local_path):
+                        try:
+                            with open(local_path, "rb") as f_img:
+                                img_content = f_img.read()
+                            fname = os.path.basename(local_path)
+                            p_res = await _execute_with_retry(
+                                lambda: client.post(
+                                    photos_url,
+                                    data={"caption": message_text, "access_token": effective_token},
+                                    files={"source": (fname, img_content, "image/png")},
+                                )
+                            )
+                        except Exception as e:
+                            logger.warning("Facebook single local photo error: %s", e)
+                            p_res = None
+
+                    if not p_res or p_res.status_code not in (200, 201):
+                        pub_url = resolve_public_media_url(single_media)
+                        p_res = await _execute_with_retry(
+                            lambda: client.post(
+                                photos_url,
+                                data={"url": pub_url, "caption": message_text, "access_token": effective_token},
+                            )
+                        )
+
+                    if p_res and p_res.status_code in (200, 201):
+                        fb_post_id = p_res.json().get("id", "fb-published")
+                        return PublishResult(external_post_id=fb_post_id, success=True)
+                    else:
+                        logger.warning("Facebook single photo post failed: %s. Falling back to feed.", p_res.text if p_res else "")
+
+                # ── TEXT / LINK FEED POST ───────────────────────────────────
+                url = f"https://graph.facebook.com/v19.0/{post.account_id}/feed"
+                payload = {
+                    "message": message_text,
+                    "access_token": effective_token,
+                }
+                if is_public_link:
+                    payload["link"] = clean_link
 
                 response = await _execute_with_retry(
                     lambda: client.post(url, data=payload)
                 )
-
                 if response.status_code not in (200, 201):
                     err_text = response.text
                     logger.error("Facebook Page feed error %d: %s", response.status_code, err_text)

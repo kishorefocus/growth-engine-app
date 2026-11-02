@@ -22,7 +22,7 @@ from app.models.auth import BrandProfile, SocialAccount
 from app.models.social import ContentIdea, Post
 from app.providers.social import PostPayload, PublishResult, get_social_publisher
 from app.routers.analytics import register_short_link
-from app.routers.posts import ensure_website_url, get_all_screenshots_for_content, get_varied_destination_url
+from app.routers.posts import ensure_website_url, get_all_screenshots_for_content, get_curated_screenshots, get_varied_destination_url
 from app.services.audit import write_audit_log
 from app.services.crypto import decrypt_token, encrypt_token
 from app.services.utm import utm_dict
@@ -202,7 +202,8 @@ async def generate_weekly_content_batch(ctx: Optional[dict] = None, db: Optional
                 else:
                     body = f"{idea.topic}\n\nFull guide and verified workflows: {link_to_use}"
 
-                media_urls = get_all_screenshots_for_content(dest_url)
+                media_count = 3 if plat in ("instagram", "facebook") else 2
+                media_urls = get_curated_screenshots(idea.topic, dest_url, count=media_count)
                 post = Post(
                     idea_id=idea.id,
                     platform=plat,

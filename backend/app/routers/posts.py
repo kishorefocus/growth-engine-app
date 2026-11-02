@@ -289,16 +289,77 @@ def get_all_folder_screenshots() -> list[str]:
     return discovered if discovered else ALL_FOLDER_SCREENSHOTS
 
 
-def get_all_screenshots_for_content(primary_route: Optional[str] = None) -> list[str]:
+def get_curated_screenshots(topic: str = "", primary_route: Optional[str] = None, count: int = 3) -> list[str]:
     """
-    Return all screenshot images from the screenshots folder.
-    Places the primary route's matching screenshot first, followed by all other screenshots,
-    ensuring every post content includes all images inside this folder.
+    Select 2 or 3 relevant, curated screenshots matching the topic or route
+    from the screenshots folder (/screenshots/*.png).
     """
-    all_imgs = get_all_folder_screenshots()
-    primary = get_screenshot_for_route(primary_route) if primary_route else "/screenshots/home.png"
-    remaining = [s for s in all_imgs if s != primary]
-    return [primary] + remaining
+    lower = f"{topic} {primary_route or ''}".lower()
+
+    if any(k in lower for k in ("social", "studio", "calendar", "repurpose", "content", "schedule")):
+        candidates = [
+            "/screenshots/growth_social_ideas.png",
+            "/screenshots/growth_calendar.png",
+            "/screenshots/growth_dashboard.png",
+        ]
+    elif any(k in lower for k in ("seo", "search", "keyword", "rank", "organic", "sitemap")):
+        candidates = [
+            "/screenshots/growth_seo_manager.png",
+            "/screenshots/growth_dashboard.png",
+            "/screenshots/growth_launch.png",
+        ]
+    elif any(k in lower for k in ("lead", "campaign", "email", "cold", "outreach", "b2b", "prospect")):
+        candidates = [
+            "/screenshots/growth_leads.png",
+            "/screenshots/growth_campaigns.png",
+            "/screenshots/growth_inbox.png",
+        ]
+    elif any(k in lower for k in ("video", "reels", "shorts", "script", "youtube")):
+        candidates = [
+            "/screenshots/growth_video_studio.png",
+            "/screenshots/growth_social_ideas.png",
+            "/screenshots/growth_calendar.png",
+        ]
+    elif any(k in lower for k in ("connect", "oauth", "integration", "channel")):
+        candidates = [
+            "/screenshots/growth_connections.png",
+            "/screenshots/growth_settings.png",
+            "/screenshots/growth_dashboard.png",
+        ]
+    elif any(k in lower for k in ("pipeline", "discovery", "call", "crm")):
+        candidates = [
+            "/screenshots/pipeline.png",
+            "/screenshots/discovery.png",
+            "/screenshots/calls.png",
+        ]
+    elif any(k in lower for k in ("pricing", "plan", "cost", "tier")):
+        candidates = [
+            "/screenshots/pricing.png",
+            "/screenshots/growth_dashboard.png",
+            "/screenshots/home.png",
+        ]
+    else:
+        primary = get_screenshot_for_route(primary_route) if primary_route else "/screenshots/growth_dashboard.png"
+        defaults = [
+            "/screenshots/growth_dashboard.png",
+            "/screenshots/growth_calendar.png",
+            "/screenshots/growth_social_ideas.png",
+            "/screenshots/growth_leads.png",
+            "/screenshots/growth_seo_manager.png",
+        ]
+        candidates = [primary] + [d for d in defaults if d != primary]
+
+    target_count = max(2, min(count, 3))
+    return candidates[:target_count]
+
+
+def get_all_screenshots_for_content(primary_route: Optional[str] = None, count: int = 3) -> list[str]:
+    """
+    Return 2 or 3 curated screenshot images from the screenshots folder.
+    Places the primary route's matching screenshot first, followed by complementary screenshots.
+    """
+    return get_curated_screenshots("", primary_route, count=count)
+
 
 
 def get_varied_destination_url(topic_or_pillar: str = "", platform: str = "", seed: Optional[str] = None) -> str:
@@ -529,11 +590,11 @@ async def generate_platform_posts(
     created_posts: list[Post] = []
 
     platform_configs = [
-        ("x", adapted_data.x.body, get_all_screenshots_for_content(x_dest), base_time, x_dest),
-        ("linkedin", adapted_data.linkedin.body, get_all_screenshots_for_content(li_dest), base_time + timedelta(hours=2), li_dest),
-        ("instagram", adapted_data.instagram.caption, get_all_screenshots_for_content(ig_dest), base_time + timedelta(hours=4), ig_dest),
-        ("facebook", adapted_data.facebook.body, get_all_screenshots_for_content(fb_dest), base_time + timedelta(hours=6), fb_dest),
-        ("youtube", yt_body, get_all_screenshots_for_content(yt_dest), base_time + timedelta(hours=8), yt_dest),
+        ("x", adapted_data.x.body, get_curated_screenshots(clean_topic, x_dest, 2), base_time, x_dest),
+        ("linkedin", adapted_data.linkedin.body, get_curated_screenshots(clean_topic, li_dest, 2), base_time + timedelta(hours=2), li_dest),
+        ("instagram", adapted_data.instagram.caption, get_curated_screenshots(clean_topic, ig_dest, 3), base_time + timedelta(hours=4), ig_dest),
+        ("facebook", adapted_data.facebook.body, get_curated_screenshots(clean_topic, fb_dest, 3), base_time + timedelta(hours=6), fb_dest),
+        ("youtube", yt_body, get_curated_screenshots(clean_topic, yt_dest, 2), base_time + timedelta(hours=8), yt_dest),
     ]
 
     for plat, body_text, media_urls, sched_time, plat_dest_url in platform_configs:
