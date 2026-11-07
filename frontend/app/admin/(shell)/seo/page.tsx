@@ -10,44 +10,6 @@ import {
   useBatchPublishSEOPages,
 } from "@/lib/hooks";
 import { SEOPageItem, SEOTemplate } from "@/lib/api-client";
-import { clsx } from "clsx";
-import { Search, Zap, FileText, Globe, BarChart3, X } from "lucide-react";
-
-function QualityScore({ score }: { score: number | null | undefined }) {
-  if (score === null || score === undefined) return <span className="font-black text-slate-400">—</span>;
-  const cls =
-    score >= 80
-      ? "text-emerald-600 dark:text-emerald-400"
-      : score >= 60
-      ? "text-amber-600 dark:text-amber-400"
-      : "text-red-600 dark:text-red-400";
-  return <span className={clsx("font-black text-sm", cls)}>{score}</span>;
-}
-
-function StatusPill({ status }: { status: string }) {
-  if (status === "published") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-400/40 backdrop-blur-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-        Published
-      </span>
-    );
-  }
-  if (status === "rejected") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/15 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-400/40 backdrop-blur-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-        Rejected
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-400/40 backdrop-blur-sm">
-      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-      Draft
-    </span>
-  );
-}
 
 export default function SEOAdminPage() {
   const { data: templates, isLoading: loadingTemplates } = useSEOTemplates();
@@ -156,32 +118,13 @@ export default function SEOAdminPage() {
     setShowTemplateModal(false);
   };
 
-  const STATUS_TABS = [
-    { value: "", label: "All" },
-    { value: "draft", label: "Drafts" },
-    { value: "published", label: "Published" },
-    { value: "rejected", label: "Rejected" },
-  ];
-
   return (
-    <div className="relative min-h-screen p-5 md:p-8 space-y-8">
-      {/* Ambient orbs */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] animate-pulse-slow" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-[100px] animate-pulse-slow" />
-      </div>
-
-      {/* Page Header */}
+    <div className="space-y-8">
+      {/* Top Banner & Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 mb-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-            <Search className="w-3.5 h-3.5" />
-            Growth
-          </div>
-          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-            SEO Manager
-          </h1>
-          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
+          <h1 className="text-2xl font-bold tracking-tight text-white">Programmatic SEO Manager</h1>
+          <p className="text-xs text-slate-400 mt-1">
             Generate and publish thousands of high-converting programmatic SEO pages from templates.
           </p>
         </div>
@@ -189,148 +132,122 @@ export default function SEOAdminPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowTemplateModal(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+            className="px-3.5 py-2 rounded-lg border border-slate-700 bg-slate-800 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
           >
-            <FileText className="w-4 h-4" />
-            New Template
+            + New Template
           </button>
           <button
             onClick={() => {
               setGenTemplateId(templates?.[0]?.id || "");
               setShowGenerateModal(true);
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
+            className="px-4 py-2 rounded-lg font-bold text-xs text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-300 hover:brightness-110 shadow-md shadow-cyan-500/20 transition-all"
           >
-            <Zap className="w-4 h-4" />
-            Generate Batch
+            ⚡ Generate Batch
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {/* Total Pages */}
-        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(37,99,235,0.8)] rounded-2xl p-5 group">
-          <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-blue-500/8 dark:bg-blue-500/10" />
-          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Total Pages</div>
-          <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-1">{totalPages}</div>
-          <div className="font-medium text-xs text-slate-400 mt-1">Across all templates</div>
+        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+          <div className="text-xs text-slate-400 font-medium">Total Pages</div>
+          <div className="text-2xl font-bold text-white mt-1">{totalPages}</div>
+          <div className="text-[10px] text-slate-500 mt-1">Across all templates</div>
         </div>
 
-        {/* Published */}
-        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(16,185,129,0.6)] rounded-2xl p-5 group">
-          <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-emerald-500/8 dark:bg-emerald-500/10" />
-          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Published</div>
-          <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight mt-1">{publishedPages}</div>
-          <div className="font-medium text-xs text-slate-400 mt-1">Live in sitemap &amp; indexing</div>
+        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+          <div className="text-xs text-emerald-400 font-medium">Published</div>
+          <div className="text-2xl font-bold text-emerald-400 mt-1">{publishedPages}</div>
+          <div className="text-[10px] text-slate-500 mt-1">Live in sitemap & indexing</div>
         </div>
 
-        {/* Drafts */}
-        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(245,158,11,0.6)] rounded-2xl p-5 group">
-          <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-amber-500/8 dark:bg-amber-500/10" />
-          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Drafts</div>
-          <div className="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight mt-1">{draftPages}</div>
-          <div className="font-medium text-xs text-slate-400 mt-1">Quality checked &amp; ready</div>
+        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+          <div className="text-xs text-amber-400 font-medium">Drafts Awaiting Approval</div>
+          <div className="text-2xl font-bold text-amber-400 mt-1">{draftPages}</div>
+          <div className="text-[10px] text-slate-500 mt-1">Quality checked & ready</div>
         </div>
 
-        {/* Avg Quality */}
-        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(99,102,241,0.6)] rounded-2xl p-5 group">
-          <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-violet-500/8 dark:bg-violet-500/10" />
-          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Avg Quality</div>
-          <div className={clsx("text-3xl font-black tracking-tight mt-1", avgQuality >= 80 ? "text-emerald-600 dark:text-emerald-400" : avgQuality >= 60 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400")}>
-            {avgQuality}<span className="text-lg font-bold text-slate-400">/100</span>
-          </div>
-          <div className="font-medium text-xs text-slate-400 mt-1">Enforced &gt; 65 threshold</div>
+        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+          <div className="text-xs text-cyan-400 font-medium">Avg Quality Score</div>
+          <div className="text-2xl font-bold text-cyan-400 mt-1">{avgQuality} / 100</div>
+          <div className="text-[10px] text-slate-500 mt-1">Enforced {">"} 65 threshold</div>
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Status filter tabs */}
-            <div className="flex gap-0 border-2 border-slate-900 dark:border-slate-700 rounded-xl overflow-hidden w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)]">
-              {STATUS_TABS.map((tab, i) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setStatusFilter(tab.value)}
-                  className={clsx(
-                    "font-bold text-sm px-4 py-2",
-                    i > 0 && "border-l-2 border-slate-900 dark:border-slate-700",
-                    statusFilter === tab.value
-                      ? "bg-slate-900 dark:bg-blue-600 text-white"
-                      : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+      {/* Filter & Batch Actions Bar */}
+      <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-950 text-xs text-slate-200"
+          >
+            <option value="">All Statuses</option>
+            <option value="draft">Drafts Only</option>
+            <option value="published">Published</option>
+            <option value="rejected">Rejected (Thin/Duplicate)</option>
+          </select>
 
-            {/* Template filter */}
-            <select
-              value={selectedTemplateId}
-              onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
-            >
-              <option value="">All Templates</option>
-              {templates?.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.type} ({t.url_pattern})
-                </option>
-              ))}
-            </select>
+          {/* Template Filter */}
+          <select
+            value={selectedTemplateId}
+            onChange={(e) => setSelectedTemplateId(e.target.value)}
+            className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-950 text-xs text-slate-200"
+          >
+            <option value="">All Templates</option>
+            {templates?.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.type} ({t.url_pattern})
+              </option>
+            ))}
+          </select>
 
-            {/* Quality filter */}
-            <select
-              value={minQuality === undefined ? "" : String(minQuality)}
-              onChange={(e) => setMinQuality(e.target.value ? Number(e.target.value) : undefined)}
-              className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
-            >
-              <option value="">All Quality Scores</option>
-              <option value="80">Score ≥ 80 (High Quality)</option>
-              <option value="70">Score ≥ 70 (Approved)</option>
-            </select>
-          </div>
+          {/* Quality Filter */}
+          <select
+            value={minQuality === undefined ? "" : String(minQuality)}
+            onChange={(e) => setMinQuality(e.target.value ? Number(e.target.value) : undefined)}
+            className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-950 text-xs text-slate-200"
+          >
+            <option value="">All Quality Scores</option>
+            <option value="80">Score ≥ 80 (High Quality)</option>
+            <option value="70">Score ≥ 70 (Approved)</option>
+          </select>
+        </div>
 
-          {/* Batch publish */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleSelectAllDrafts}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
-            >
-              Select Batch
-            </button>
-            <button
-              onClick={handleBatchPublish}
-              disabled={selectedPageIds.length === 0 || batchPublishMutation.isPending}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
-            >
-              {batchPublishMutation.isPending
-                ? "Publishing..."
-                : `Approve & Publish (${selectedPageIds.length})`}
-            </button>
-          </div>
+        {/* Batch Publish Selected */}
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <button
+            onClick={handleSelectAllDrafts}
+            className="text-xs text-slate-400 hover:text-slate-200 px-2 py-1"
+          >
+            Select Batch (20-50)
+          </button>
+          <button
+            onClick={handleBatchPublish}
+            disabled={selectedPageIds.length === 0 || batchPublishMutation.isPending}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-950 bg-emerald-400 hover:brightness-110 disabled:opacity-40 transition-all"
+          >
+            {batchPublishMutation.isPending
+              ? "Publishing..."
+              : `Approve & Publish Batch (${selectedPageIds.length})`}
+          </button>
         </div>
       </div>
 
       {/* Pages Table */}
-      <div className="border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.75)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.3)] rounded-2xl overflow-hidden">
+      <div className="rounded-xl border border-slate-800 bg-slate-900/30 overflow-hidden">
         {loadingPages ? (
-          <div className="p-8 space-y-3">
-            <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-            <div className="h-4 w-1/2 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-            <div className="h-4 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
-          </div>
+          <div className="p-8 text-center text-xs text-slate-400">Loading SEO pages...</div>
         ) : pages && pages.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse divide-y divide-slate-100 dark:divide-slate-800">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-900 dark:bg-slate-800 text-white">
-                  <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest w-10">
+                <tr className="border-b border-slate-800 text-[11px] font-semibold uppercase text-slate-400 bg-slate-950/40">
+                  <th className="py-3 px-4 w-10">
                     <input
                       type="checkbox"
-                      className="accent-blue-500 w-4 h-4"
                       checked={selectedPageIds.length > 0 && selectedPageIds.length === pages.length}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -341,40 +258,39 @@ export default function SEOAdminPage() {
                       }}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Slug &amp; Title</th>
-                  <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Variables</th>
-                  <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Quality</th>
-                  <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Status</th>
-                  <th className="px-4 py-3 text-right font-black text-xs uppercase tracking-widest">Actions</th>
+                  <th className="py-3 px-4">Slug & Title</th>
+                  <th className="py-3 px-4">Variables</th>
+                  <th className="py-3 px-4">Quality Score</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-800/60">
                 {pages.map((p) => {
                   const isSelected = selectedPageIds.includes(p.id);
-                  const qualityScore = p.quality_score || 0;
+                  const isHighQuality = (p.quality_score || 0) >= 70;
                   return (
-                    <tr key={p.id} className="bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-colors">
-                      <td className="px-4 py-3">
+                    <tr key={p.id} className="hover:bg-slate-800/20 transition-colors">
+                      <td className="py-3.5 px-4">
                         <input
                           type="checkbox"
-                          className="accent-blue-500 w-4 h-4"
                           checked={isSelected}
                           onChange={() => handleToggleSelectPage(p.id)}
                         />
                       </td>
-                      <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
-                        <div className="font-bold text-sm text-slate-900 dark:text-white truncate max-w-sm">
+                      <td className="py-3.5 px-4 font-mono text-slate-200">
+                        <div className="font-semibold text-white truncate max-w-sm">
                           {p.title || p.slug}
                         </div>
-                        <div className="text-xs font-medium text-blue-600 dark:text-blue-400 font-mono">
+                        <div className="text-[11px] text-cyan-400 hover:underline">
                           /{p.slug}
                         </div>
                       </td>
-                      <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
+                      <td className="py-3.5 px-4 text-slate-400">
                         {p.variables ? (
                           <div className="flex flex-wrap gap-1">
                             {Object.entries(p.variables).map(([k, v]) => (
-                              <span key={k} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-black uppercase tracking-wider bg-blue-500 text-white border-2 border-blue-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]">
+                              <span key={k} className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px]">
                                 {k}: {String(v)}
                               </span>
                             ))}
@@ -383,23 +299,42 @@ export default function SEOAdminPage() {
                           "—"
                         )}
                       </td>
-                      <td className="px-4 py-3">
-                        <QualityScore score={p.quality_score} />
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              isHighQuality ? "bg-emerald-400" : "bg-amber-400"
+                            }`}
+                          />
+                          <span className={isHighQuality ? "text-emerald-400" : "text-amber-400"}>
+                            {p.quality_score ?? "—"}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <StatusPill status={p.status} />
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                            p.status === "published"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : p.status === "rejected"
+                              ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                          }`}
+                        >
+                          {p.status}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-right space-x-2">
+                      <td className="py-3.5 px-4 text-right space-x-2">
                         <button
                           onClick={() => setPreviewPage(p)}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs"
                         >
                           Preview
                         </button>
                         {p.status === "draft" && (
                           <button
                             onClick={() => batchPublishMutation.mutateAsync([p.id])}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
+                            className="px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold"
                           >
                             Approve
                           </button>
@@ -409,7 +344,7 @@ export default function SEOAdminPage() {
                             href={`/${p.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                            className="px-2.5 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-semibold inline-block"
                           >
                             Live ↗
                           </a>
@@ -422,11 +357,8 @@ export default function SEOAdminPage() {
             </table>
           </div>
         ) : (
-          <div className="p-12 text-center">
-            <Globe className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-            <p className="font-medium text-sm text-slate-500 dark:text-slate-400">
-              No programmatic pages generated yet. Click &quot;Generate Batch&quot; to create pages from variable combinations.
-            </p>
+          <div className="p-12 text-center text-slate-500 text-xs">
+            No programmatic pages generated yet. Click "Generate Batch" to create pages from variable combinations.
           </div>
         )}
       </div>
@@ -434,32 +366,21 @@ export default function SEOAdminPage() {
       {/* Generate Batch Modal */}
       {showGenerateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 w-full max-w-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="inline-flex items-center gap-1.5 mb-1 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                  <Zap className="w-3.5 h-3.5" />
-                  Generate
-                </div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Programmatic SEO Pages</h3>
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-                  Enter variable combinations (JSON or CSV). Each page will be drafted, evaluated for quality, and claims-checked.
-                </p>
-              </div>
-              <button onClick={() => setShowGenerateModal(false)} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <X className="w-4 h-4 text-slate-500" />
-              </button>
-            </div>
+          <div className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-white mb-2">⚡ Generate Programmatic SEO Pages</h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Enter variable combinations (JSON or CSV). Each page will be drafted by Claude, evaluated for quality ({">"} 600 words, no duplicate content), and claims-checked.
+            </p>
 
             <form onSubmit={handleGenerate} className="space-y-4">
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Choose Template
                 </label>
                 <select
                   value={genTemplateId}
                   onChange={(e) => setGenTemplateId(e.target.value)}
-                  className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
                   required
                 >
                   {templates?.map((t) => (
@@ -471,43 +392,43 @@ export default function SEOAdminPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Variable Combinations (JSON Array)
                 </label>
                 <textarea
                   value={manualVarsText}
                   onChange={(e) => setManualVarsText(e.target.value)}
                   rows={6}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all resize-none font-mono"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white font-mono"
                   placeholder='[{"industry": "SaaS", "city": "Austin"}]'
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Or Upload / Paste CSV Content
                 </label>
                 <textarea
                   value={csvContent}
                   onChange={(e) => setCsvContent(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all resize-none font-mono"
-                  placeholder={"industry,city\nLogistics,Dallas\nReal Estate,Miami"}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white font-mono"
+                  placeholder="industry,city&#10;Logistics,Dallas&#10;Real Estate,Miami"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t-2 border-slate-100 dark:border-slate-800">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowGenerateModal(false)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={generateMutation.isPending}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
+                  className="px-5 py-2 rounded-lg text-xs font-bold text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-300 hover:brightness-110 disabled:opacity-50"
                 >
                   {generateMutation.isPending ? "Generating Pages..." : "Generate Pages"}
                 </button>
@@ -520,87 +441,76 @@ export default function SEOAdminPage() {
       {/* New Template Modal */}
       {showTemplateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 w-full max-w-lg">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="inline-flex items-center gap-1.5 mb-1 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                  <FileText className="w-3.5 h-3.5" />
-                  Templates
-                </div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Create New SEO Template</h3>
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-                  Define URL and title patterns with variable placeholders like {"{industry}"} and {"{city}"}.
-                </p>
-              </div>
-              <button onClick={() => setShowTemplateModal(false)} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <X className="w-4 h-4 text-slate-500" />
-              </button>
-            </div>
+          <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-white mb-2">Create New SEO Template</h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Define URL and title patterns with variable placeholders like {"{industry}"} and {"{city}"}.
+            </p>
 
             <form onSubmit={handleCreateTemplate} className="space-y-3">
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Type Slug</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Type Slug</label>
                 <input
                   type="text"
                   value={newTemplateType}
                   onChange={(e) => setNewTemplateType(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">URL Pattern</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">URL Pattern</label>
                 <input
                   type="text"
                   value={newUrlPattern}
                   onChange={(e) => setNewUrlPattern(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all font-mono"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white font-mono"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Title Pattern</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Title Pattern</label>
                 <input
                   type="text"
                   value={newTitlePattern}
                   onChange={(e) => setNewTitlePattern(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">H1 Pattern</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">H1 Pattern</label>
                 <input
                   type="text"
                   value={newH1Pattern}
                   onChange={(e) => setNewH1Pattern(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Body Prompt</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Body Prompt</label>
                 <textarea
                   value={newBodyPrompt}
                   onChange={(e) => setNewBodyPrompt(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all resize-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t-2 border-slate-100 dark:border-slate-800">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowTemplateModal(false)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createTemplateMutation.isPending}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
+                  className="px-4 py-2 rounded-lg text-xs font-bold text-slate-950 bg-cyan-400 hover:brightness-110"
                 >
                   Save Template
                 </button>
@@ -613,40 +523,38 @@ export default function SEOAdminPage() {
       {/* Page Preview Modal */}
       {previewPage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100 dark:border-slate-800 mb-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
               <div>
-                <h3 className="text-base font-black text-slate-900 dark:text-white">{previewPage.title}</h3>
-                <div className="text-xs font-medium text-blue-600 dark:text-blue-400 font-mono mt-0.5">/{previewPage.slug}</div>
+                <h3 className="text-base font-bold text-white">{previewPage.title}</h3>
+                <div className="text-xs text-cyan-400 font-mono">/{previewPage.slug}</div>
               </div>
               <button
                 onClick={() => setPreviewPage(null)}
-                className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                className="text-slate-400 hover:text-white text-lg font-bold"
               >
-                <X className="w-4 h-4 text-slate-500" />
+                ✕
               </button>
             </div>
 
-            <div className="space-y-4 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-              <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                <strong className="font-black text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 block mb-2">Meta Description</strong>
-                <p className="font-medium text-slate-600 dark:text-slate-300 italic">{previewPage.meta_description}</p>
-              </div>
-
-              <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                <strong className="font-black text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 block mb-2">Introduction</strong>
-                <p className="font-medium text-slate-600 dark:text-slate-300">{previewPage.content_json?.intro}</p>
+            <div className="space-y-4 text-xs text-slate-300 leading-relaxed">
+              <div>
+                <strong className="text-white block mb-1">Meta Description:</strong>
+                <p className="text-slate-400 italic">{previewPage.meta_description}</p>
               </div>
 
               <div>
-                <strong className="font-black text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 block mb-3">
-                  Sections ({previewPage.content_json?.sections?.length || 0})
-                </strong>
+                <strong className="text-white block mb-1">Introduction:</strong>
+                <p>{previewPage.content_json?.intro}</p>
+              </div>
+
+              <div>
+                <strong className="text-white block mb-2">Sections ({previewPage.content_json?.sections?.length || 0}):</strong>
                 <div className="space-y-3">
                   {previewPage.content_json?.sections?.map((s, idx) => (
-                    <div key={idx} className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                      <div className="font-black text-sm text-blue-600 dark:text-blue-400 mb-1">{s.heading}</div>
-                      <div className="font-medium text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line">{s.content}</div>
+                    <div key={idx} className="p-3 rounded-lg border border-slate-800 bg-slate-950">
+                      <div className="font-bold text-cyan-300 mb-1">{s.heading}</div>
+                      <div className="text-slate-400 whitespace-pre-line">{s.content}</div>
                     </div>
                   ))}
                 </div>
@@ -654,14 +562,12 @@ export default function SEOAdminPage() {
 
               {previewPage.content_json?.faq && (
                 <div>
-                  <strong className="font-black text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 block mb-3">
-                    FAQs ({previewPage.content_json.faq.length})
-                  </strong>
+                  <strong className="text-white block mb-2">FAQs ({previewPage.content_json.faq.length}):</strong>
                   <div className="space-y-2">
                     {previewPage.content_json.faq.map((f, idx) => (
-                      <div key={idx} className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                        <div className="font-bold text-sm text-slate-800 dark:text-slate-200">Q: {f.question}</div>
-                        <div className="font-medium text-sm text-slate-500 dark:text-slate-400 mt-1">A: {f.answer}</div>
+                      <div key={idx} className="p-2 rounded bg-slate-800/40">
+                        <div className="font-semibold text-slate-200">Q: {f.question}</div>
+                        <div className="text-slate-400">A: {f.answer}</div>
                       </div>
                     ))}
                   </div>
@@ -669,10 +575,10 @@ export default function SEOAdminPage() {
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t-2 border-slate-100 dark:border-slate-800 mt-6">
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-800 mt-6">
               <button
                 onClick={() => setPreviewPage(null)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700"
               >
                 Close Preview
               </button>
@@ -682,9 +588,9 @@ export default function SEOAdminPage() {
                     await batchPublishMutation.mutateAsync([previewPage.id]);
                     setPreviewPage(null);
                   }}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
+                  className="px-4 py-2 rounded-lg text-xs font-bold text-slate-950 bg-emerald-400 hover:brightness-110"
                 >
-                  Approve &amp; Publish Now
+                  Approve & Publish Now
                 </button>
               )}
             </div>

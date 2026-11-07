@@ -16,7 +16,6 @@ import {
   RefreshCw,
   ExternalLink,
   Info,
-  Settings,
 } from "lucide-react";
 import { clsx } from "clsx";
 import Link from "next/link";
@@ -33,14 +32,11 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 md:p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.85)] dark:hover:shadow-[6px_6px_0px_0px_rgba(99,102,241,0.5)] transition-shadow">
+    <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-1 h-6 rounded-full bg-blue-500" />
-            <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">{title}</h2>
-          </div>
-          {description && <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1 max-w-xl">{description}</p>}
+          <h3 className="text-sm font-semibold text-white">{title}</h3>
+          {description && <p className="text-xs text-slate-500 mt-1">{description}</p>}
         </div>
         {badge}
       </div>
@@ -52,14 +48,14 @@ function SectionCard({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-slate-400 mb-1.5">{label}</label>
       {children}
     </div>
   );
 }
 
 const INPUT_CLS =
-  "w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all";
+  "w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500/50 transition-all";
 const TEXTAREA_CLS = INPUT_CLS + " resize-none";
 
 export default function SettingsPage() {
@@ -130,30 +126,17 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-slate-500 text-sm p-8">
-        <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+        <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
         Loading settings...
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen p-5 md:p-8 max-w-4xl space-y-8">
-      {/* Ambient Background */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] animate-pulse-slow" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-[100px] animate-pulse-slow" />
-      </div>
-
-      {/* Page Header */}
+    <div className="max-w-4xl space-y-6">
       <div>
-        <div className="inline-flex items-center gap-1.5 mb-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-          <Settings className="w-3.5 h-3.5" />
-          Account
-        </div>
-        <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-          Settings & Deliverability
-        </h1>
-        <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
+        <h2 className="text-xl font-bold text-white">Settings & Deliverability</h2>
+        <p className="text-sm text-slate-500 mt-0.5">
           Configure your brand profile, sending domain authentication, and outreach compliance
         </p>
       </div>
@@ -166,12 +149,12 @@ export default function SettingsPage() {
           domainHealth && (
             <span
               className={clsx(
-                "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm capitalize",
+                "text-xs font-mono px-2.5 py-1 rounded-full border capitalize font-semibold flex items-center gap-1.5",
                 domainHealth.overall === "pass"
-                  ? "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 border-emerald-400/40"
+                  ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                   : domainHealth.overall === "warn"
-                  ? "text-amber-700 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 border-amber-400/40"
-                  : "text-rose-700 dark:text-rose-300 bg-rose-500/15 dark:bg-rose-500/20 border-rose-400/40"
+                  ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                  : "bg-rose-500/15 text-rose-400 border-rose-500/30"
               )}
             >
               {domainHealth.overall === "pass" ? (
@@ -193,13 +176,13 @@ export default function SettingsPage() {
                 value={checkDomain}
                 onChange={(e) => setCheckDomain(e.target.value)}
                 placeholder="sendingdomain.com"
-                className="w-full px-4 py-2.5 pl-10 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50"
               />
             </div>
             <button
               type="submit"
               disabled={isCheckingDomain}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0 shrink-0"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold shrink-0 transition-all shadow-md shadow-violet-500/20 disabled:opacity-60"
             >
               {isCheckingDomain ? (
                 <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Verifying DNS...</>
@@ -242,49 +225,45 @@ export default function SettingsPage() {
         title="Domain Warm-Up Guidance & Ramp Schedule"
         description="To protect your sender reputation, never send at full volume immediately. Follow this progressive 6-week warm-up ramp."
         badge={
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-amber-500 text-white border-2 border-amber-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(120,53,15,1)]">
+          <span className="flex items-center gap-1 text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
             <Flame className="w-3.5 h-3.5" /> Warm-up Protocol
           </span>
         }
       >
-        <div className="space-y-4">
-          {/* Warm-up Table */}
-          <div className="border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.75)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.3)] rounded-2xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-slate-900 dark:bg-slate-800 text-white">
-                    <th className="px-4 py-3 font-black text-xs uppercase tracking-widest">Timeline</th>
-                    <th className="px-4 py-3 font-black text-xs uppercase tracking-widest">Recommended Daily Volume</th>
-                    <th className="px-4 py-3 font-black text-xs uppercase tracking-widest">Protocol & Deliverability Target</th>
+        <div className="space-y-3">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-white/[0.08] text-slate-500">
+                  <th className="pb-2 font-medium">Timeline</th>
+                  <th className="pb-2 font-medium">Recommended Daily Volume</th>
+                  <th className="pb-2 font-medium">Protocol & Deliverability Target</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.04]">
+                {(domainHealth?.warmup_schedule || [
+                  { week: 1, daily_limit: 20, note: "Start conservative. High personalization only." },
+                  { week: 2, daily_limit: 40, note: "Monitor bounce rate (<2%) and spam complaints (<0.1%)." },
+                  { week: 3, daily_limit: 75, note: "Expand ICP segment gradually." },
+                  { week: 4, daily_limit: 125, note: "Full sequence testing with A/B subject lines." },
+                  { week: 5, daily_limit: 200, note: "Healthy domain reputation established." },
+                  { week: 6, daily_limit: 300, note: "Scale to standard operating volume." },
+                ]).map((item) => (
+                  <tr key={item.week} className="hover:bg-white/[0.01]">
+                    <td className="py-2.5 font-medium text-white">Week {item.week}</td>
+                    <td className="py-2.5 font-mono text-violet-400 font-semibold">
+                      {item.daily_limit} emails / day
+                    </td>
+                    <td className="py-2.5 text-slate-400">{item.note}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {(domainHealth?.warmup_schedule || [
-                    { week: 1, daily_limit: 20, note: "Start conservative. High personalization only." },
-                    { week: 2, daily_limit: 40, note: "Monitor bounce rate (<2%) and spam complaints (<0.1%)." },
-                    { week: 3, daily_limit: 75, note: "Expand ICP segment gradually." },
-                    { week: 4, daily_limit: 125, note: "Full sequence testing with A/B subject lines." },
-                    { week: 5, daily_limit: 200, note: "Healthy domain reputation established." },
-                    { week: 6, daily_limit: 300, note: "Scale to standard operating volume." },
-                  ]).map((item) => (
-                    <tr key={item.week} className="bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-colors">
-                      <td className="px-4 py-3 font-black text-slate-800 dark:text-slate-200">Week {item.week}</td>
-                      <td className="px-4 py-3 font-black text-blue-600 dark:text-blue-400 font-mono">
-                        {item.daily_limit} emails / day
-                      </td>
-                      <td className="px-4 py-3 font-medium text-slate-600 dark:text-slate-400">{item.note}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          {/* Auto-Pause Info */}
-          <div className="flex gap-3 p-4 bg-blue-50 dark:bg-blue-500/10 border-l-4 border-blue-500 border border-blue-200 dark:border-blue-500/30 rounded-xl">
-            <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+          <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-2.5 text-xs text-slate-400">
+            <Info className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
+            <span>
               <strong>Auto-Pause Safety Thresholds:</strong> The background worker checks campaign health every 15 minutes. Any campaign exceeding a <strong>5.0% bounce rate</strong> or <strong>0.3% complaint rate</strong> is automatically paused to safeguard your domain.
             </span>
           </div>
@@ -350,7 +329,7 @@ export default function SettingsPage() {
                 value={form.value_props}
                 onChange={(e) => setForm({ ...form, value_props: e.target.value })}
                 className={TEXTAREA_CLS}
-                placeholder={"Reach clients in 50+ countries\nOfficial social APIs only\nHuman in the loop on every send"}
+                placeholder="Reach clients in 50+ countries&#10;Official social APIs only&#10;Human in the loop on every send"
               />
             </Field>
 
@@ -361,7 +340,7 @@ export default function SettingsPage() {
                 value={form.banned_phrases}
                 onChange={(e) => setForm({ ...form, banned_phrases: e.target.value })}
                 className={TEXTAREA_CLS}
-                placeholder={"guaranteed ROI\n10x your leads"}
+                placeholder="guaranteed ROI&#10;10x your leads"
               />
             </Field>
 
@@ -380,7 +359,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={update.isPending}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-all shadow-lg shadow-violet-500/20 disabled:opacity-60"
               >
                 {update.isPending ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
@@ -398,16 +377,16 @@ export default function SettingsPage() {
         title="Suppression List Management"
         description="Addresses and domains permanently blocked from outreach. Checked automatically before every single send."
       >
-        <div className="flex items-center justify-between p-4 bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-          <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="text-xs text-slate-400">
             Manage unsubscribes, manual opt-outs, and auto-suppressed complaint addresses in the unified Leads center.
           </div>
           <Link
             href="/admin/leads"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-xs font-semibold text-white transition-all shrink-0"
           >
             <span>Open Suppression List</span>
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3.5 h-3.5 text-violet-400" />
           </Link>
         </div>
       </SectionCard>
@@ -429,28 +408,28 @@ function DnsRecordCard({
   hint?: string;
 }) {
   return (
-    <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-4 space-y-2">
+    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">{name}</span>
+        <span className="text-xs font-bold text-white">{name}</span>
         <span
           className={clsx(
-            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm uppercase",
+            "text-[10px] font-mono px-2 py-0.5 rounded uppercase font-semibold flex items-center gap-1",
             status === "pass"
-              ? "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 border-emerald-400/40"
+              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
               : status === "warn"
-              ? "text-amber-700 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 border-amber-400/40"
-              : "text-rose-700 dark:text-rose-300 bg-rose-500/15 dark:bg-rose-500/20 border-rose-400/40"
+              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
           )}
         >
           {status === "pass" ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
           {status}
         </span>
       </div>
-      <p className="text-[11px] font-mono text-slate-600 dark:text-slate-300 truncate bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+      <p className="text-[11px] font-mono text-slate-300 truncate bg-black/40 p-2 rounded-lg border border-white/[0.04]">
         {value}
       </p>
       {hint && (
-        <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
+        <p className="text-[11px] text-slate-500 leading-tight">
           {hint}
         </p>
       )}
