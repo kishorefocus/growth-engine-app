@@ -156,282 +156,277 @@ export default function LeadsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="relative min-h-screen p-5 md:p-8 space-y-8">
+      {/* Ambient Orbs */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] animate-pulse-slow" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-[100px] animate-pulse-slow" />
+      </div>
+
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-white tracking-tight">Lead Engine</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              Dogfooding Ready
-            </span>
+          <div className="inline-flex items-center gap-1.5 mb-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <Users className="w-3.5 h-3.5" />
+            CRM
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+            Leads
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
             Build ICPs, import leads, verify deliverability, and enforce zero-spam suppression.
           </p>
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex items-center gap-1.5 p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl self-start sm:self-auto">
-          <button
-            onClick={() => setActiveTab("leads")}
-            className={clsx(
-              "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2",
-              activeTab === "leads"
-                ? "bg-violet-600 text-white shadow-md shadow-violet-500/20"
-                : "text-slate-400 hover:text-slate-200"
-            )}
-          >
-            <Users className="w-3.5 h-3.5" />
-            Leads {leads ? `(${leads.length})` : ""}
-          </button>
-          <button
-            onClick={() => setActiveTab("icps")}
-            className={clsx(
-              "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2",
-              activeTab === "icps"
-                ? "bg-violet-600 text-white shadow-md shadow-violet-500/20"
-                : "text-slate-400 hover:text-slate-200"
-            )}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            ICPs {icps ? `(${icps.length})` : ""}
-          </button>
-          <button
-            onClick={() => setActiveTab("suppression")}
-            className={clsx(
-              "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2",
-              activeTab === "suppression"
-                ? "bg-violet-600 text-white shadow-md shadow-violet-500/20"
-                : "text-slate-400 hover:text-slate-200"
-            )}
-          >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            Suppression
-          </button>
+        {/* Tab Switcher — LAYER 8 */}
+        <div className="flex gap-0 border-2 border-slate-900 dark:border-slate-700 rounded-xl overflow-hidden w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)]">
+          {(["leads", "icps", "suppression"] as const).map((tab, i) => {
+            const icons = { leads: <Users className="w-3.5 h-3.5" />, icps: <Layers className="w-3.5 h-3.5" />, suppression: <ShieldAlert className="w-3.5 h-3.5" /> };
+            const labels = { leads: `Leads${leads ? ` (${leads.length})` : ""}`, icps: `ICPs${icps ? ` (${icps.length})` : ""}`, suppression: "Suppression" };
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={clsx(
+                  "flex items-center gap-2 font-bold text-sm px-4 py-2",
+                  i > 0 && "border-l-2 border-slate-900 dark:border-slate-700",
+                  activeTab === tab
+                    ? "bg-slate-900 dark:bg-blue-600 text-white"
+                    : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                )}
+              >
+                {icons[tab]}
+                {labels[tab]}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {activeTab === "leads" && (
         <div className="space-y-4">
           {/* Action Bar */}
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-            {/* Search and Filters */}
-            <div className="flex flex-wrap items-center gap-2.5 flex-1">
-              <div className="relative min-w-[220px] flex-1 max-w-xs">
-                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search leads by name, email, company..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50"
-                />
+          <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 md:p-6">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+              {/* Search and Filters */}
+              <div className="flex flex-wrap items-center gap-2.5 flex-1">
+                <div className="relative min-w-[220px] flex-1 max-w-xs">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search leads by name, email, company..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full px-4 py-2.5 pl-10 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
+                  />
+                </div>
+
+                {/* ICP filter */}
+                <select
+                  value={selectedIcp}
+                  onChange={(e) => setSelectedIcp(e.target.value)}
+                  className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
+                >
+                  <option value="">All ICPs</option>
+                  {(icps || []).map((i) => (
+                    <option key={i.id} value={i.id}>
+                      {i.name}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Verification filter */}
+                <select
+                  value={selectedVerification}
+                  onChange={(e) => setSelectedVerification(e.target.value)}
+                  className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
+                >
+                  <option value="">All Verification</option>
+                  <option value="valid">Valid Only</option>
+                  <option value="risky">Risky</option>
+                  <option value="invalid">Invalid</option>
+                  <option value="pending">Pending</option>
+                </select>
+
+                {/* Status filter */}
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="new">New</option>
+                  <option value="queued">Queued</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="replied">Replied</option>
+                  <option value="signed_up">Signed Up</option>
+                  <option value="unsubscribed">Unsubscribed</option>
+                </select>
+
+                {(selectedIcp || selectedVerification || selectedStatus || searchQuery) && (
+                  <button
+                    onClick={() => {
+                      setSelectedIcp("");
+                      setSelectedVerification("");
+                      setSelectedStatus("");
+                      setSearchQuery("");
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-rose-500 text-white border-2 border-rose-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(127,29,29,1)]"
+                  >
+                    <X className="w-3 h-3" /> Reset
+                  </button>
+                )}
               </div>
 
-              {/* ICP filter */}
-              <select
-                value={selectedIcp}
-                onChange={(e) => setSelectedIcp(e.target.value)}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50"
-              >
-                <option value="" className="bg-[#12121e]">All ICPs</option>
-                {(icps || []).map((i) => (
-                  <option key={i.id} value={i.id} className="bg-[#12121e]">
-                    {i.name}
-                  </option>
-                ))}
-              </select>
-
-              {/* Verification filter */}
-              <select
-                value={selectedVerification}
-                onChange={(e) => setSelectedVerification(e.target.value)}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50"
-              >
-                <option value="" className="bg-[#12121e]">All Verification</option>
-                <option value="valid" className="bg-[#12121e]">Valid Only</option>
-                <option value="risky" className="bg-[#12121e]">Risky</option>
-                <option value="invalid" className="bg-[#12121e]">Invalid</option>
-                <option value="pending" className="bg-[#12121e]">Pending</option>
-              </select>
-
-              {/* Status filter */}
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50"
-              >
-                <option value="" className="bg-[#12121e]">All Statuses</option>
-                <option value="new" className="bg-[#12121e]">New</option>
-                <option value="queued" className="bg-[#12121e]">Queued</option>
-                <option value="contacted" className="bg-[#12121e]">Contacted</option>
-                <option value="replied" className="bg-[#12121e]">Replied</option>
-                <option value="signed_up" className="bg-[#12121e]">Signed Up</option>
-                <option value="unsubscribed" className="bg-[#12121e]">Unsubscribed</option>
-              </select>
-
-              {(selectedIcp || selectedVerification || selectedStatus || searchQuery) && (
+              {/* Actions */}
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => {
-                    setSelectedIcp("");
-                    setSelectedVerification("");
-                    setSelectedStatus("");
-                    setSearchQuery("");
-                  }}
-                  className="text-xs text-violet-400 hover:text-violet-300 px-2 py-1"
+                  onClick={() => setShowImportGr(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
                 >
-                  Reset
+                  <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+                  GlobalReach API
                 </button>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowImportGr(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-500/15 border border-violet-500/30 text-violet-300 hover:bg-violet-500/25 text-xs font-semibold transition-all shadow-sm"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-                GlobalReach API
-              </button>
-              <button
-                onClick={() => setShowImportCsv(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-white/[0.08] text-xs font-semibold transition-all"
-              >
-                <Upload className="w-3.5 h-3.5 text-slate-400" />
-                CSV Import
-              </button>
-              <button
-                onClick={() => setShowCreateLead(true)}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-lg shadow-violet-500/20"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add Lead
-              </button>
+                <button
+                  onClick={() => setShowImportCsv(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  CSV Import
+                </button>
+                <button
+                  onClick={() => setShowCreateLead(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Lead
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Bulk Action Bar (when items selected) */}
           {selectedLeadIds.length > 0 && (
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-violet-600/15 border border-violet-500/30 text-white text-xs animate-in fade-in">
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border-l-4 border-blue-500 border border-blue-200 dark:border-blue-500/30">
               <div className="flex items-center gap-3">
-                <span className="font-semibold text-violet-300">
+                <span className="font-black text-sm text-blue-700 dark:text-blue-300">
                   {selectedLeadIds.length} lead{selectedLeadIds.length > 1 ? "s" : ""} selected
                 </span>
-                <span className="text-slate-500">|</span>
+                <span className="text-slate-400">|</span>
                 <button
                   onClick={handleBulkVerify}
                   disabled={verifyLead.isPending}
-                  className="hover:text-emerald-400 flex items-center gap-1.5 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors disabled:opacity-50"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <ShieldCheck className="w-4 h-4" />
                   Verify Deliverability
                 </button>
                 <button
                   onClick={() => setShowEnrollModal(true)}
-                  className="hover:text-indigo-400 flex items-center gap-1.5 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
                 >
-                  <Mail className="w-3.5 h-3.5 text-indigo-400" />
+                  <Mail className="w-4 h-4" />
                   Enroll in Campaign
                 </button>
               </div>
               <button
                 onClick={() => setSelectedLeadIds([])}
-                className="text-slate-400 hover:text-slate-200"
+                className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
               >
-                Deselect
+                <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
           )}
 
-          {/* Leads Table */}
-          <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+          {/* Leads Table — LAYER 6 */}
+          <div className="border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.75)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.3)] rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-white/[0.06] bg-white/[0.01] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                    <th className="py-3.5 px-4 w-10">
+                  <tr className="bg-slate-900 dark:bg-slate-800 text-white">
+                    <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest w-10">
                       <input
                         type="checkbox"
                         checked={filteredLeads.length > 0 && selectedLeadIds.length === filteredLeads.length}
                         onChange={toggleSelectAll}
-                        className="rounded border-white/20 bg-white/5 text-violet-600 focus:ring-0 cursor-pointer"
+                        className="rounded border-white/20 bg-white/5 text-blue-500 focus:ring-0 cursor-pointer"
                       />
                     </th>
-                    <th className="py-3.5 px-4">Contact</th>
-                    <th className="py-3.5 px-4">Company & Title</th>
-                    <th className="py-3.5 px-4">Country</th>
-                    <th className="py-3.5 px-4">Verification</th>
-                    <th className="py-3.5 px-4">Status</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
+                    <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Contact</th>
+                    <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Company & Title</th>
+                    <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Country</th>
+                    <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Verification</th>
+                    <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Status</th>
+                    <th className="px-4 py-3 text-right font-black text-xs uppercase tracking-widest">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.04] text-xs">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {loadingLeads ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-500">
-                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-violet-400" />
-                        Loading leads...
+                      <td colSpan={7} className="py-16 text-center">
+                        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-3 text-blue-500" />
+                        <p className="text-sm font-medium text-slate-500">Loading leads...</p>
                       </td>
                     </tr>
                   ) : filteredLeads.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-500">
-                        No leads found matching your criteria. Import leads using GlobalReach API or CSV.
+                      <td colSpan={7} className="py-16 text-center">
+                        <Users className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                        <p className="text-sm font-bold text-slate-500">No leads found</p>
+                        <p className="text-xs font-medium text-slate-400 mt-1">Import leads using GlobalReach API or CSV.</p>
                       </td>
                     </tr>
                   ) : (
                     filteredLeads.map((lead) => (
                       <tr
                         key={lead.id}
-                        className="hover:bg-white/[0.02] transition-colors group"
+                        className="bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-colors group"
                       >
-                        <td className="py-3.5 px-4">
+                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
                           <input
                             type="checkbox"
                             checked={selectedLeadIds.includes(lead.id)}
                             onChange={() => toggleSelectOne(lead.id)}
-                            className="rounded border-white/20 bg-white/5 text-violet-600 focus:ring-0 cursor-pointer"
+                            className="rounded border-slate-300 dark:border-white/20 text-blue-500 focus:ring-0 cursor-pointer"
                           />
                         </td>
-                        <td className="py-3.5 px-4">
-                          <div className="font-medium text-white">
+                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
+                          <div className="font-bold text-slate-900 dark:text-white text-sm">
                             {lead.first_name || lead.last_name
                               ? `${lead.first_name || ""} ${lead.last_name || ""}`.trim()
                               : "—"}
                           </div>
-                          <div className="text-[11px] font-mono text-slate-400">{lead.email}</div>
+                          <div className="text-xs font-mono text-slate-400 dark:text-slate-500">{lead.email}</div>
                         </td>
-                        <td className="py-3.5 px-4">
-                          <div className="text-slate-300 font-medium">{lead.company || "—"}</div>
-                          <div className="text-[11px] text-slate-500">{lead.title || "—"}</div>
+                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
+                          <div className="font-semibold text-slate-700 dark:text-slate-200">{lead.company || "—"}</div>
+                          <div className="text-xs text-slate-500">{lead.title || "—"}</div>
                         </td>
-                        <td className="py-3.5 px-4 text-slate-400">
+                        <td className="px-4 py-3 font-medium text-slate-600 dark:text-slate-400 text-sm">
                           {lead.country || "—"}
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
                           <VerificationBadge status={lead.verification_status} />
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">
                           <StatusBadge status={lead.status} />
                         </td>
-                        <td className="py-3.5 px-4 text-right space-x-1">
+                        <td className="px-4 py-3 text-right space-x-1">
                           <button
                             title="Verify deliverability"
                             onClick={() => handleVerifyOne(lead.id)}
                             disabled={verifyLead.isPending}
-                            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-slate-400 hover:text-emerald-400 transition-colors"
+                            className="p-2 rounded-xl border-2 border-transparent hover:border-emerald-200 dark:hover:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all"
                           >
-                            <ShieldCheck className="w-3.5 h-3.5" />
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                           </button>
                           <button
                             title="GDPR Erasure"
                             onClick={() => handleDeleteOne(lead.id)}
                             disabled={deleteLead.isPending}
-                            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition-colors"
+                            className="p-2 rounded-xl border-2 border-transparent hover:border-rose-200 dark:hover:border-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-all"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5 text-rose-500" />
                           </button>
                         </td>
                       </tr>
@@ -477,26 +472,26 @@ export default function LeadsPage() {
       {/* Modal: Enroll in Campaign */}
       {showEnrollModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#12121e] border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 max-w-md w-full space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white">Enroll in Campaign</h3>
-              <button onClick={() => setShowEnrollModal(false)} className="text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
+              <h3 className="text-base font-black text-slate-900 dark:text-white">Enroll in Campaign</h3>
+              <button onClick={() => setShowEnrollModal(false)} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
-            <p className="text-xs text-slate-400">
-              Only verified leads with status <span className="text-emerald-400 font-mono">valid</span> will be enrolled.
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              Only verified leads with status <span className="text-emerald-600 dark:text-emerald-400 font-black font-mono">valid</span> will be enrolled.
             </p>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Select Campaign</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Select Campaign</label>
               <select
                 value={selectedCampaignId}
                 onChange={(e) => setSelectedCampaignId(e.target.value)}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-violet-500"
+                className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
               >
-                <option value="" className="bg-[#12121e]">Choose a campaign...</option>
+                <option value="">Choose a campaign...</option>
                 {(campaigns || []).map((c) => (
-                  <option key={c.id} value={c.id} className="bg-[#12121e]">
+                  <option key={c.id} value={c.id}>
                     {c.name} ({c.status})
                   </option>
                 ))}
@@ -506,7 +501,7 @@ export default function LeadsPage() {
               <button
                 type="button"
                 onClick={() => setShowEnrollModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
               >
                 Cancel
               </button>
@@ -514,7 +509,7 @@ export default function LeadsPage() {
                 type="button"
                 onClick={handleEnroll}
                 disabled={enrollLeads.isPending}
-                className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-500/25"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
               >
                 {enrollLeads.isPending ? "Enrolling..." : "Enroll Leads"}
               </button>
@@ -532,28 +527,29 @@ function VerificationBadge({ status }: { status: string }) {
   switch (status) {
     case "valid":
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <CheckCircle2 className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-400/40 backdrop-blur-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           Valid
         </span>
       );
     case "risky":
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
-          <AlertTriangle className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-400/40 backdrop-blur-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
           Risky
         </span>
       );
     case "invalid":
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
-          <X className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/15 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-400/40 backdrop-blur-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
           Invalid
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-500/10 dark:bg-slate-500/20 text-slate-600 dark:text-slate-400 border border-slate-400/30 backdrop-blur-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
           Pending
         </span>
       );
@@ -562,18 +558,18 @@ function VerificationBadge({ status }: { status: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    new: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    queued: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-    contacted: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    replied: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    signed_up: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-    bounced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-    unsubscribed: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+    new: "bg-blue-500 border-blue-900",
+    queued: "bg-violet-500 border-violet-900",
+    contacted: "bg-amber-500 border-amber-900",
+    replied: "bg-emerald-500 border-emerald-900",
+    signed_up: "bg-violet-500 border-violet-900",
+    bounced: "bg-rose-500 border-rose-900",
+    unsubscribed: "bg-slate-500 border-slate-700",
   };
   return (
     <span
       className={clsx(
-        "inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium uppercase border",
+        "inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white border-2 rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]",
         styles[status] || styles.new
       )}
     >
@@ -611,33 +607,33 @@ function CreateLeadModal({ icps, onClose }: { icps: ICP[]; onClose: () => void }
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#12121e] border border-white/10 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 max-w-lg w-full space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-white">Create Lead</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
-            <X className="w-4 h-4" />
+          <h3 className="text-base font-black text-slate-900 dark:text-white">Create Lead</h3>
+          <button onClick={onClose} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <X className="w-4 h-4 text-slate-500" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Email *</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Email *</label>
               <input
                 required
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 placeholder="founder@company.com"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Company</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Company</label>
               <input
                 type="text"
                 value={form.company}
                 onChange={(e) => setForm({ ...form, company: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 placeholder="Acme Web Studio"
               />
             </div>
@@ -645,74 +641,74 @@ function CreateLeadModal({ icps, onClose }: { icps: ICP[]; onClose: () => void }
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">First Name</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">First Name</label>
               <input
                 type="text"
                 value={form.first_name}
                 onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Last Name</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Last Name</label>
               <input
                 type="text"
                 value={form.last_name}
                 onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Title</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Title</label>
               <input
                 type="text"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 placeholder="CEO & Co-founder"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Country</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Country</label>
               <input
                 type="text"
                 value={form.country}
                 onChange={(e) => setForm({ ...form, country: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 placeholder="US"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Assign ICP</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Assign ICP</label>
             <select
               value={form.icp_id}
               onChange={(e) => setForm({ ...form, icp_id: e.target.value })}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+              className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
             >
-              <option value="" className="bg-[#12121e]">None</option>
+              <option value="">None</option>
               {icps.map((i) => (
-                <option key={i.id} value={i.id} className="bg-[#12121e]">{i.name}</option>
+                <option key={i.id} value={i.id}>{i.name}</option>
               ))}
             </select>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={createLead.isPending}
-              className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-500/25"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
             >
               {createLead.isPending ? "Creating..." : "Save Lead"}
             </button>
@@ -747,65 +743,67 @@ function GlobalReachImportModal({ icps, onClose }: { icps: ICP[]; onClose: () =>
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#12121e] border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 max-w-md w-full space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-violet-400" />
+            <div className="w-8 h-8 rounded-xl bg-violet-100 dark:bg-violet-500/20 border-2 border-violet-300 dark:border-violet-500/30 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Dogfooding Lead Pull</h3>
-              <p className="text-[11px] text-slate-400">Import via GlobalReach official API</p>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white">Dogfooding Lead Pull</h3>
+              <p className="text-xs font-medium text-slate-500">Import via GlobalReach official API</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
-            <X className="w-4 h-4" />
+          <button onClick={onClose} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <X className="w-4 h-4 text-slate-500" />
           </button>
         </div>
 
-        <p className="text-xs text-slate-300 leading-relaxed bg-white/[0.02] p-3 rounded-xl border border-white/[0.04]">
-          Pulls targeted B2B agency leads matching your chosen Ideal Customer Profile from the GlobalReach lead database.
-        </p>
+        <div className="flex gap-3 p-4 bg-blue-50 dark:bg-blue-500/10 border-l-4 border-blue-500 border border-blue-200 dark:border-blue-500/30 rounded-xl">
+          <p className="text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+            Pulls targeted B2B agency leads matching your chosen Ideal Customer Profile from the GlobalReach lead database.
+          </p>
+        </div>
 
         <form onSubmit={handleImport} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Target ICP *</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Target ICP *</label>
             <select
               required
               value={icpId}
               onChange={(e) => setIcpId(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white"
+              className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
             >
               {icps.map((i) => (
-                <option key={i.id} value={i.id} className="bg-[#12121e]">{i.name}</option>
+                <option key={i.id} value={i.id}>{i.name}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Max Leads to Pull</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Max Leads to Pull</label>
             <input
               type="number"
               min={5}
               max={250}
               value={maxResults}
               onChange={(e) => setMaxResults(Number(e.target.value))}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white"
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={importGr.isPending}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-500/25"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
             >
               {importGr.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
               Pull Leads
@@ -873,34 +871,34 @@ function CsvImportModal({ icps, onClose }: { icps: ICP[]; onClose: () => void })
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#12121e] border border-white/10 rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 max-w-xl w-full space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <FileSpreadsheet className="w-4 h-4 text-violet-400" />
+          <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5 text-blue-500" />
             CSV Lead Import
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
-            <X className="w-4 h-4" />
+          <button onClick={onClose} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <X className="w-4 h-4 text-slate-500" />
           </button>
         </div>
 
         <form onSubmit={handleParseAndUpload} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Assign to ICP (Optional)</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Assign to ICP (Optional)</label>
             <select
               value={icpId}
               onChange={(e) => setIcpId(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+              className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
             >
-              <option value="" className="bg-[#12121e]">None</option>
+              <option value="">None</option>
               {icps.map((i) => (
-                <option key={i.id} value={i.id} className="bg-[#12121e]">{i.name}</option>
+                <option key={i.id} value={i.id}>{i.name}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">
               Paste CSV Content (with header row)
             </label>
             <textarea
@@ -908,47 +906,47 @@ function CsvImportModal({ icps, onClose }: { icps: ICP[]; onClose: () => void })
               rows={5}
               value={csvText}
               onChange={(e) => setCsvText(e.target.value)}
-              placeholder="email,first_name,company,title,country&#10;sarah@designagency.com,Sarah,DesignCraft,Owner,US&#10;mark@webflowpros.io,Mark,FlowPros,CEO,UK"
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl p-3 text-xs text-white font-mono"
+              placeholder={"email,first_name,company,title,country\nsarah@designagency.com,Sarah,DesignCraft,Owner,US\nmark@webflowpros.io,Mark,FlowPros,CEO,UK"}
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all resize-none font-mono"
             />
           </div>
 
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] space-y-2">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Column Mapping</p>
+          <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] space-y-2">
+            <p className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Column Mapping</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
-                <span className="text-slate-500">Email column:</span>
+                <span className="text-slate-500 font-medium">Email column:</span>
                 <input
                   type="text"
                   value={mapping.email}
                   onChange={(e) => setMapping({ ...mapping, email: e.target.value })}
-                  className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2 py-1 text-xs text-white mt-0.5"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all mt-0.5"
                 />
               </div>
               <div>
-                <span className="text-slate-500">Company column:</span>
+                <span className="text-slate-500 font-medium">Company column:</span>
                 <input
                   type="text"
                   value={mapping.company}
                   onChange={(e) => setMapping({ ...mapping, company: e.target.value })}
-                  className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-2 py-1 text-xs text-white mt-0.5"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all mt-0.5"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={importCsv.isPending}
-              className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-500/25"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
             >
               {importCsv.isPending ? "Importing..." : "Process Import"}
             </button>
@@ -1005,14 +1003,15 @@ function ICPsTab() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-slate-400">
-          Define Ideal Customer Profiles to pull targeted leads via GlobalReach and organize outreach campaigns.
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full bg-blue-500" />
+          <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Ideal Customer Profiles</h2>
+        </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-500/20"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
         >
           <Plus className="w-3.5 h-3.5" />
           Create ICP
@@ -1021,41 +1020,43 @@ function ICPsTab() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
-          <div className="col-span-full py-12 text-center text-slate-500">
-            <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-violet-400" />
-            Loading ICPs...
+          <div className="col-span-full py-16 text-center">
+            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-3 text-blue-500" />
+            <p className="text-sm font-medium text-slate-500">Loading ICPs...</p>
           </div>
         ) : (icps || []).length === 0 ? (
-          <div className="col-span-full py-12 text-center text-slate-500 bg-white/[0.02] border border-white/[0.06] rounded-2xl">
-            No Ideal Customer Profiles defined yet. Click "Create ICP" to add your target audience.
+          <div className="col-span-full bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-12 text-center">
+            <Layers className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <p className="text-sm font-bold text-slate-600 dark:text-slate-400">No Ideal Customer Profiles defined yet.</p>
+            <p className="text-xs font-medium text-slate-400 mt-1">Click "Create ICP" to add your target audience.</p>
           </div>
         ) : (
           (icps || []).map((icp) => (
             <div
               key={icp.id}
-              className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/10 transition-all flex flex-col justify-between space-y-4"
+              className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 md:p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.85)] dark:hover:shadow-[6px_6px_0px_0px_rgba(99,102,241,0.5)] transition-shadow flex flex-col justify-between space-y-4"
             >
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-white text-sm">{icp.name}</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-bold text-sm text-slate-800 dark:text-slate-100">{icp.name}</h4>
                   <button
                     onClick={() => handleDelete(icp.id)}
-                    className="p-1 text-slate-500 hover:text-rose-400 transition-colors"
+                    className="p-2 rounded-xl border-2 border-transparent hover:border-rose-200 dark:hover:border-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-all"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
                   </button>
                 </div>
-                <div className="space-y-1.5 text-xs text-slate-400">
-                  {icp.industry && <div><span className="text-slate-600">Industry:</span> {icp.industry}</div>}
-                  {icp.geography && <div><span className="text-slate-600">Geo:</span> {icp.geography}</div>}
-                  {icp.company_size && <div><span className="text-slate-600">Size:</span> {icp.company_size}</div>}
+                <div className="space-y-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">
+                  {icp.industry && <div><span className="font-black text-slate-400 uppercase tracking-wider text-[10px]">Industry: </span>{icp.industry}</div>}
+                  {icp.geography && <div><span className="font-black text-slate-400 uppercase tracking-wider text-[10px]">Geo: </span>{icp.geography}</div>}
+                  {icp.company_size && <div><span className="font-black text-slate-400 uppercase tracking-wider text-[10px]">Size: </span>{icp.company_size}</div>}
                 </div>
               </div>
 
               {icp.titles && icp.titles.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/[0.04]">
+                <div className="flex flex-wrap gap-1.5 pt-3 border-t border-slate-100 dark:border-slate-700">
                   {icp.titles.map((t, idx) => (
-                    <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] bg-white/[0.04] text-slate-300">
+                    <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-blue-500 text-white border-2 border-blue-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]">
                       {t}
                     </span>
                   ))}
@@ -1068,79 +1069,79 @@ function ICPsTab() {
 
       {showAddModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#12121e] border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 max-w-md w-full space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white">New ICP Profile</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
+              <h3 className="text-base font-black text-slate-900 dark:text-white">New ICP Profile</h3>
+              <button onClick={() => setShowAddModal(false)} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
             <form onSubmit={handleCreate} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Profile Name *</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Profile Name *</label>
                 <input
                   required
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. US Web Design Agencies 1-10"
-                  className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Industry</label>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Industry</label>
                   <input
                     type="text"
                     value={form.industry}
                     onChange={(e) => setForm({ ...form, industry: e.target.value })}
                     placeholder="Web Design, Marketing"
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Geography</label>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Geography</label>
                   <input
                     type="text"
                     value={form.geography}
                     onChange={(e) => setForm({ ...form, geography: e.target.value })}
                     placeholder="US, UK, CA"
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Company Size</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Company Size</label>
                 <input
                   type="text"
                   value={form.company_size}
                   onChange={(e) => setForm({ ...form, company_size: e.target.value })}
                   placeholder="1-10 employees"
-                  className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Target Titles (comma separated)</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Target Titles (comma separated)</label>
                 <input
                   type="text"
                   value={form.titles}
                   onChange={(e) => setForm({ ...form, titles: e.target.value })}
                   placeholder="Founder, Owner, Creative Director"
-                  className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createIcp.isPending}
-                  className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-500/25"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
                 >
                   {createIcp.isPending ? "Saving..." : "Save Profile"}
                 </button>
@@ -1188,94 +1189,105 @@ function SuppressionTab() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Quick Add */}
-      <form onSubmit={handleAdd} className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex flex-wrap items-center gap-3">
-        <div className="flex-1 min-w-[200px]">
-          <input
-            required
-            type="text"
-            placeholder="Email or domain to suppress (e.g. competitor.com or user@xyz.com)"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white"
-          />
-        </div>
-        <div className="w-48">
-          <input
-            type="text"
-            placeholder="Reason (e.g. competitor, opt_out)"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={addSup.isPending}
-          className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-all shadow-md shadow-rose-500/20"
-        >
-          {addSup.isPending ? "Adding..." : "Suppress"}
-        </button>
-      </form>
+    <div className="space-y-5">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-1 h-6 rounded-full bg-blue-500" />
+        <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Suppression List</h2>
+      </div>
 
-      {/* Suppression Table */}
-      <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
-        <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
+      {/* Quick Add */}
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 md:p-6">
+        <form onSubmit={handleAdd} className="flex flex-wrap items-end gap-3">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Email or Domain</label>
+            <input
+              required
+              type="text"
+              placeholder="competitor.com or user@xyz.com"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
+            />
+          </div>
+          <div className="w-48">
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Reason</label>
+            <input
+              type="text"
+              placeholder="competitor, opt_out"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={addSup.isPending}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white font-bold text-sm border-2 border-red-900 rounded-xl shadow-[3px_3px_0px_0px_rgba(127,29,29,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(127,29,29,0.8)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
+          >
+            {addSup.isPending ? "Adding..." : "Suppress"}
+          </button>
+        </form>
+      </div>
+
+      {/* Suppression Table — LAYER 6 */}
+      <div>
+        <div className="flex items-center justify-between mb-4 px-1">
           <div className="relative w-72">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search suppression records..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white"
+              className="w-full px-4 py-2.5 pl-10 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
             />
           </div>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs font-medium text-slate-400">
             Enforced before every single outbound email send.
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-[11px] font-semibold text-slate-400 uppercase">
-                <th className="py-3 px-4">Email or Domain</th>
-                <th className="py-3 px-4">Reason</th>
-                <th className="py-3 px-4">Added Date</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={4} className="py-8 text-center text-slate-500">Loading suppression list...</td>
+        <div className="border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.75)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.3)] rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-900 dark:bg-slate-800 text-white">
+                  <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Email or Domain</th>
+                  <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Reason</th>
+                  <th className="px-4 py-3 text-left font-black text-xs uppercase tracking-widest">Added Date</th>
+                  <th className="px-4 py-3 text-right font-black text-xs uppercase tracking-widest">Actions</th>
                 </tr>
-              ) : (suppression || []).length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="py-8 text-center text-slate-500">No suppression records found.</td>
-                </tr>
-              ) : (
-                (suppression || []).map((s) => (
-                  <tr key={s.id} className="hover:bg-white/[0.02]">
-                    <td className="py-3 px-4 font-mono font-medium text-rose-300">{s.email_or_domain}</td>
-                    <td className="py-3 px-4 text-slate-400">{s.reason || "unspecified"}</td>
-                    <td className="py-3 px-4 text-slate-500">{new Date(s.added_at).toLocaleDateString()}</td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => handleRemove(s.id)}
-                        disabled={removeSup.isPending}
-                        className="text-slate-500 hover:text-white px-2 py-1 rounded"
-                      >
-                        Remove
-                      </button>
-                    </td>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={4} className="py-10 text-center text-slate-500 text-sm">Loading suppression list...</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (suppression || []).length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-10 text-center text-slate-500 text-sm">No suppression records found.</td>
+                  </tr>
+                ) : (
+                  (suppression || []).map((s) => (
+                    <tr key={s.id} className="bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-rose-600 dark:text-rose-400 text-sm">{s.email_or_domain}</td>
+                      <td className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300 text-sm">{s.reason || "unspecified"}</td>
+                      <td className="px-4 py-3 font-medium text-slate-500 text-sm">{new Date(s.added_at).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => handleRemove(s.id)}
+                          disabled={removeSup.isPending}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100 disabled:opacity-50"
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

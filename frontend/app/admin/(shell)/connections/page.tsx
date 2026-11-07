@@ -38,6 +38,7 @@ interface PlatformConfig {
   scopes: string[];
   gradient: string;
   iconBg: string;
+  iconColor: string;
   officialDocUrl: string;
   defaultId?: string;
   defaultHandle?: string;
@@ -51,7 +52,8 @@ const PLATFORMS: PlatformConfig[] = [
     description: "Meta Graph API for publishing feed posts, links, screenshots, and updates to your verified Page.",
     scopes: ["pages_manage_posts", "pages_read_engagement", "pages_show_list"],
     gradient: "from-indigo-600/10 to-blue-700/10 border-indigo-500/20",
-    iconBg: "bg-indigo-600/15 text-indigo-400 border-indigo-500/30",
+    iconBg: "bg-indigo-600",
+    iconColor: "text-white",
     officialDocUrl: "https://developers.facebook.com/docs/pages-api",
     defaultId: "",
     defaultHandle: "GetyourclientsB2B Facebook",
@@ -63,7 +65,8 @@ const PLATFORMS: PlatformConfig[] = [
     description: "Meta Graph API container publishing for carousels, screenshots, single images, and Reels.",
     scopes: ["instagram_basic", "instagram_content_publish", "pages_show_list"],
     gradient: "from-pink-600/10 to-rose-600/10 border-pink-500/20",
-    iconBg: "bg-pink-600/15 text-pink-400 border-pink-500/30",
+    iconBg: "bg-pink-600",
+    iconColor: "text-white",
     officialDocUrl: "https://developers.facebook.com/docs/instagram-api/guides/content-publishing",
     defaultId: "",
     defaultHandle: "@getyourclientsb2b",
@@ -75,7 +78,8 @@ const PLATFORMS: PlatformConfig[] = [
     description: "LinkedIn Posts API for publishing directly to your company / organization page.",
     scopes: ["openid", "profile", "email", "w_member_social"],
     gradient: "from-blue-600/10 to-indigo-600/10 border-blue-500/20",
-    iconBg: "bg-blue-600/15 text-blue-400 border-blue-500/30",
+    iconBg: "bg-blue-600",
+    iconColor: "text-white",
     officialDocUrl: "https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api",
     defaultId: "urn:li:organization:98765432",
     defaultHandle: "GetyourclientsB2B",
@@ -87,7 +91,8 @@ const PLATFORMS: PlatformConfig[] = [
     description: "Official API v2 integration with single tweets and multi-tweet thread support.",
     scopes: ["tweet.read", "tweet.write", "users.read", "offline.access"],
     gradient: "from-sky-500/10 to-blue-600/10 border-sky-500/20",
-    iconBg: "bg-sky-500/15 text-sky-400 border-sky-500/30",
+    iconBg: "bg-slate-900",
+    iconColor: "text-white",
     officialDocUrl: "https://developer.twitter.com/en/docs/twitter-api",
     defaultId: "1654321987654321",
     defaultHandle: "@getyourclients",
@@ -99,7 +104,8 @@ const PLATFORMS: PlatformConfig[] = [
     description: "Google Cloud YouTube Data API v3 for uploading private review videos and Shorts.",
     scopes: ["youtube.upload", "youtube.readonly"],
     gradient: "from-red-600/10 to-rose-700/10 border-red-500/20",
-    iconBg: "bg-red-600/15 text-red-400 border-red-500/30",
+    iconBg: "bg-red-600",
+    iconColor: "text-white",
     officialDocUrl: "https://developers.google.com/youtube/v3/docs/videos/insert",
     defaultId: "UCgetyourclientsb2b_mock",
     defaultHandle: "@getyourclientsb2b_youtube",
@@ -294,74 +300,87 @@ export default function ConnectionsPage() {
   const fbAccount = getAccountForPlatform("facebook");
   const isFbConnected = !!fbAccount && fbAccount.status === "active";
 
+  const INPUT_CLS = "w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all";
+
   return (
-    <div className="space-y-6 max-w-6xl">
-      {/* Top Header */}
+    <div className="relative min-h-screen p-5 md:p-8 space-y-8 max-w-6xl">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] animate-pulse-slow" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-[100px] animate-pulse-slow" />
+      </div>
+
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            Social & Video Connections
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-              Official APIs
-            </span>
-          </h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <div className="inline-flex items-center gap-1.5 mb-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <Link2 className="w-3.5 h-3.5" />
+            Integrations
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+            Connections
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
             Connect verified social accounts to publish approved posts and video assets directly via official APIs.
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-blue-500 text-white border-2 border-blue-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]">
+            <ShieldCheck className="w-3 h-3" /> Official APIs
+          </span>
           <button
             onClick={() => refetch()}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-300 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold text-sm border-2 border-slate-900 dark:border-slate-700 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.5)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
           >
-            <RefreshCw className={clsx("w-3.5 h-3.5", isLoading && "animate-spin text-violet-400")} />
+            <RefreshCw className={clsx("w-3.5 h-3.5", isLoading && "animate-spin text-blue-500")} />
             Refresh Status
           </button>
         </div>
       </div>
 
       {/* OAuth Setup & Developer Portal Guide */}
-      <div className="rounded-2xl border border-violet-500/20 bg-violet-500/[0.04] p-4 text-xs">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 text-xs">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-violet-500/20 text-violet-300 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-xl border-2 border-slate-900 dark:border-slate-700 bg-blue-500 text-white flex items-center justify-center font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]">
               <Share2 className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-semibold text-white text-sm">OAuth 2.0 Redirect URIs & Setup Guide</p>
-              <p className="text-slate-400 text-[11px]">
-                API Base: <span className="font-mono text-violet-300">{API_BASE}</span>
+              <p className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wider">OAuth 2.0 Redirect URIs & Setup Guide</p>
+              <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium mt-0.5">
+                API Base: <span className="font-mono text-blue-600 dark:text-blue-400">{API_BASE}</span>
               </p>
             </div>
           </div>
           <button
             onClick={() => setShowMetaGuide(!showMetaGuide)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 transition-all"
+            className="inline-flex items-center gap-1.5 px-4 py-2 font-bold text-sm border-2 border-slate-900 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.3)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
           >
-            {showMetaGuide ? "Hide Setup Guide" : "View Whitelist URLs & Developer Setup"}
+            {showMetaGuide ? "Hide Setup Guide" : "View Whitelist URLs & Dev Setup"}
             {showMetaGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         </div>
 
         {showMetaGuide && (
-          <div className="mt-4 pt-3 border-t border-violet-500/15 space-y-3 text-slate-300 leading-relaxed">
+          <div className="mt-5 pt-4 border-t-2 border-slate-900 dark:border-slate-700 space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed">
             {/* Guide Tabs */}
-            <div className="flex flex-wrap gap-1.5 border-b border-white/[0.06] pb-2.5">
+            <div className="flex gap-0 border-2 border-slate-900 dark:border-slate-700 rounded-xl overflow-hidden w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)]">
               {[
-                { id: "meta", label: "Meta (Facebook & IG)" },
+                { id: "meta", label: "Meta (FB & IG)" },
                 { id: "linkedin", label: "LinkedIn" },
                 { id: "x", label: "X (Twitter)" },
                 { id: "youtube", label: "YouTube (Google)" },
-              ].map((tab) => (
+              ].map((tab, i) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveGuideTab(tab.id as any)}
                   className={clsx(
-                    "px-3 py-1 rounded-lg text-xs font-medium transition-all",
+                    "font-bold text-xs px-4 py-2 whitespace-nowrap transition-colors",
+                    i > 0 && "border-l-2 border-slate-900 dark:border-slate-700",
                     activeGuideTab === tab.id
-                      ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
-                      : "bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]"
+                      ? "bg-slate-900 dark:bg-blue-600 text-white"
+                      : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                   )}
                 >
                   {tab.label}
@@ -372,73 +391,53 @@ export default function ConnectionsPage() {
             {/* Meta Guide */}
             {activeGuideTab === "meta" && (
               <div className="space-y-3">
-                <p className="text-slate-300">
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
                   Configure Facebook Login settings in your{" "}
                   <a
                     href="https://developers.facebook.com/apps/1125229983597930/fb-login/settings/"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-violet-400 underline hover:text-violet-300 inline-flex items-center gap-0.5"
+                    className="text-blue-600 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-300 inline-flex items-center gap-0.5 font-bold"
                   >
                     Meta Developer Console (App ID 1125229983597930) <ExternalLink className="w-3 h-3" />
                   </a>:
                 </p>
-
-                <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] text-slate-400">Facebook Redirect URI:</span>
-                    <div className="flex items-center gap-2">
-                      <code className="text-[11px] text-emerald-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
-                        {`${API_BASE}/api/v1/connections/facebook/callback`}
-                      </code>
-                      <button
-                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/facebook/callback`)}
-                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
-                        title="Copy URI"
-                      >
-                        {copiedUri === `${API_BASE}/api/v1/connections/facebook/callback` ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
-                      </button>
+                <div className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-xl p-3 space-y-2">
+                  {[
+                    { label: "Facebook Redirect URI:", value: `${API_BASE}/api/v1/connections/facebook/callback`, color: "text-blue-600 dark:text-blue-400" },
+                    { label: "Instagram Redirect URI:", value: `${API_BASE}/api/v1/connections/instagram/callback`, color: "text-pink-600 dark:text-pink-400" },
+                  ].map(({ label, value, color }) => (
+                    <div key={value} className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">{label}</span>
+                      <div className="flex items-center gap-2">
+                        <code className={clsx("text-[11px] font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700", color)}>
+                          {value}
+                        </code>
+                        <button
+                          onClick={() => handleCopyUri(value)}
+                          className="p-1 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                          title="Copy URI"
+                        >
+                          {copiedUri === value ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] text-slate-400">Instagram Redirect URI:</span>
-                    <div className="flex items-center gap-2">
-                      <code className="text-[11px] text-pink-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
-                        {`${API_BASE}/api/v1/connections/instagram/callback`}
-                      </code>
-                      <button
-                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/instagram/callback`)}
-                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
-                        title="Copy URI"
-                      >
-                        {copiedUri === `${API_BASE}/api/v1/connections/instagram/callback` ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-[11px]">
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                    <p className="font-semibold text-white mb-1">1. Facebook Page Requirement</p>
-                    <p className="text-slate-400">
-                      Meta only allows automated posting to Facebook Pages, not personal profiles. Make sure you have created a Page under your Facebook account.
-                    </p>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                    <p className="font-semibold text-white mb-1">2. Instagram Business Requirement</p>
-                    <p className="text-slate-400">
-                      Instagram accounts must be a Professional/Business account linked to your Facebook Page in Meta Business Suite.
-                    </p>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px]">
+                  {[
+                    { title: "1. Facebook Page Requirement", body: "Meta only allows automated posting to Facebook Pages, not personal profiles. Make sure you have created a Page under your Facebook account." },
+                    { title: "2. Instagram Business Requirement", body: "Instagram accounts must be a Professional/Business account linked to your Facebook Page in Meta Business Suite." },
+                  ].map(({ title, body }) => (
+                    <div key={title} className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-xl p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                      <p className="font-black text-slate-900 dark:text-white mb-1 uppercase tracking-wider">{title}</p>
+                      <p className="text-slate-500 dark:text-slate-400 font-medium">{body}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -446,46 +445,28 @@ export default function ConnectionsPage() {
             {/* LinkedIn Guide */}
             {activeGuideTab === "linkedin" && (
               <div className="space-y-3">
-                <p className="text-slate-300">
+                <p className="text-sm font-medium">
                   Configure OAuth settings in your{" "}
-                  <a
-                    href="https://www.linkedin.com/developers/apps/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-400 underline hover:text-blue-300 inline-flex items-center gap-0.5"
-                  >
+                  <a href="https://www.linkedin.com/developers/apps/" target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 underline hover:text-blue-700 inline-flex items-center gap-0.5 font-bold">
                     LinkedIn Developer Portal (Client ID: 779fkl5zbp48jc) <ExternalLink className="w-3 h-3" />
                   </a>:
                 </p>
-
-                <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
+                <div className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-xl p-3">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] text-slate-400">Authorized Redirect URL:</span>
+                    <span className="text-[11px] font-bold text-slate-500">Authorized Redirect URL:</span>
                     <div className="flex items-center gap-2">
-                      <code className="text-[11px] text-blue-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                      <code className="text-[11px] text-blue-600 dark:text-blue-400 font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
                         {`${API_BASE}/api/v1/connections/linkedin/callback`}
                       </code>
-                      <button
-                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/linkedin/callback`)}
-                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
-                        title="Copy URI"
-                      >
-                        {copiedUri === `${API_BASE}/api/v1/connections/linkedin/callback` ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
+                      <button onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/linkedin/callback`)} className="p-1 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                        {copiedUri === `${API_BASE}/api/v1/connections/linkedin/callback` ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
                 </div>
-
-                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-[11px]">
-                  <p className="font-semibold text-white mb-1">LinkedIn App Requirements</p>
-                  <p className="text-slate-400">
-                    Go to <strong>Auth</strong> tab &rarr; <strong>Authorized redirect URLs for your app</strong>, and paste the URL above.
-                    Under the <strong>Products</strong> tab, enable <em>&quot;Share on LinkedIn&quot;</em> and <em>&quot;Sign In with LinkedIn using OpenID Connect&quot;</em>.
-                  </p>
+                <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-xl p-3 text-[11px]">
+                  <p className="font-black text-slate-900 dark:text-white mb-1 uppercase tracking-wider">LinkedIn App Requirements</p>
+                  <p className="text-slate-500 font-medium">Go to <strong>Auth</strong> tab → <strong>Authorized redirect URLs for your app</strong>, and paste the URL above. Under the <strong>Products</strong> tab, enable <em>&quot;Share on LinkedIn&quot;</em> and <em>&quot;Sign In with LinkedIn using OpenID Connect&quot;</em>.</p>
                 </div>
               </div>
             )}
@@ -493,52 +474,26 @@ export default function ConnectionsPage() {
             {/* X / Twitter Guide */}
             {activeGuideTab === "x" && (
               <div className="space-y-3">
-                <p className="text-slate-300">
+                <p className="text-sm font-medium">
                   Configure User Authentication in your{" "}
-                  <a
-                    href="https://developer.twitter.com/en/portal/dashboard"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sky-400 underline hover:text-sky-300 inline-flex items-center gap-0.5"
-                  >
+                  <a href="https://developer.twitter.com/en/portal/dashboard" target="_blank" rel="noreferrer" className="text-sky-600 dark:text-sky-400 underline hover:text-sky-700 inline-flex items-center gap-0.5 font-bold">
                     X (Twitter) Developer Portal (Client ID: LTQzaGZPMFMxNGdqVHNaNjlkamY6MTpjaQ) <ExternalLink className="w-3 h-3" />
                   </a>:
                 </p>
-
-                <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] text-slate-400">Callback / Redirect URI:</span>
-                    <div className="flex items-center gap-2">
-                      <code className="text-[11px] text-sky-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
-                        {`${API_BASE}/api/v1/connections/x/callback`}
-                      </code>
-                      <button
-                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/x/callback`)}
-                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
-                        title="Copy URI"
-                      >
-                        {copiedUri === `${API_BASE}/api/v1/connections/x/callback` ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
-                      </button>
+                <div className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-xl p-3 space-y-2">
+                  {[
+                    { label: "Callback / Redirect URI:", value: `${API_BASE}/api/v1/connections/x/callback`, color: "text-sky-600 dark:text-sky-400" },
+                    { label: "Website URL:", value: "https://growth.getyourclientsb2b.com", color: "text-slate-600 dark:text-slate-300" },
+                  ].map(({ label, value, color }) => (
+                    <div key={value} className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="text-[11px] font-bold text-slate-500">{label}</span>
+                      <code className={clsx("text-[11px] font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700", color)}>{value}</code>
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] text-slate-400">Website URL:</span>
-                    <code className="text-[11px] text-slate-300 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
-                      https://growth.getyourclientsb2b.com
-                    </code>
-                  </div>
+                  ))}
                 </div>
-
-                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-[11px]">
-                  <p className="font-semibold text-white mb-1">X App Authentication Settings</p>
-                  <p className="text-slate-400">
-                    Set <strong>App permissions</strong> to <em>Read and write</em>. Set <strong>Type of App</strong> to <em>Web App, Automated App or Bot</em>. Enter the Callback URI and Website URL as shown above.
-                  </p>
+                <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-xl p-3 text-[11px]">
+                  <p className="font-black text-slate-900 dark:text-white mb-1 uppercase tracking-wider">X App Authentication Settings</p>
+                  <p className="text-slate-500 font-medium">Set <strong>App permissions</strong> to <em>Read and write</em>. Set <strong>Type of App</strong> to <em>Web App, Automated App or Bot</em>. Enter the Callback URI and Website URL as shown above.</p>
                 </div>
               </div>
             )}
@@ -546,57 +501,36 @@ export default function ConnectionsPage() {
             {/* YouTube Guide */}
             {activeGuideTab === "youtube" && (
               <div className="space-y-3">
-                <p className="text-slate-300">
+                <p className="text-sm font-medium">
                   Configure OAuth 2.0 Credentials in your{" "}
-                  <a
-                    href="https://console.cloud.google.com/apis/credentials"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-red-400 underline hover:text-red-300 inline-flex items-center gap-0.5"
-                  >
+                  <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer" className="text-red-600 dark:text-red-400 underline hover:text-red-700 inline-flex items-center gap-0.5 font-bold">
                     Google Cloud Console <ExternalLink className="w-3 h-3" />
                   </a>:
                 </p>
-
-                <div className="space-y-2 bg-black/40 p-3 rounded-xl border border-white/[0.06]">
+                <div className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] text-slate-400">Authorized Redirect URI:</span>
+                    <span className="text-[11px] font-bold text-slate-500">Authorized Redirect URI:</span>
                     <div className="flex items-center gap-2">
-                      <code className="text-[11px] text-red-400 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
+                      <code className="text-[11px] text-red-600 dark:text-red-400 font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
                         {`${API_BASE}/api/v1/connections/youtube/callback`}
                       </code>
-                      <button
-                        onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/youtube/callback`)}
-                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10"
-                        title="Copy URI"
-                      >
-                        {copiedUri === `${API_BASE}/api/v1/connections/youtube/callback` ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
+                      <button onClick={() => handleCopyUri(`${API_BASE}/api/v1/connections/youtube/callback`)} className="p-1 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                        {copiedUri === `${API_BASE}/api/v1/connections/youtube/callback` ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
-
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] text-slate-400">Authorized JavaScript Origins:</span>
+                    <span className="text-[11px] font-bold text-slate-500">Authorized JavaScript Origins:</span>
                     <div className="space-y-1 text-right">
-                      <code className="block text-[11px] text-slate-300 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
-                        https://growth.getyourclientsb2b.com
-                      </code>
-                      <code className="block text-[11px] text-slate-300 font-mono bg-white/[0.03] px-2 py-0.5 rounded border border-white/[0.06]">
-                        https://growth-api.getyourclientsb2b.com
-                      </code>
+                      {["https://growth.getyourclientsb2b.com", "https://growth-api.getyourclientsb2b.com"].map((v) => (
+                        <code key={v} className="block text-[11px] text-slate-600 dark:text-slate-300 font-mono bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">{v}</code>
+                      ))}
                     </div>
                   </div>
                 </div>
-
-                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-[11px]">
-                  <p className="font-semibold text-white mb-1">Google Cloud Console Requirements</p>
-                  <p className="text-slate-400">
-                    Under <strong>APIs & Services</strong> &rarr; <strong>Library</strong>, ensure <em>YouTube Data API v3</em> is enabled. Under <strong>Credentials</strong> &rarr; Edit your OAuth 2.0 Web Client, add the Authorized Javascript Origins and Authorized Redirect URI shown above.
-                  </p>
+                <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-xl p-3 text-[11px]">
+                  <p className="font-black text-slate-900 dark:text-white mb-1 uppercase tracking-wider">Google Cloud Console Requirements</p>
+                  <p className="text-slate-500 font-medium">Under <strong>APIs &amp; Services</strong> → <strong>Library</strong>, ensure <em>YouTube Data API v3</em> is enabled. Under <strong>Credentials</strong> → Edit your OAuth 2.0 Web Client, add the Authorized Javascript Origins and Authorized Redirect URI shown above.</p>
                 </div>
               </div>
             )}
@@ -605,7 +539,7 @@ export default function ConnectionsPage() {
       </div>
 
       {/* Grid of Platforms */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {PLATFORMS.map((plat) => {
           const account = getAccountForPlatform(plat.id);
           const isConnected = !!account && account.status === "active";
@@ -615,21 +549,22 @@ export default function ConnectionsPage() {
             <div
               key={plat.id}
               className={clsx(
-                "p-5 rounded-2xl bg-white/[0.02] border transition-all flex flex-col justify-between",
-                plat.gradient,
-                isConnected ? "border-emerald-500/30" : "border-white/[0.08] hover:border-white/15"
+                "bg-white dark:bg-slate-900 border-2 rounded-2xl p-5 transition-shadow flex flex-col justify-between",
+                isConnected
+                  ? "border-emerald-500 shadow-[4px_4px_0px_0px_rgba(16,185,129,0.4)] hover:shadow-[6px_6px_0px_0px_rgba(16,185,129,0.5)]"
+                  : "border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.85)] dark:hover:shadow-[6px_6px_0px_0px_rgba(99,102,241,0.5)]"
               )}
             >
               <div>
                 {/* Header row */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className={clsx("w-10 h-10 rounded-xl border flex items-center justify-center font-bold text-base", plat.iconBg)}>
+                    <div className={clsx("w-12 h-12 rounded-xl border-2 border-slate-900 dark:border-slate-700 flex items-center justify-center font-black text-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]", plat.iconBg, plat.iconColor)}>
                       {plat.name[0]}
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-white">{plat.name}</h3>
-                      <p className="text-[11px] text-slate-500">{plat.category}</p>
+                      <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">{plat.name}</h3>
+                      <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{plat.category}</p>
                     </div>
                   </div>
 
@@ -637,44 +572,44 @@ export default function ConnectionsPage() {
                   {isConnected ? (
                     <div className="flex items-center gap-1.5">
                       {account?.external_id?.startsWith("mock_") || account?.external_id === plat.defaultId ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20" title="Connected in Sandbox / Test Mode. Posts are simulated. Connect a real Page Token to publish to your live feed.">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-400/40 backdrop-blur-sm" title="Connected in Sandbox / Test Mode. Posts are simulated.">
                           Sandbox Mode
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-400/40 backdrop-blur-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           Live API
                         </span>
                       )}
                     </div>
                   ) : isExpired ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-400/40 backdrop-blur-sm">
                       <AlertTriangle className="w-3 h-3" />
                       Token Expired
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-800 text-slate-400 border border-white/[0.06]">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-500/15 dark:bg-slate-500/20 text-slate-600 dark:text-slate-300 border border-slate-400/40 backdrop-blur-sm">
                       Not Connected
                     </span>
                   )}
                 </div>
 
                 {/* Description */}
-                <p className="text-xs text-slate-400 mt-3.5 leading-relaxed">{plat.description}</p>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-3.5 leading-relaxed">{plat.description}</p>
 
                 {/* Scopes & Details */}
-                <div className="mt-4 pt-3 border-t border-white/[0.04] space-y-2">
+                <div className="mt-4 pt-3 border-t-2 border-slate-100 dark:border-slate-800 space-y-2">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-500">Connected Account:</span>
-                    <span className="font-mono text-slate-300 font-medium">
+                    <span className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Connected Account:</span>
+                    <span className="font-mono text-slate-700 dark:text-slate-300 font-medium">
                       {account?.handle || "—"}
                     </span>
                   </div>
 
                   {account?.external_id && (
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-500">Account / Page ID:</span>
-                      <span className="font-mono text-[10px] text-slate-400">
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Account / Page ID:</span>
+                      <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400">
                         {account.external_id}
                       </span>
                     </div>
@@ -682,8 +617,8 @@ export default function ConnectionsPage() {
 
                   {account?.expires_at && (
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-500">Token Status:</span>
-                      <span className={clsx("font-mono text-[10px]", isExpired ? "text-amber-400 font-semibold" : "text-slate-400")}>
+                      <span className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Token Status:</span>
+                      <span className={clsx("font-mono text-[10px] font-medium", isExpired ? "text-amber-600 dark:text-amber-400 font-bold" : "text-slate-500 dark:text-slate-400")}>
                         {isExpired
                           ? "Expired (Refresh required)"
                           : `Valid until ${new Date(account.expires_at).toLocaleDateString()}`}
@@ -692,19 +627,20 @@ export default function ConnectionsPage() {
                   )}
 
                   {isExpired && (
-                    <div className="mt-3 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[11px] leading-relaxed flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-semibold text-amber-200">Session Expired on Meta:</span> Click <span className="underline font-medium">Reconnect (OAuth)</span> below to refresh, or click <span className="underline font-medium">Token / ID</span> to paste a new token.
+                    <div className="mt-3 flex gap-3 p-3 bg-amber-50 dark:bg-amber-500/10 border-l-4 border-amber-500 border border-amber-200 dark:border-amber-500/30 rounded-xl">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      <div className="text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                        <span className="font-black">Session Expired on Meta:</span> Click <span className="underline">Reconnect (OAuth)</span> below to refresh, or click <span className="underline">Token / ID</span> to paste a new token.
                       </div>
                     </div>
                   )}
 
+                  {/* Scope chips */}
                   <div className="flex flex-wrap gap-1 pt-1">
                     {plat.scopes.map((s) => (
                       <span
                         key={s}
-                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.04] text-slate-500 border border-white/[0.04]"
+                        className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-400/30 backdrop-blur-sm font-mono"
                       >
                         {s}
                       </span>
@@ -714,14 +650,14 @@ export default function ConnectionsPage() {
               </div>
 
               {/* Action buttons */}
-              <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2 flex-wrap">
+              <div className="mt-5 pt-3 border-t-2 border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 flex-wrap">
                 <a
                   href={plat.officialDocUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[11px] text-slate-500 hover:text-slate-300 flex items-center gap-1 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-900 dark:hover:border-slate-500 transition-all"
                 >
-                  Docs <ExternalLink className="w-3 h-3" />
+                  Official Docs <ExternalLink className="w-3 h-3" />
                 </a>
 
                 <div className="flex items-center gap-2 flex-wrap">
@@ -730,17 +666,17 @@ export default function ConnectionsPage() {
                       {(account?.external_id?.startsWith("mock_") || account?.external_id === plat.defaultId) && (
                         <button
                           onClick={() => openDirectModal(plat)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-violet-200 bg-violet-600/30 hover:bg-violet-600/50 border border-violet-500/30 transition-all"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-blue-900 dark:border-blue-700 rounded-xl bg-blue-500 text-white shadow-[2px_2px_0px_0px_rgba(30,27,75,1)] hover:shadow-[1px_1px_0px_0px_rgba(30,27,75,1)] hover:translate-x-[1px] hover:translate-y-[1px] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all duration-100"
                           title="Replace sandbox credentials with real live Meta Page Access Token"
                         >
-                          <KeyRound className="w-3 h-3 text-violet-300" />
+                          <KeyRound className="w-3 h-3" />
                           Enter Live Token
                         </button>
                       )}
                       <button
                         onClick={() => handleDisconnect(account.id, plat.name)}
                         disabled={disconnectMutation.isPending}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-rose-900 rounded-xl bg-rose-600 text-white shadow-[2px_2px_0px_0px_rgba(136,19,55,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(136,19,55,0.8)] hover:translate-x-[1px] hover:translate-y-[1px] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all duration-100 disabled:opacity-50"
                       >
                         <Unlink className="w-3 h-3" />
                         Disconnect
@@ -751,10 +687,10 @@ export default function ConnectionsPage() {
                       {/* Direct Page ID / Token Modal trigger */}
                       <button
                         onClick={() => openDirectModal(plat)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-all"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-900 dark:hover:border-slate-500 transition-all"
                         title="Connect directly with Page ID & Access Token"
                       >
-                        <KeyRound className="w-3 h-3 text-slate-400" />
+                        <KeyRound className="w-3 h-3" />
                         Token / ID
                       </button>
 
@@ -763,7 +699,7 @@ export default function ConnectionsPage() {
                         <button
                           onClick={() => handleDisconnect(account.id, plat.name)}
                           disabled={disconnectMutation.isPending}
-                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-rose-900 rounded-xl bg-rose-600 text-white shadow-[2px_2px_0px_0px_rgba(136,19,55,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(136,19,55,0.8)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all duration-100 disabled:opacity-50"
                           title="Remove expired connection"
                         >
                           <Unlink className="w-3 h-3" />
@@ -775,7 +711,7 @@ export default function ConnectionsPage() {
                       <button
                         onClick={() => handleQuickConnect(plat.id)}
                         disabled={connectMockMutation.isPending}
-                        className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/25 transition-all"
+                        className="inline-flex items-center px-3 py-1.5 text-xs font-bold border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-900 dark:hover:border-slate-500 transition-all"
                         title="1-click connect with verified GetyourclientsB2B test account"
                       >
                         1-Click Connect
@@ -785,7 +721,7 @@ export default function ConnectionsPage() {
                       <button
                         onClick={() => handleStartOAuth(plat.id)}
                         disabled={connectingPlatform === plat.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-sm shadow-violet-600/30 transition-all"
+                        className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
                       >
                         <Link2 className="w-3 h-3" />
                         {connectingPlatform === plat.id
@@ -808,34 +744,34 @@ export default function ConnectionsPage() {
       {/* Direct Connect / Token Modal */}
       {modalPlatform && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl bg-slate-900 border border-white/10 p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="w-full max-w-lg bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[8px_8px_0px_0px_rgba(99,102,241,0.5)] p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className={clsx("w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm", modalPlatform.iconBg)}>
+                <div className={clsx("w-10 h-10 rounded-xl border-2 border-slate-900 dark:border-slate-700 flex items-center justify-center font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]", modalPlatform.iconBg, modalPlatform.iconColor)}>
                   {modalPlatform.name[0]}
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-white">
+                  <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
                     Direct Connect: {modalPlatform.name}
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     Connect immediately using a Page ID / Access Token or 1-click test mode.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setModalPlatform(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
+                className="p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-900 dark:hover:border-slate-500 transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Quick 1-click fill button */}
-            <div className="p-3 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-between gap-3">
+            <div className="flex gap-3 p-4 bg-blue-50 dark:bg-blue-500/10 border-l-4 border-blue-500 border border-blue-200 dark:border-blue-500/30 rounded-xl items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-white">Testing / Sandbox Mode</p>
-                <p className="text-[11px] text-violet-200/80">Connect immediately with verified @getyourclientsb2b credentials.</p>
+                <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Testing / Sandbox Mode</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Connect immediately with verified @getyourclientsb2b credentials.</p>
               </div>
               <button
                 type="button"
@@ -844,7 +780,7 @@ export default function ConnectionsPage() {
                   setDirectHandle(modalPlatform.defaultHandle || `@getyourclientsb2b_${modalPlatform.id}`);
                   setDirectToken(`mock_token_${modalPlatform.id}_live_ready`);
                 }}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-violet-200 bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 transition-all shrink-0"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white font-bold text-xs border-2 border-blue-900 rounded-xl shadow-[2px_2px_0px_0px_rgba(30,27,75,1)] hover:shadow-[1px_1px_0px_0px_rgba(30,27,75,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all duration-100 shrink-0"
               >
                 Autofill Test Data
               </button>
@@ -852,7 +788,7 @@ export default function ConnectionsPage() {
 
             <form onSubmit={handleDirectConnectSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
                   {modalPlatform.id === "facebook" ? "Facebook Page ID (Numeric)" : modalPlatform.id === "instagram" ? "Instagram Business Account ID (Numeric)" : "Account / Page ID"}
                 </label>
                 <input
@@ -860,15 +796,15 @@ export default function ConnectionsPage() {
                   value={directExternalId}
                   onChange={(e) => setDirectExternalId(e.target.value)}
                   placeholder={modalPlatform.id === "facebook" ? "Leave blank to auto-detect from token" : "e.g. numeric ID"}
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-white/[0.04] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 />
-                <p className="text-[10px] text-slate-500 mt-1">
+                <p className="text-[10px] font-medium text-slate-500 mt-1">
                   {modalPlatform.id === "facebook" && "Must be a Facebook Page ID (not personal profile). Leave blank to auto-detect from your token."}
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
                   Display Handle / Page Name
                 </label>
                 <input
@@ -876,13 +812,13 @@ export default function ConnectionsPage() {
                   value={directHandle}
                   onChange={(e) => setDirectHandle(e.target.value)}
                   placeholder={modalPlatform.defaultHandle || "e.g. @getyourclientsb2b"}
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-white/[0.04] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Access Token / Page Token <span className="text-rose-400">*</span>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+                  Access Token / Page Token <span className="text-rose-500">*</span>
                 </label>
                 <textarea
                   value={directToken}
@@ -890,36 +826,30 @@ export default function ConnectionsPage() {
                   placeholder="Paste Meta Page Access Token (from Graph API Explorer or Meta Business Suite) or test token..."
                   rows={3}
                   required
-                  className="w-full px-3.5 py-2 rounded-xl text-xs bg-white/[0.04] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 font-mono"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all resize-none font-mono"
                 />
-                <p className="text-[10px] text-slate-500 mt-1">
+                <p className="text-[10px] font-medium text-slate-500 mt-1">
                   Tokens are encrypted at rest with Fernet. Real tokens are auto-verified against Meta Graph API.
                 </p>
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t-2 border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setModalPlatform(null)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition-all"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingDirect}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-md shadow-violet-600/30 transition-all flex items-center gap-1.5"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
                 >
                   {isSubmittingDirect ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      Connecting...
-                    </>
+                    <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Connecting...</>
                   ) : (
-                    <>
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Save & Connect
-                    </>
+                    <><CheckCircle2 className="w-3.5 h-3.5" /> Save & Connect</>
                   )}
                 </button>
               </div>

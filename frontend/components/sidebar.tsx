@@ -101,28 +101,29 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
   const sidebarContent = (
     <aside className={clsx(
-      "w-64 shrink-0 h-full flex flex-col",
-      "bg-white dark:bg-[#0c0e17]",
-      "border-r border-slate-200 dark:border-slate-800",
-      "transition-colors shadow-xl shadow-slate-200/50 dark:shadow-black/70"
+      "w-60 shrink-0 h-full flex flex-col",
+      "bg-white dark:bg-slate-950",
+      "border-r-2 border-slate-900 dark:border-slate-700",
+      "shadow-[4px_0px_0px_0px_rgba(0,0,0,0.08)] dark:shadow-[4px_0px_0px_0px_rgba(99,102,241,0.15)]",
+      "transition-colors"
     )}>
 
       {/* Logo */}
-      <div className="px-4 py-5 border-b border-slate-200 dark:border-slate-800">
+      <div className="px-4 py-5 border-b-2 border-slate-900 dark:border-slate-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-500 via-violet-500 to-pink-500 flex items-center justify-center shadow-lg shadow-blue-500/30 animate-pulse-slow">
               <TrendingUp className="w-4.5 h-4.5 text-white" />
             </div>
             <div>
-              <p className="text-slate-900 dark:text-white font-extrabold text-sm leading-none tracking-tight">GetYourClients</p>
+              <p className="text-slate-900 dark:text-white font-black text-sm leading-none tracking-tight">GetYourClients</p>
               <p className="text-[10px] font-mono mt-0.5 bg-gradient-to-r from-blue-600 via-pink-500 to-green-500 dark:from-blue-400 dark:via-pink-400 dark:to-green-400 bg-clip-text text-transparent font-bold">Growth Engine</p>
             </div>
           </div>
           {/* Close button (mobile only) */}
           <button
             onClick={onClose}
-            className="md:hidden w-8 h-8 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all border border-slate-200 dark:border-slate-700"
+            className="md:hidden p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-300"
             aria-label="Close menu"
           >
             <X className="w-4 h-4" />
@@ -152,10 +153,16 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               className={clsx(
                 "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all group relative overflow-hidden",
                 isActive
-                  ? `border ${activeColor} shadow-sm`
+                  ? clsx(
+                      "border-2 border-slate-900 dark:border-slate-700",
+                      "bg-white dark:bg-slate-900",
+                      "shadow-[2px_2px_0px_0px_rgba(0,0,0,0.75)] dark:shadow-[2px_2px_0px_0px_rgba(99,102,241,0.5)]",
+                      "translate-x-[-1px] translate-y-[-1px]",
+                      activeColor
+                    )
                   : isComingSoon
-                  ? "text-slate-400 dark:text-slate-600 cursor-not-allowed"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-blue-700 dark:hover:text-white font-medium border border-transparent"
+                  ? "text-slate-400 dark:text-slate-600 cursor-not-allowed border-2 border-transparent"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-blue-700 dark:hover:text-white font-medium border-2 border-transparent"
               )}
             >
               {/* Active left-accent strip */}
@@ -177,6 +184,12 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
               <span className="flex-1 text-left truncate text-[13px]">{item.label}</span>
 
+              {item.badge && (
+                <span className="text-[9px] font-black uppercase px-1.5 py-0.5 bg-blue-500 text-white border border-blue-900 rounded shadow-[1px_1px_0px_0px_rgba(30,27,75,1)] shrink-0">
+                  {item.badge}
+                </span>
+              )}
+
               {isComingSoon && (
                 <span className="text-[9px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 shrink-0">
                   {item.comingIn}
@@ -191,9 +204,9 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       </nav>
 
       {/* User footer */}
-      <div className="px-3 py-3 border-t border-slate-200 dark:border-slate-800 space-y-2 bg-slate-50/70 dark:bg-slate-900/40">
+      <div className="px-3 py-3 border-t-2 border-slate-900 dark:border-slate-700 space-y-2 bg-slate-50 dark:bg-slate-900/60">
         {user && (
-          <div className="px-2 py-2 flex items-center gap-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 shadow-sm">
+          <div className="px-2 py-2 flex items-center gap-2.5 rounded-xl bg-white dark:bg-slate-800/80 border-2 border-slate-200 dark:border-slate-700/70 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
             <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 via-pink-500 to-green-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
               {user.email[0].toUpperCase()}
             </div>
@@ -204,22 +217,25 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           </div>
         )}
         <div className="flex gap-1.5">
+          {/* Theme toggle — ghost icon button style */}
           <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
             className={clsx(
-              "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all border",
+              "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all",
+              "border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800",
               isDark
-                ? "text-yellow-400 bg-slate-800/80 hover:bg-slate-700 border-slate-700"
-                : "text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200 shadow-sm"
+                ? "text-yellow-400"
+                : "text-blue-700"
             )}
             aria-label="Toggle theme"
           >
             {isDark ? <Sun className="w-3.5 h-3.5 text-yellow-400" /> : <Moon className="w-3.5 h-3.5 text-blue-600" />}
             {isDark ? "Light" : "Dark"}
           </button>
+          {/* Logout — secondary brutalist button */}
           <button
             onClick={handleLogout}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 border border-slate-200 dark:border-slate-700 transition-all shadow-sm"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all duration-100 bg-white dark:bg-transparent"
           >
             <LogOut className="w-3.5 h-3.5" />Sign out
           </button>
@@ -231,7 +247,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar — always visible */}
-      <div className="hidden md:block w-64 shrink-0 h-screen sticky top-0">
+      <div className="hidden md:block w-60 shrink-0 h-screen sticky top-0">
         {sidebarContent}
       </div>
 
@@ -245,7 +261,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             aria-hidden="true"
           />
           {/* Drawer */}
-          <div className="fixed inset-y-0 left-0 z-50 w-64 md:hidden animate-slide-in-left bg-white dark:bg-[#0c0e17] shadow-2xl">
+          <div className="fixed inset-y-0 left-0 z-50 w-60 md:hidden animate-slide-in-left bg-white dark:bg-slate-950 shadow-2xl">
             {sidebarContent}
           </div>
         </>

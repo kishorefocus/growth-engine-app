@@ -84,6 +84,9 @@ function calculateSpamScore(subject: string, body: string): { score: number; fla
   return { score: Math.min(10, Math.round(score * 10) / 10), flags };
 }
 
+const INPUT_CLS = "w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all";
+const INPUT_SM_CLS = "w-full px-3 py-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all";
+
 // ─── Campaign List & Detail Page ──────────────────────────────────────────────
 
 export default function CampaignsPage() {
@@ -93,18 +96,30 @@ export default function CampaignsPage() {
   const { data: campaigns, isLoading } = useCampaigns();
 
   return (
-    <div className="space-y-6 max-w-7xl">
-      {/* Header */}
+    <div className="relative min-h-screen p-5 md:p-8 space-y-8 max-w-7xl">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] animate-pulse-slow" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-[100px] animate-pulse-slow" />
+      </div>
+
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">Outreach Campaigns</h2>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <div className="inline-flex items-center gap-1.5 mb-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <Mail className="w-3.5 h-3.5" />
+            Outreach
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+            Campaigns
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
             Compliant multi-step cold email sequences with AI personalization
           </p>
         </div>
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-all shadow-lg shadow-violet-500/20 w-fit"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 w-fit"
         >
           <Plus className="w-4 h-4" />
           New Campaign
@@ -112,20 +127,20 @@ export default function CampaignsPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center p-12 text-slate-500 text-sm gap-2">
-          <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
-          Loading campaigns...
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl flex items-center justify-center p-12 gap-3">
+          <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Loading campaigns...</span>
         </div>
       ) : campaigns && campaigns.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-          <Mail className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-white">No campaigns yet</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-12 text-center">
+          <Mail className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+          <h3 className="text-base font-black text-slate-900 dark:text-white">No campaigns yet</h3>
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
             Create your first multi-step cold outreach sequence to target your verified leads.
           </p>
           <button
             onClick={() => setIsCreateOpen(true)}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold"
+            className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
           >
             <Plus className="w-4 h-4" />
             Create Campaign
@@ -135,9 +150,12 @@ export default function CampaignsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Campaign List Sidebar */}
           <div className="lg:col-span-4 space-y-3">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-1">
-              Active & Draft Campaigns ({campaigns?.length})
-            </h3>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-1 h-6 rounded-full bg-blue-500" />
+              <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                Active & Draft ({campaigns?.length})
+              </h2>
+            </div>
             {campaigns?.map((c) => {
               const isSelected = (selectedCampaignId || campaigns[0]?.id) === c.id;
               const winText = c.sending_window ? `${c.sending_window.start} - ${c.sending_window.end}` : "09:00 - 17:00";
@@ -146,31 +164,31 @@ export default function CampaignsPage() {
                   key={c.id}
                   onClick={() => setSelectedCampaignId(c.id)}
                   className={clsx(
-                    "p-4 rounded-xl border cursor-pointer transition-all text-left",
+                    "p-4 rounded-xl border-2 cursor-pointer transition-all text-left",
                     isSelected
-                      ? "bg-violet-600/10 border-violet-500/40 shadow-sm"
-                      : "bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] hover:border-white/10"
+                      ? "bg-blue-50 dark:bg-slate-800/80 border-blue-500 shadow-[2px_2px_0px_0px_rgba(37,99,235,0.8)]"
+                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-900 dark:hover:border-slate-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.12)]"
                   )}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-sm text-white truncate mr-2">
+                    <span className="font-black text-sm text-slate-900 dark:text-white truncate mr-2">
                       {c.name}
                     </span>
                     <span
                       className={clsx(
-                        "text-[10px] font-mono px-2 py-0.5 rounded-full capitalize shrink-0 font-medium",
-                        c.status === "active" && "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
-                        c.status === "paused" && "bg-amber-500/15 text-amber-400 border border-amber-500/30",
-                        c.status === "draft" && "bg-slate-500/15 text-slate-400 border border-slate-500/30",
-                        c.status === "completed" && "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm capitalize shrink-0",
+                        c.status === "active" && "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 border-emerald-400/40",
+                        c.status === "paused" && "text-amber-700 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 border-amber-400/40",
+                        c.status === "draft" && "text-slate-600 dark:text-slate-300 bg-slate-500/15 dark:bg-slate-500/20 border-slate-400/40",
+                        c.status === "completed" && "text-blue-700 dark:text-blue-300 bg-blue-500/15 dark:bg-blue-500/20 border-blue-400/40"
                       )}
                     >
                       {c.status}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-slate-500">
+                  <div className="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      <Clock className="w-3.5 h-3.5" />
                       {winText}
                     </span>
                     <span>Limit: {c.daily_limit}/day</span>
@@ -214,9 +232,9 @@ function CampaignDetailView({ campaignId }: { campaignId: string }) {
 
   if (isLoading || !campaign) {
     return (
-      <div className="p-8 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06] text-slate-500">
-        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-violet-400" />
-        Loading campaign details...
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-8 text-center flex flex-col items-center gap-3">
+        <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+        <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Loading campaign details...</span>
       </div>
     );
   }
@@ -250,25 +268,25 @@ function CampaignDetailView({ campaignId }: { campaignId: string }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Top Banner / Controls */}
-      <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-bold text-white">{campaign.name}</h3>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">{campaign.name}</h3>
               <span
                 className={clsx(
-                  "text-xs font-mono px-2.5 py-0.5 rounded-full capitalize font-medium",
-                  campaign.status === "active" && "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
-                  campaign.status === "paused" && "bg-amber-500/15 text-amber-400 border border-amber-500/30",
-                  campaign.status === "draft" && "bg-slate-500/15 text-slate-400 border border-slate-500/30"
+                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm capitalize",
+                  campaign.status === "active" && "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 border-emerald-400/40",
+                  campaign.status === "paused" && "text-amber-700 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 border-amber-400/40",
+                  campaign.status === "draft" && "text-slate-600 dark:text-slate-300 bg-slate-500/15 dark:bg-slate-500/20 border-slate-400/40"
                 )}
               >
                 {campaign.status}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
               Window: {winText} ({campaign.timezone_mode}) · Daily Limit: {campaign.daily_limit} emails
             </p>
           </div>
@@ -276,19 +294,19 @@ function CampaignDetailView({ campaignId }: { campaignId: string }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsEnrollOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-xs font-medium text-slate-200 border border-white/[0.08] transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-900 dark:hover:border-slate-500 transition-all"
             >
-              <Users className="w-3.5 h-3.5 text-violet-400" />
+              <Users className="w-3.5 h-3.5 text-blue-500" />
               Enroll Leads
             </button>
             <button
               onClick={handleToggleStatus}
               disabled={pause.isPending || resume.isPending}
               className={clsx(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm",
+                "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 rounded-xl transition-all duration-100",
                 campaign.status === "active"
-                  ? "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/30"
-                  : "bg-emerald-600 hover:bg-emerald-500 text-white"
+                  ? "bg-amber-500 text-white border-amber-900 shadow-[2px_2px_0px_0px_rgba(120,53,15,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(120,53,15,0.8)] hover:translate-x-[1px] hover:translate-y-[1px]"
+                  : "bg-emerald-600 text-white border-emerald-900 shadow-[2px_2px_0px_0px_rgba(6,78,59,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(6,78,59,0.8)] hover:translate-x-[1px] hover:translate-y-[1px]"
               )}
             >
               {campaign.status === "active" ? (
@@ -299,14 +317,14 @@ function CampaignDetailView({ campaignId }: { campaignId: string }) {
             </button>
             <button
               onClick={() => setIsEditingSettings(!isEditingSettings)}
-              className="p-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] text-slate-400 hover:text-white transition-all"
+              className="p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-900 dark:hover:border-slate-500 transition-all"
               title="Edit Settings"
             >
               <Edit2 className="w-4 h-4" />
             </button>
             <button
               onClick={handleDelete}
-              className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-all"
+              className="p-2 rounded-xl border-2 border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400 hover:bg-rose-600 hover:text-white hover:border-rose-900 transition-all"
               title="Delete Campaign"
             >
               <Trash2 className="w-4 h-4" />
@@ -325,25 +343,28 @@ function CampaignDetailView({ campaignId }: { campaignId: string }) {
 
       {/* Aggregate Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <StatMetric label="Sent" value={stats?.sent ?? 0} icon={<Send className="w-3.5 h-3.5 text-violet-400" />} />
-        <StatMetric label="Delivered" value={stats?.delivered ?? 0} icon={<CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />} />
+        <StatMetric label="Sent" value={stats?.sent ?? 0} icon={<Send className="w-3.5 h-3.5 text-blue-500" />} />
+        <StatMetric label="Delivered" value={stats?.delivered ?? 0} icon={<CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />} />
         <StatMetric label="Opened" value={stats?.opened ?? 0} icon={<Eye className="w-3.5 h-3.5 text-blue-400" />} />
-        <StatMetric label="Replied" value={stats?.replied ?? 0} icon={<MessageSquare className="w-3.5 h-3.5 text-amber-400" />} />
-        <StatMetric label="Bounced" value={stats?.bounced ?? 0} icon={<XCircle className="w-3.5 h-3.5 text-rose-400" />} />
+        <StatMetric label="Replied" value={stats?.replied ?? 0} icon={<MessageSquare className="w-3.5 h-3.5 text-amber-500" />} />
+        <StatMetric label="Bounced" value={stats?.bounced ?? 0} icon={<XCircle className="w-3.5 h-3.5 text-rose-500" />} />
       </div>
 
       {/* Sequence Steps Builder */}
-      <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-4">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 space-y-5">
         <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-sm font-semibold text-white">Sequence Steps</h4>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Automated follow-ups that automatically stop on reply, bounce, or unsubscribe.
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-6 rounded-full bg-blue-500" />
+            <div>
+              <h4 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Sequence Steps</h4>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                Automated follow-ups that stop on reply, bounce, or unsubscribe.
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setIsAddStepOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 text-xs font-semibold border border-violet-500/30 transition-all"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
           >
             <Plus className="w-3.5 h-3.5" />
             Add Step
@@ -351,8 +372,8 @@ function CampaignDetailView({ campaignId }: { campaignId: string }) {
         </div>
 
         {steps && steps.length === 0 ? (
-          <div className="p-8 text-center rounded-xl bg-white/[0.01] border border-dashed border-white/[0.08]">
-            <p className="text-xs text-slate-500">No steps defined yet. Add Step 1 to begin your sequence.</p>
+          <div className="p-8 text-center rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">No steps defined yet. Add Step 1 to begin your sequence.</p>
           </div>
         ) : (
           <div className="space-y-4 relative">
@@ -410,11 +431,11 @@ function CampaignDetailView({ campaignId }: { campaignId: string }) {
 
 function StatMetric({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center gap-3">
-      <div className="p-2 rounded-lg bg-white/[0.04]">{icon}</div>
+    <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-4 flex items-center gap-3">
+      <div className="p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">{icon}</div>
       <div>
-        <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">{label}</p>
-        <p className="text-base font-bold text-white tabular-nums">{value.toLocaleString()}</p>
+        <p className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{label}</p>
+        <p className="text-xl font-black text-slate-900 dark:text-white tabular-nums">{value.toLocaleString()}</p>
       </div>
     </div>
   );
@@ -452,30 +473,30 @@ function StepCard({
   const spam = calculateSpamScore(step.subject_template || "", step.body_template || "");
 
   return (
-    <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.1] transition-all space-y-3">
+    <div className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-900 dark:hover:border-slate-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.12)] transition-all rounded-2xl p-5 space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <span className="w-6 h-6 rounded-full bg-violet-600/20 text-violet-400 font-mono text-xs flex items-center justify-center font-bold">
+          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg border-2 border-slate-900 dark:border-slate-700 bg-blue-500 text-white font-black text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]">
             {step.step_number}
           </span>
-          <span className="text-sm font-semibold text-white">
+          <span className="text-sm font-black text-slate-900 dark:text-white">
             {isFirst ? "Initial Outreach" : `Follow-up (+${step.delay_days} days)`}
           </span>
           {step.ai_personalize && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-medium">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-amber-500 text-white border-2 border-amber-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(120,53,15,1)]">
               <Sparkles className="w-3 h-3" />
-              AI Personalized
+              AI
             </span>
           )}
-          {/* Spam hint */}
+          {/* Spam badge */}
           <span
             className={clsx(
-              "text-[10px] font-mono px-2 py-0.5 rounded-md border",
+              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm",
               spam.score < 2
-                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                ? "text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 dark:bg-emerald-500/20 border-emerald-400/40"
                 : spam.score < 5
-                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                ? "text-amber-700 dark:text-amber-300 bg-amber-500/15 dark:bg-amber-500/20 border-amber-400/40"
+                : "text-rose-700 dark:text-rose-300 bg-rose-500/15 dark:bg-rose-500/20 border-rose-400/40"
             )}
             title={spam.flags.join(", ") || "Clean copy"}
           >
@@ -487,7 +508,7 @@ function StepCard({
           {step.ai_personalize && (
             <button
               onClick={() => setIsPreviewOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-medium border border-amber-500/20 transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-amber-900 rounded-xl bg-amber-500 text-white shadow-[2px_2px_0px_0px_rgba(120,53,15,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(120,53,15,0.8)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all duration-100"
             >
               <Eye className="w-3.5 h-3.5" />
               AI Preview
@@ -495,14 +516,14 @@ function StepCard({
           )}
           <button
             onClick={onEdit}
-            className="p-1 rounded-lg text-slate-400 hover:text-white transition-all"
+            className="p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-900 dark:hover:border-slate-500 transition-all"
             title="Edit Step"
           >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={handleDelete}
-            className="p-1 rounded-lg text-rose-400 hover:text-rose-300 transition-all"
+            className="p-2 rounded-xl border-2 border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400 hover:bg-rose-600 hover:text-white hover:border-rose-900 transition-all"
             title="Delete Step"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -511,13 +532,13 @@ function StepCard({
       </div>
 
       {/* Subject & Preview */}
-      <div className="p-3 rounded-lg bg-black/40 border border-white/[0.04] space-y-1">
-        <p className="text-xs text-slate-300">
-          <span className="text-slate-500 font-mono">Subject: </span>
+      <div className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-3 space-y-1">
+        <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+          <span className="font-black text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider text-[10px]">Subject: </span>
           {step.subject_template}
         </p>
-        <p className="text-xs text-slate-400 line-clamp-2">
-          <span className="text-slate-500 font-mono">Body: </span>
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 line-clamp-2">
+          <span className="font-black text-slate-400 dark:text-slate-500 font-mono uppercase tracking-wider text-[10px]">Body: </span>
           {step.body_template}
         </p>
       </div>
@@ -595,30 +616,30 @@ function StepEditorModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-[#0f0f17] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-white/[0.08]">
-          <h3 className="text-base font-bold text-white">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[8px_8px_0px_0px_rgba(99,102,241,0.5)] w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between p-5 border-b-2 border-slate-900 dark:border-slate-700">
+          <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
             {step ? `Edit Step ${step.step_number}` : `Add Step ${nextStepNumber}`}
           </h3>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-900 dark:hover:border-slate-500 transition-all">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <form onSubmit={handleSave} className="p-5 space-y-4 overflow-y-auto flex-1">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Step Number</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Step Number</label>
               <input
                 type="number"
                 min={1}
                 value={form.step_number}
                 onChange={(e) => setForm({ ...form, step_number: parseInt(e.target.value) || 1 })}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+                className={INPUT_SM_CLS}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
                 Delay After Previous Step (Days)
               </label>
               <input
@@ -626,23 +647,23 @@ function StepEditorModal({
                 min={0}
                 value={form.delay_days}
                 onChange={(e) => setForm({ ...form, delay_days: parseInt(e.target.value) || 0 })}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+                className={INPUT_SM_CLS}
               />
             </div>
           </div>
 
           {/* AI Personalize Toggle */}
-          <div className="p-3.5 rounded-xl bg-amber-500/[0.06] border border-amber-500/20 flex items-center justify-between">
+          <div className="flex gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 border-l-4 border-amber-500 border border-amber-200 dark:border-amber-500/30 rounded-xl items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Sparkles className="w-4 h-4 text-amber-500" />
               <div>
-                <p className="text-xs font-semibold text-white">AI Personalization (Claude 3.5 Sonnet)</p>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">AI Personalization (Claude 3.5 Sonnet)</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                   Researches lead company & website, generates truthful 60-100 word copy verified with claims guard.
                 </p>
               </div>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
+            <label className="relative inline-flex items-center cursor-pointer shrink-0">
               <input
                 type="checkbox"
                 checked={form.ai_personalize}
@@ -655,9 +676,9 @@ function StepEditorModal({
 
           {/* Merge Field Selector */}
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-slate-400">Insert Merge Tag</label>
-              <span className="text-[11px] text-slate-500">Click to append to template</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Insert Merge Tag</label>
+              <span className="text-[11px] font-medium text-slate-500">Click to append to template</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {["first_name", "last_name", "company", "title", "website", "country"].map((field) => (
@@ -665,7 +686,7 @@ function StepEditorModal({
                   type="button"
                   key={field}
                   onClick={() => insertMerge(field, "body")}
-                  className="px-2 py-1 rounded bg-white/[0.04] hover:bg-violet-600/20 hover:text-violet-300 text-[11px] font-mono text-slate-400 border border-white/[0.06] transition-all"
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400 text-[11px] font-mono text-slate-500 dark:text-slate-400 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all"
                 >
                   +{`{${field}}`}
                 </button>
@@ -675,43 +696,52 @@ function StepEditorModal({
 
           {/* Subject Line */}
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-slate-400">Subject Template</label>
-              <span className="text-[10px] text-slate-500">{form.subject_template.length}/60 chars</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Subject Template</label>
+              <span className="text-[10px] font-medium text-slate-500">{form.subject_template.length}/60 chars</span>
             </div>
             <input
               type="text"
               value={form.subject_template}
               onChange={(e) => setForm({ ...form, subject_template: e.target.value })}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50"
+              className={INPUT_CLS}
               placeholder="Quick question regarding {company}"
             />
           </div>
 
           {/* Body */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Email Body (Plain Text)</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Email Body (Plain Text)</label>
             <textarea
               rows={6}
               value={form.body_template}
               onChange={(e) => setForm({ ...form, body_template: e.target.value })}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50 font-sans resize-none"
-              placeholder="Hi {first_name},&#10;&#10;I noticed {company} has been expanding recently. We found your profile through GlobalReach...&#10;&#10;Would you have 10 minutes next Tuesday?"
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all font-sans resize-none"
+              placeholder={"Hi {first_name},\n\nI noticed {company} has been expanding recently...\n\nWould you have 10 minutes next Tuesday?"}
             />
           </div>
 
           {/* Spam Score Card */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-3">
-            <ShieldAlert className={clsx("w-4 h-4 mt-0.5 shrink-0", spam.score < 3 ? "text-emerald-400" : spam.score < 5 ? "text-amber-400" : "text-rose-400")} />
+          <div
+            className={clsx(
+              "flex gap-3 p-4 rounded-xl border-l-4",
+              spam.score < 3
+                ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500 border border-emerald-200 dark:border-emerald-500/30"
+                : spam.score < 5
+                ? "bg-amber-50 dark:bg-amber-500/10 border-amber-500 border border-amber-200 dark:border-amber-500/30"
+                : "bg-red-50 dark:bg-red-500/10 border-red-500 border border-red-200 dark:border-red-500/30"
+            )}
+          >
+            <ShieldAlert className={clsx("w-4 h-4 mt-0.5 shrink-0", spam.score < 3 ? "text-emerald-500" : spam.score < 5 ? "text-amber-500" : "text-rose-500")} />
             <div className="text-xs space-y-1">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-white">Spam Score Heuristic: {spam.score}/10</span>
-                <span className={clsx("text-[10px] font-medium", spam.score < 3 ? "text-emerald-400" : spam.score < 5 ? "text-amber-400" : "text-rose-400")}>
+                <span className="font-black text-slate-900 dark:text-white uppercase tracking-wider">Spam Score Heuristic: {spam.score}/10</span>
+                <span className={clsx("text-[10px] font-black uppercase tracking-wider", spam.score < 3 ? "text-emerald-600" : spam.score < 5 ? "text-amber-600" : "text-rose-600")}>
                   {spam.score < 3 ? "Great deliverability" : spam.score < 5 ? "Moderate risk" : "High spam trigger risk"}
                 </span>
               </div>
               {spam.flags.length > 0 && (
-                <ul className="text-slate-400 list-disc list-inside text-[11px]">
+                <ul className="text-slate-500 dark:text-slate-400 list-disc list-inside text-[11px] font-medium">
                   {spam.flags.map((flag, i) => (
                     <li key={i}>{flag}</li>
                   ))}
@@ -720,18 +750,18 @@ function StepEditorModal({
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.08]">
+          <div className="flex justify-end gap-2 pt-2 border-t-2 border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={createStep.isPending || updateStep.isPending}
-              className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-500/20 disabled:opacity-60"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
             >
               {createStep.isPending || updateStep.isPending ? "Saving..." : "Save Step"}
             </button>
@@ -780,27 +810,27 @@ function AiPreviewModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-      <div className="bg-[#0f0f17] border border-white/10 rounded-2xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-white/[0.08]">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[8px_8px_0px_0px_rgba(99,102,241,0.5)] w-full max-w-xl max-h-[85vh] flex flex-col">
+        <div className="flex items-center justify-between p-5 border-b-2 border-slate-900 dark:border-slate-700">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <h3 className="text-base font-bold text-white">AI Copy Preview (Step {stepNumber})</h3>
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">AI Copy Preview (Step {stepNumber})</h3>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-900 dark:hover:border-slate-500 transition-all">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
               Select Sample Lead to Personalize For
             </label>
             <div className="flex gap-2">
               <select
                 value={leadId}
                 onChange={(e) => setLeadId(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+                className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all"
               >
                 <option value="">Select a verified lead...</option>
                 {leads?.map((lead) => (
@@ -813,7 +843,7 @@ function AiPreviewModal({
                 type="button"
                 onClick={() => handleGenerate()}
                 disabled={loading || !leadId}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold shrink-0 transition-all disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white font-bold text-sm border-2 border-amber-900 rounded-xl shadow-[3px_3px_0px_0px_rgba(120,53,15,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(120,53,15,0.8)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0 shrink-0"
               >
                 {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                 Generate
@@ -823,41 +853,41 @@ function AiPreviewModal({
 
           {result && (
             <div className="space-y-3 pt-2">
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-3">
+              <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-4 space-y-3">
                 <div>
-                  <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider block mb-1">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block mb-1">
                     Generated Subject
                   </span>
-                  <p className="text-sm font-semibold text-white bg-black/40 p-2.5 rounded-lg border border-white/[0.04]">
+                  <p className="text-sm font-black text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700">
                     {result.subject}
                   </p>
                 </div>
                 <div>
-                  <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider block mb-1">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 block mb-1">
                     Generated Body
                   </span>
-                  <p className="text-xs text-slate-300 bg-black/40 p-3 rounded-lg border border-white/[0.04] whitespace-pre-wrap leading-relaxed">
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 whitespace-pre-wrap leading-relaxed">
                     {result.body}
                   </p>
                 </div>
               </div>
 
               {/* Guardrails check */}
-              <div className="flex items-center gap-4 text-[11px] text-slate-400 px-1">
-                <span className="flex items-center gap-1 text-emerald-400">
+              <div className="flex items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400 px-1 font-medium">
+                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-black">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Claims Guard Passed
                 </span>
                 <span>Word count: {result.body.split(/\s+/).length} words</span>
-                <span className="text-amber-400 font-mono">Dogfooding pitch included</span>
+                <span className="text-amber-600 dark:text-amber-400 font-black">Dogfooding pitch included</span>
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex justify-end p-4 border-t border-white/[0.08]">
+        <div className="flex justify-end p-4 border-t-2 border-slate-100 dark:border-slate-800">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-semibold text-white"
+            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-2 border-slate-200 dark:border-slate-700 hover:border-slate-900 dark:hover:border-slate-500 transition-all"
           >
             Close Preview
           </button>
@@ -908,28 +938,28 @@ function CampaignSettingsForm({
   };
 
   return (
-    <form onSubmit={handleSave} className="mt-4 pt-4 border-t border-white/[0.08] space-y-3">
+    <form onSubmit={handleSave} className="mt-5 pt-5 border-t-2 border-slate-100 dark:border-slate-800 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Campaign Name</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Campaign Name</label>
           <input
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"
+            className={INPUT_SM_CLS}
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Daily Limit (Max sends/day)</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Daily Limit</label>
           <input
             type="number"
             value={form.daily_limit}
             onChange={(e) => setForm({ ...form, daily_limit: parseInt(e.target.value) || 20 })}
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"
+            className={INPUT_SM_CLS}
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Sending Window (Hour)</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Sending Window (Hour)</label>
           <div className="flex items-center gap-1">
             <input
               type="number"
@@ -937,25 +967,25 @@ function CampaignSettingsForm({
               max={23}
               value={form.sending_window_start}
               onChange={(e) => setForm({ ...form, sending_window_start: parseInt(e.target.value) || 9 })}
-              className="w-16 bg-white/[0.03] border border-white/[0.08] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none text-center"
+              className="w-16 px-2 py-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 text-center"
             />
-            <span className="text-slate-500 text-xs">to</span>
+            <span className="text-slate-500 text-xs font-medium">to</span>
             <input
               type="number"
               min={0}
               max={23}
               value={form.sending_window_end}
               onChange={(e) => setForm({ ...form, sending_window_end: parseInt(e.target.value) || 17 })}
-              className="w-16 bg-white/[0.03] border border-white/[0.08] rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none text-center"
+              className="w-16 px-2 py-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 text-center"
             />
           </div>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">Timezone Mode</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Timezone Mode</label>
           <select
             value={form.timezone_mode}
             onChange={(e) => setForm({ ...form, timezone_mode: e.target.value as "recipient" | "fixed" })}
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none"
+            className="w-full px-3 py-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all"
           >
             <option value="recipient">Recipient local timezone</option>
             <option value="fixed">Fixed sender timezone</option>
@@ -966,14 +996,14 @@ function CampaignSettingsForm({
         <button
           type="button"
           onClick={onClose}
-          className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white"
+          className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={update.isPending}
-          className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold shadow-sm"
+          className="inline-flex items-center gap-2 px-5 py-2 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-xs border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
         >
           {update.isPending ? "Saving..." : "Save Changes"}
         </button>
@@ -1024,33 +1054,33 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-[#0f0f17] border border-white/10 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[8px_8px_0px_0px_rgba(99,102,241,0.5)] w-full max-w-lg p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-white">Create New Outreach Campaign</h3>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">
-            <X className="w-5 h-5" />
+          <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Create New Outreach Campaign</h3>
+          <button onClick={onClose} className="p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-900 dark:hover:border-slate-500 transition-all">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Campaign Name</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Campaign Name</label>
             <input
               type="text"
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50"
+              className={INPUT_CLS}
               placeholder="e.g. US Web Design Agencies Q4"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Target ICP</label>
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Target ICP</label>
             <select
               value={form.icp_id}
               onChange={(e) => setForm({ ...form, icp_id: e.target.value })}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all"
             >
               <option value="">None / General Audience</option>
               {icps?.map((icp) => (
@@ -1063,19 +1093,19 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Daily Sending Limit</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Daily Sending Limit</label>
               <input
                 type="number"
                 min={5}
                 max={500}
                 value={form.daily_limit}
                 onChange={(e) => setForm({ ...form, daily_limit: parseInt(e.target.value) || 20 })}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
+                className={INPUT_CLS}
               />
-              <span className="text-[10px] text-slate-500">Start at 20/day during warm-up</span>
+              <span className="text-[10px] font-medium text-slate-500 mt-1 block">Start at 20/day during warm-up</span>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Sending Window (Hours)</label>
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Sending Window (Hours)</label>
               <div className="flex items-center gap-1 mt-1">
                 <input
                   type="number"
@@ -1083,33 +1113,33 @@ function CreateCampaignModal({ onClose }: { onClose: () => void }) {
                   max={23}
                   value={form.sending_window_start}
                   onChange={(e) => setForm({ ...form, sending_window_start: parseInt(e.target.value) || 9 })}
-                  className="w-16 bg-white/[0.03] border border-white/[0.08] rounded-xl px-2 py-1.5 text-xs text-white text-center"
+                  className="w-16 px-2 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 text-center"
                 />
-                <span className="text-slate-500 text-xs">to</span>
+                <span className="text-slate-500 text-xs font-medium">to</span>
                 <input
                   type="number"
                   min={0}
                   max={23}
                   value={form.sending_window_end}
                   onChange={(e) => setForm({ ...form, sending_window_end: parseInt(e.target.value) || 17 })}
-                  className="w-16 bg-white/[0.03] border border-white/[0.08] rounded-xl px-2 py-1.5 text-xs text-white text-center"
+                  className="w-16 px-2 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 text-center"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.08]">
+          <div className="flex justify-end gap-2 pt-2 border-t-2 border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={create.isPending}
-              className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all shadow-md shadow-violet-500/20 disabled:opacity-60"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
             >
               {create.isPending ? "Creating..." : "Create Campaign"}
             </button>
@@ -1166,36 +1196,36 @@ function EnrollLeadsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-      <div className="bg-[#0f0f17] border border-white/10 rounded-2xl w-full max-w-xl max-h-[85vh] flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-white/[0.08]">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[8px_8px_0px_0px_rgba(99,102,241,0.5)] w-full max-w-xl max-h-[85vh] flex flex-col">
+        <div className="flex items-center justify-between p-5 border-b-2 border-slate-900 dark:border-slate-700">
           <div>
-            <h3 className="text-base font-bold text-white">Enroll Verified Leads</h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Only leads with verification status <span className="text-emerald-400 font-mono">valid</span> are eligible.
+            <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Enroll Verified Leads</h3>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+              Only leads with verification status <span className="text-emerald-600 dark:text-emerald-400 font-black font-mono">valid</span> are eligible.
             </p>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-900 dark:hover:border-slate-500 transition-all">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="p-5 flex-1 overflow-y-auto space-y-3">
           {isLoading ? (
-            <div className="p-8 text-center text-slate-500 text-xs">
-              <Loader2 className="w-4 h-4 animate-spin mx-auto mb-2 text-violet-400" />
-              Loading verified leads...
+            <div className="p-8 text-center flex flex-col items-center gap-3 text-slate-500">
+              <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+              <span className="text-xs font-medium">Loading verified leads...</span>
             </div>
           ) : !leads || leads.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs">
+            <div className="p-8 text-center text-sm font-medium text-slate-500 dark:text-slate-400">
               No verified leads found. Import leads or run verification first.
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-white/[0.06]">
+              <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 pb-2 border-b-2 border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={handleSelectAll}
-                  className="text-violet-400 hover:underline font-medium"
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-black"
                 >
                   {selectedIds.length === leads.length ? "Deselect All" : "Select All"}
                 </button>
@@ -1209,10 +1239,10 @@ function EnrollLeadsModal({
                       key={lead.id}
                       onClick={() => toggleSelect(lead.id)}
                       className={clsx(
-                        "flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all text-xs",
+                        "flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all text-xs",
                         isChecked
-                          ? "bg-violet-600/10 border-violet-500/40 text-white"
-                          : "bg-white/[0.02] border-white/[0.04] text-slate-300 hover:bg-white/[0.04]"
+                          ? "bg-blue-50 dark:bg-slate-800/80 border-blue-500 shadow-[2px_2px_0px_0px_rgba(37,99,235,0.6)]"
+                          : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-900 dark:hover:border-slate-500"
                       )}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
@@ -1220,16 +1250,16 @@ function EnrollLeadsModal({
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => {}}
-                          className="rounded border-white/20 text-violet-600 focus:ring-0"
+                          className="rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-0 focus:ring-offset-0"
                         />
                         <div className="min-w-0">
-                          <p className="font-medium truncate">
+                          <p className="font-black text-slate-900 dark:text-white truncate">
                             {lead.first_name} {lead.last_name || ""} {lead.company ? `(${lead.company})` : ""}
                           </p>
-                          <p className="text-[11px] text-slate-500 truncate">{lead.email}</p>
+                          <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{lead.email}</p>
                         </div>
                       </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 shrink-0">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-400/40 backdrop-blur-sm shrink-0">
                         valid
                       </span>
                     </div>
@@ -1240,17 +1270,17 @@ function EnrollLeadsModal({
           )}
         </div>
 
-        <div className="flex justify-end gap-2 p-4 border-t border-white/[0.08]">
+        <div className="flex justify-end gap-2 p-4 border-t-2 border-slate-100 dark:border-slate-800">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all"
           >
             Cancel
           </button>
           <button
             onClick={handleEnroll}
             disabled={selectedIds.length === 0 || enroll.isPending}
-            className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold shadow-md shadow-violet-500/20 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
           >
             {enroll.isPending ? "Enrolling..." : `Enroll ${selectedIds.length} Leads`}
           </button>

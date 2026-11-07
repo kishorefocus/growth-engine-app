@@ -42,6 +42,14 @@ const PLATFORMS = [
   { id: "youtube", name: "YouTube", color: "#f87171", bg: "bg-red-500/15 text-red-400 border-red-500/20" },
 ];
 
+const PLATFORM_BADGE: Record<string, string> = {
+  x: "bg-sky-500 border-sky-900",
+  linkedin: "bg-blue-500 border-blue-900",
+  instagram: "bg-pink-500 border-pink-900",
+  facebook: "bg-indigo-500 border-indigo-900",
+  youtube: "bg-red-600 border-red-900",
+};
+
 function getLivePostUrl(platform: string, externalId?: string): string | null {
   if (!externalId || externalId.includes("mock") || externalId.includes("dryrun")) return null;
   const plat = platform.toLowerCase();
@@ -72,8 +80,8 @@ function PostMediaGallery({ mediaUrls, platform }: { mediaUrls?: string[]; platf
 
   if (validImages.length === 0) {
     return (
-      <div className="p-3 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[11px] text-slate-400">
-        <span className="font-semibold text-slate-200">Image Prompt:</span> {mediaUrls[0]}
+      <div className="p-3 rounded-lg bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 text-[11px] text-slate-600 dark:text-slate-400">
+        <span className="font-bold text-slate-800 dark:text-slate-200">Image Prompt:</span> {mediaUrls[0]}
       </div>
     );
   }
@@ -84,7 +92,7 @@ function PostMediaGallery({ mediaUrls, platform }: { mediaUrls?: string[]; platf
   return (
     <div className="space-y-2">
       {/* Main image viewer with carousel navigation */}
-      <div className="rounded-xl overflow-hidden border border-white/[0.08] bg-black/70 shadow-xl group relative">
+      <div className="rounded-xl overflow-hidden border-2 border-slate-900 dark:border-slate-700 bg-black/70 shadow-xl group relative">
         <img
           src={currentImg}
           alt={`Slide ${currentIndex + 1} - ${imageName}`}
@@ -145,7 +153,7 @@ function PostMediaGallery({ mediaUrls, platform }: { mediaUrls?: string[]; platf
         </div>
       </div>
 
-      {/* Thumbnails row (showing all images inside the folder) */}
+      {/* Thumbnails row */}
       {validImages.length > 1 && (
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 scrollbar-thin">
           {validImages.map((img, idx) => {
@@ -156,10 +164,10 @@ function PostMediaGallery({ mediaUrls, platform }: { mediaUrls?: string[]; platf
                 type="button"
                 onClick={() => setCurrentIndex(idx)}
                 className={clsx(
-                  "relative shrink-0 rounded-lg overflow-hidden border transition-all cursor-pointer",
+                  "relative shrink-0 rounded-lg overflow-hidden border-2 transition-all cursor-pointer",
                   idx === currentIndex
-                    ? "border-violet-500 ring-2 ring-violet-500/50 scale-105"
-                    : "border-white/10 opacity-60 hover:opacity-100"
+                    ? "border-blue-500 ring-2 ring-blue-500/50 scale-105"
+                    : "border-slate-700 opacity-60 hover:opacity-100"
                 )}
                 title={thumbName}
               >
@@ -274,65 +282,75 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="relative min-h-screen p-5 md:p-8 space-y-8">
+      {/* Ambient Orbs */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-[100px] animate-pulse" />
+      </div>
+
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            Social Studio & Calendar
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20 font-mono">
-              DRY_RUN Active
-            </span>
-          </h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <div className="inline-flex items-center gap-1.5 mb-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <CalendarDays className="w-3.5 h-3.5" />
+            Schedule
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+            Content Calendar
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
             Review drafts, approve in queue with side-by-side platform previews, and manage schedule times.
           </p>
         </div>
 
-        {/* View and Tab toggles */}
-        <div className="flex items-center gap-2">
-          <div className="p-1 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center gap-1">
-            <button
-              onClick={() => setActiveTab("calendar")}
-              className={clsx(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5",
-                activeTab === "calendar" ? "bg-violet-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
-              )}
-            >
-              <CalendarDays className="w-3.5 h-3.5" />
-              Calendar
-            </button>
-            <button
-              onClick={() => setActiveTab("approval")}
-              className={clsx(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 relative",
-                activeTab === "approval" ? "bg-violet-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
-              )}
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Approval Queue
-              {pendingPosts.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-black font-bold">
-                  {pendingPosts.length}
-                </span>
-              )}
-            </button>
-          </div>
+        {/* Tab toggles */}
+        <div className="flex items-center gap-0 border-2 border-slate-900 dark:border-slate-700 rounded-xl overflow-hidden w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)]">
+          <button
+            onClick={() => setActiveTab("calendar")}
+            className={clsx(
+              "font-bold text-sm px-4 py-2 flex items-center gap-1.5 transition-colors",
+              activeTab === "calendar"
+                ? "bg-slate-900 dark:bg-blue-600 text-white"
+                : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+            )}
+          >
+            <CalendarDays className="w-3.5 h-3.5" />
+            Calendar
+          </button>
+          <button
+            onClick={() => setActiveTab("approval")}
+            className={clsx(
+              "font-bold text-sm px-4 py-2 flex items-center gap-1.5 relative border-l-2 border-slate-900 dark:border-slate-700 transition-colors",
+              activeTab === "approval"
+                ? "bg-slate-900 dark:bg-blue-600 text-white"
+                : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+            )}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Approval Queue
+            {pendingPosts.length > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500 text-black font-bold">
+                {pendingPosts.length}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Filter Row */}
+      {/* Platform Filter */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {PLATFORMS.map((p) => (
+        <div className="flex gap-0 border-2 border-slate-900 dark:border-slate-700 rounded-xl overflow-hidden w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)] overflow-x-auto">
+          {PLATFORMS.map((p, i) => (
             <button
               key={p.id}
               onClick={() => setSelectedPlatform(p.id)}
               className={clsx(
-                "px-3 py-1.5 rounded-xl text-xs font-medium border transition-all whitespace-nowrap",
+                "font-bold text-sm px-4 py-2 whitespace-nowrap transition-colors",
+                i > 0 && "border-l-2 border-slate-900 dark:border-slate-700",
                 selectedPlatform === p.id
-                  ? "bg-white/[0.1] text-white border-white/20 font-semibold"
-                  : "bg-white/[0.02] text-slate-400 border-white/[0.06] hover:bg-white/[0.05]"
+                  ? "bg-slate-900 dark:bg-blue-600 text-white"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
               )}
             >
               {p.name}
@@ -341,167 +359,350 @@ export default function CalendarPage() {
         </div>
 
         {activeTab === "calendar" && (
-          <div className="flex items-center gap-2">
-            <div className="p-1 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center text-xs">
-              <button
-                onClick={() => setViewMode("week")}
-                className={clsx("px-2.5 py-1 rounded-lg", viewMode === "week" ? "bg-white/[0.1] text-white" : "text-slate-400")}
-              >
-                Week
-              </button>
-              <button
-                onClick={() => setViewMode("month")}
-                className={clsx("px-2.5 py-1 rounded-lg", viewMode === "month" ? "bg-white/[0.1] text-white" : "text-slate-400")}
-              >
-                Month
-              </button>
-            </div>
+          <div className="flex gap-0 border-2 border-slate-900 dark:border-slate-700 rounded-xl overflow-hidden w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)]">
+            <button
+              onClick={() => setViewMode("week")}
+              className={clsx(
+                "font-bold text-sm px-4 py-2 transition-colors",
+                viewMode === "week"
+                  ? "bg-slate-900 dark:bg-blue-600 text-white"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+              )}
+            >
+              Week
+            </button>
+            <button
+              onClick={() => setViewMode("month")}
+              className={clsx(
+                "font-bold text-sm px-4 py-2 border-l-2 border-slate-900 dark:border-slate-700 transition-colors",
+                viewMode === "month"
+                  ? "bg-slate-900 dark:bg-blue-600 text-white"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+              )}
+            >
+              Month
+            </button>
           </div>
         )}
       </div>
 
       {/* ─── TAB 1: CALENDAR VIEW ───────────────────────────────────────────── */}
       {activeTab === "calendar" && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Best Time Heuristic Bar */}
           {calendarData?.best_time_suggestions && (
-            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-slate-300">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span className="font-semibold text-white">Suggested Posting Windows:</span>
-                <span className="text-slate-500 hidden md:inline">
-                  (Weekday mornings in target timezones)
-                </span>
+            <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span className="font-bold text-slate-800 dark:text-white">Suggested Posting Windows:</span>
+                <span className="text-slate-400 hidden md:inline">(Weekday mornings in target timezones)</span>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 {Object.entries(calendarData.best_time_suggestions).map(([plat, times]) => (
-                  <div key={plat} className="flex items-center gap-1.5 text-[11px] font-mono">
-                    <span className="capitalize text-slate-400">{plat}:</span>
-                    <span className="text-violet-300 font-semibold">{times.join(", ")}</span>
+                  <div key={plat} className="flex items-center gap-1.5 text-xs font-medium">
+                    <span className="capitalize text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">{plat}:</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-bold">{(times as string[]).join(", ")}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Calendar Items List / Timeline */}
+          {/* Calendar Items */}
           {isCalendarLoading ? (
-            <div className="p-12 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06] animate-pulse">
-              <RefreshCw className="w-6 h-6 text-violet-400 animate-spin mx-auto mb-2" />
-              <p className="text-xs text-slate-400">Loading scheduled calendar feed...</p>
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-12 text-center space-y-3">
+              <RefreshCw className="w-6 h-6 text-blue-500 animate-spin mx-auto" />
+              <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse mx-auto" />
+              <div className="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse mx-auto" />
             </div>
           ) : !calendarData || calendarData.items.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-3">
-              <CalendarIcon className="w-10 h-10 text-slate-600 mx-auto" />
-              <h3 className="text-sm font-semibold text-white">No scheduled posts on calendar</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-12 text-center space-y-4">
+              <CalendarIcon className="w-12 h-12 text-slate-400 mx-auto" />
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">No scheduled posts on calendar</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                 Approve drafts from the Approval Queue or generate a new batch from Content Ideas to schedule posts.
               </p>
               <Link
                 href="/admin/ideas"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
               >
                 Go to Ideas Studio
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {calendarData.items.map((item) => {
-                const platConf = PLATFORMS.find((p) => p.id === item.platform.toLowerCase()) || {
-                  name: item.platform,
-                  bg: "bg-slate-800 text-slate-400 border-white/[0.06]",
-                };
+            <div className="border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.75)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.3)] rounded-2xl overflow-hidden">
+              <div className="bg-slate-900 dark:bg-slate-800 px-5 py-3 flex items-center gap-3">
+                <div className="w-1 h-5 rounded-full bg-blue-500" />
+                <h2 className="text-xs font-black text-white uppercase tracking-widest">Scheduled Posts</h2>
+                <span className="ml-auto text-xs font-black text-slate-400">{calendarData.items.length} posts</span>
+              </div>
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
+                {calendarData.items.map((item) => {
+                  const platConf = PLATFORMS.find((p) => p.id === item.platform.toLowerCase()) || {
+                    name: item.platform,
+                    bg: "bg-slate-800 text-slate-400 border-white/[0.06]",
+                  };
+                  const badgeColor = PLATFORM_BADGE[item.platform.toLowerCase()] || "bg-slate-700 border-slate-900";
 
-                return (
-                  <div
-                    key={item.id}
-                    className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/12 transition-all flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className={clsx("text-[10px] font-semibold px-2 py-0.5 rounded-md border", platConf.bg)}>
-                          {platConf.name}
-                        </span>
-                        <span
-                          className={clsx(
-                            "text-[10px] font-medium px-2 py-0.5 rounded-full",
-                            item.status === "published"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : item.status === "failed"
-                              ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                              : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                  return (
+                    <div
+                      key={item.id}
+                      className="px-5 py-4 bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={clsx(
+                              "inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white border-2 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]",
+                              badgeColor
+                            )}>
+                              {platConf.name}
+                            </span>
+                            <span className={clsx(
+                              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm",
+                              item.status === "published"
+                                ? "bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-400/40"
+                                : item.status === "failed"
+                                ? "bg-rose-500/15 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-400/40"
+                                : "bg-blue-500/15 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-400/40"
+                            )}>
+                              <span className={clsx(
+                                "w-1.5 h-1.5 rounded-full animate-pulse",
+                                item.status === "published" ? "bg-emerald-500"
+                                  : item.status === "failed" ? "bg-rose-500"
+                                  : "bg-blue-500"
+                              )} />
+                              {item.status}
+                            </span>
+                          </div>
+                          <p className="text-sm font-medium text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                            {item.body}
+                          </p>
+                          {item.error && (
+                            <div className="flex gap-3 p-3 mt-2 bg-red-50 dark:bg-red-500/10 border-l-4 border-red-500 border border-red-200 dark:border-red-500/30 rounded-xl">
+                              <p className="text-xs font-medium text-red-700 dark:text-red-300">{item.error}</p>
+                            </div>
                           )}
-                        >
-                          {item.status}
-                        </span>
-                      </div>
+                        </div>
 
-                      <p className="text-xs text-slate-300 line-clamp-4 leading-relaxed font-sans">
-                        {item.body}
-                      </p>
-                      {item.error && (
-                        <p className="text-[11px] text-rose-400 mt-2 bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
-                          {item.error}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-white/[0.04] space-y-2.5">
-                      <div className="flex items-center justify-between text-[11px] text-slate-500">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-slate-400" />
-                          {new Date(item.scheduled_at).toLocaleString([], {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-
-                        <div className="flex items-center gap-1.5">
-                          {item.status === "published" && item.external_post_id && getLivePostUrl(item.platform, item.external_post_id) && (
-                            <a
-                              href={getLivePostUrl(item.platform, item.external_post_id)!}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-[10px] font-semibold flex items-center gap-1 transition-all"
-                              title="Open live post in new tab"
-                            >
-                              <ExternalLink className="w-2.5 h-2.5" />
-                              View Live
-                            </a>
-                          )}
-                          {item.status !== "published" && (
+                        <div className="flex flex-col items-end gap-2 shrink-0">
+                          <span className="flex items-center gap-1 text-xs font-black uppercase tracking-widest text-slate-400">
+                            <Clock className="w-3 h-3" />
+                            {new Date(item.scheduled_at).toLocaleString([], {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {item.status === "published" && item.external_post_id && getLivePostUrl(item.platform, item.external_post_id) && (
+                              <a
+                                href={getLivePostUrl(item.platform, item.external_post_id)!}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-400/40 backdrop-blur-sm"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                View Live
+                              </a>
+                            )}
+                            {item.status !== "published" && (
+                              <button
+                                onClick={() => handlePublishNow(item.id)}
+                                disabled={publishMutation.isPending}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
+                              >
+                                <Send className="w-3 h-3" />
+                                Publish Now
+                              </button>
+                            )}
+                            {item.status === "failed" && (
+                              <button
+                                onClick={() => handleRetry(item.id)}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white font-bold text-sm border-2 border-red-900 rounded-xl shadow-[3px_3px_0px_0px_rgba(127,29,29,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(127,29,29,0.8)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none transition-all duration-100"
+                              >
+                                <RotateCcw className="w-3 h-3" />
+                                Retry
+                              </button>
+                            )}
                             <button
-                              onClick={() => handlePublishNow(item.id)}
-                              disabled={publishMutation.isPending}
-                              className="px-2 py-1 rounded bg-violet-600/20 text-violet-300 hover:bg-violet-600/30 text-[10px] font-semibold flex items-center gap-1 transition-all"
-                              title="Publish now"
+                              onClick={() => {
+                                setReschedulingPost(item);
+                                setRescheduleDate(item.scheduled_at.slice(0, 16));
+                              }}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
                             >
-                              <Send className="w-2.5 h-2.5" />
-                              Publish Now
+                              Reschedule
                             </button>
-                          )}
-                          {item.status === "failed" && (
-                            <button
-                              onClick={() => handleRetry(item.id)}
-                              className="px-2 py-1 rounded bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-[10px] font-semibold flex items-center gap-1"
-                            >
-                              <RotateCcw className="w-2.5 h-2.5" />
-                              Retry
-                            </button>
-                          )}
-                          <button
-                            onClick={() => {
-                              setReschedulingPost(item);
-                              setRescheduleDate(item.scheduled_at.slice(0, 16));
-                            }}
-                            className="px-2 py-1 rounded bg-white/[0.04] text-slate-400 hover:text-white text-[10px] font-medium"
-                          >
-                            Reschedule
-                          </button>
+                          </div>
                         </div>
                       </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── TAB 2: APPROVAL QUEUE ─────────────────────────────────────────── */}
+      {activeTab === "approval" && (
+        <div className="space-y-5">
+          {/* Section Header */}
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-6 rounded-full bg-blue-500" />
+            <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+              Approval Queue
+            </h2>
+            {pendingPosts.length > 0 && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-amber-500 text-white border-2 border-amber-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]">
+                {pendingPosts.length} pending
+              </span>
+            )}
+          </div>
+
+          {pendingPosts.length === 0 ? (
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-12 text-center space-y-4">
+              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Approval Queue is Clear</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                No items are currently pending review. When new weekly batches are generated or converted from ideas, they will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {pendingPosts.map((post) => {
+                const badgeColor = PLATFORM_BADGE[post.platform?.toLowerCase()] || "bg-slate-700 border-slate-900";
+                return (
+                  <div
+                    key={post.id}
+                    className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 md:p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.85)] dark:hover:shadow-[6px_6px_0px_0px_rgba(99,102,241,0.5)] transition-shadow space-y-4"
+                  >
+                    {/* Top card row */}
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className={clsx(
+                          "inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white border-2 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]",
+                          badgeColor
+                        )}>
+                          {post.platform}
+                        </span>
+                        {post.link_url && (
+                          <span className="text-xs font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                            UTM: <span className="text-slate-500 dark:text-slate-400 font-mono">{post.link_url}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleReject(post.id)}
+                          disabled={rejectMutation.isPending}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white font-bold text-sm border-2 border-red-900 rounded-xl shadow-[3px_3px_0px_0px_rgba(127,29,29,0.8)] hover:shadow-[1px_1px_0px_0px_rgba(127,29,29,0.8)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none transition-all duration-100"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          Reject
+                        </button>
+                        <button
+                          onClick={() => handlePublishNow(post.id)}
+                          disabled={publishMutation.isPending}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          Publish Now
+                        </button>
+                        <button
+                          onClick={() => handleApprove(post.id)}
+                          disabled={approveMutation.isPending}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Approve & Schedule
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Platform Preview Mockup */}
+                    <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                      {post.platform === "x" && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
+                              GC
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs font-bold text-slate-900 dark:text-white">GetyourclientsB2B</span>
+                                <span className="text-xs font-medium text-slate-400">@getyourclientsb2b · Just now</span>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-sm font-medium text-slate-600 dark:text-slate-200 whitespace-pre-wrap leading-relaxed pl-10">
+                            {post.body}
+                          </p>
+                          <div className="pl-10">
+                            <PostMediaGallery mediaUrls={post.media_urls} platform="x" />
+                          </div>
+                          <div className="text-xs font-black uppercase tracking-widest text-slate-400 pl-10 pt-1">
+                            {post.body?.length || 0} / 280 chars
+                          </div>
+                        </div>
+                      )}
+
+                      {post.platform === "linkedin" && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-xs font-bold text-white">
+                              GC
+                            </div>
+                            <div>
+                              <span className="text-xs font-bold text-slate-900 dark:text-white">GetyourclientsB2B</span>
+                              <p className="text-xs font-medium text-slate-400">B2B Client Discovery & Cold Outreach CRM</p>
+                            </div>
+                          </div>
+                          <p className="text-sm font-medium text-slate-600 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
+                            {post.body}
+                          </p>
+                          <PostMediaGallery mediaUrls={post.media_urls} platform="linkedin" />
+                          <div className="text-xs font-black uppercase tracking-widest text-slate-400 pt-1">
+                            {post.body?.length || 0} chars (Target 800–1,300)
+                          </div>
+                        </div>
+                      )}
+
+                      {post.platform === "instagram" && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-pink-500 p-0.5">
+                              <div className="w-full h-full bg-black rounded-full flex items-center justify-center text-[10px] font-bold text-white">
+                                GC
+                              </div>
+                            </div>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white">getyourclientsb2b</span>
+                          </div>
+                          <PostMediaGallery mediaUrls={post.media_urls} platform="instagram" />
+                          <p className="text-sm font-medium text-slate-600 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
+                            {post.body}
+                          </p>
+                        </div>
+                      )}
+
+                      {post.platform === "facebook" && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">
+                              f
+                            </div>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white">GetyourclientsB2B</span>
+                          </div>
+                          <PostMediaGallery mediaUrls={post.media_urls} platform="facebook" />
+                          <p className="text-sm font-medium text-slate-600 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
+                            {post.body}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -511,159 +712,15 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* ─── TAB 2: APPROVAL QUEUE ─────────────────────────────────────────── */}
-      {activeTab === "approval" && (
-        <div className="space-y-4">
-          {pendingPosts.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-2">
-              <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-              <h3 className="text-base font-semibold text-white">Approval Queue is Clear</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                No items are currently pending review. When new weekly batches are generated or converted from ideas, they will appear here.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {pendingPosts.map((post) => (
-                <div
-                  key={post.id}
-                  className="p-5 rounded-2xl bg-white/[0.02] border border-white/[0.08] hover:border-white/12 transition-all space-y-4"
-                >
-                  {/* Top card row */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-violet-500/15 text-violet-300 border border-violet-500/20">
-                        {post.platform}
-                      </span>
-                      {post.link_url && (
-                        <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1">
-                          UTM Link: <span className="text-slate-400">{post.link_url}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleReject(post.id)}
-                        disabled={rejectMutation.isPending}
-                        className="px-3 py-1.5 rounded-xl text-xs font-medium text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition-all flex items-center gap-1.5"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        Reject
-                      </button>
-                      <button
-                        onClick={() => handlePublishNow(post.id)}
-                        disabled={publishMutation.isPending}
-                        className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-sm shadow-violet-600/30 transition-all flex items-center gap-1.5"
-                        title="Publish immediately"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        Publish Now
-                      </button>
-                      <button
-                        onClick={() => handleApprove(post.id)}
-                        disabled={approveMutation.isPending}
-                        className="px-4 py-1.5 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm shadow-emerald-600/30 transition-all flex items-center gap-1.5"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Approve & Schedule
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Side-by-side platform preview mockup */}
-                  <div className="p-4 rounded-xl bg-black/40 border border-white/[0.04]">
-                    {post.platform === "x" && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
-                            GC
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1">
-                              <span className="text-xs font-bold text-white">GetyourclientsB2B</span>
-                              <span className="text-[11px] text-slate-500">@getyourclientsb2b · Just now</span>
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed pl-10">
-                          {post.body}
-                        </p>
-                        <div className="pl-10">
-                          <PostMediaGallery mediaUrls={post.media_urls} platform="x" />
-                        </div>
-                        <div className="text-[10px] text-slate-500 font-mono pl-10 pt-1">
-                          Character count: {post.body?.length || 0} / 280 (X v2 compliant)
-                        </div>
-                      </div>
-                    )}
-
-                    {post.platform === "linkedin" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-xs font-bold text-white">
-                            GC
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-white">GetyourclientsB2B</span>
-                            <p className="text-[10px] text-slate-500">B2B Client Discovery & Cold Outreach CRM</p>
-                          </div>
-                        </div>
-                        <p className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
-                          {post.body}
-                        </p>
-                        <PostMediaGallery mediaUrls={post.media_urls} platform="linkedin" />
-                        <div className="text-[10px] text-slate-500 font-mono pt-1">
-                          Length: {post.body?.length || 0} characters (Target 800 - 1,300)
-                        </div>
-                      </div>
-                    )}
-
-                    {post.platform === "instagram" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-pink-500 p-0.5">
-                            <div className="w-full h-full bg-black rounded-full flex items-center justify-center text-[10px] font-bold text-white">
-                              GC
-                            </div>
-                          </div>
-                          <span className="text-xs font-bold text-white">getyourclientsb2b</span>
-                        </div>
-                        <PostMediaGallery mediaUrls={post.media_urls} platform="instagram" />
-                        <p className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
-                          {post.body}
-                        </p>
-                      </div>
-                    )}
-
-                    {post.platform === "facebook" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">
-                            f
-                          </div>
-                          <span className="text-xs font-bold text-white">GetyourclientsB2B</span>
-                        </div>
-                        <PostMediaGallery mediaUrls={post.media_urls} platform="facebook" />
-                        <p className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
-                          {post.body}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Reschedule Modal */}
       {reschedulingPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-sm p-6 rounded-2xl bg-[#0e0e17] border border-white/[0.08] shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-white">Reschedule Post</h3>
-            <p className="text-xs text-slate-400">
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 w-full max-w-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-6 rounded-full bg-blue-500" />
+              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Reschedule Post</h3>
+            </div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
               Select the new timestamp to publish to {reschedulingPost.platform.toUpperCase()}:
             </p>
 
@@ -671,14 +728,14 @@ export default function CalendarPage() {
               type="datetime-local"
               value={rescheduleDate}
               onChange={(e) => setRescheduleDate(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-xs focus:outline-none focus:border-violet-500"
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
             />
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setReschedulingPost(null)}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
               >
                 Cancel
               </button>
@@ -686,7 +743,7 @@ export default function CalendarPage() {
                 type="button"
                 onClick={handleRescheduleSubmit}
                 disabled={rescheduleMutation.isPending}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
               >
                 Confirm Reschedule
               </button>

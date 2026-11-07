@@ -11,6 +11,8 @@ import {
   useSendReviewRequest,
 } from "@/lib/hooks";
 import { LaunchTaskItem } from "@/lib/api-client";
+import { clsx } from "clsx";
+import { Rocket, Star, Plus, X, Sparkles, Trash2, CheckCircle2 } from "lucide-react";
 
 const PLATFORMS = [
   { id: "all", label: "All Platforms", icon: "🚀" },
@@ -20,6 +22,29 @@ const PLATFORMS = [
   { id: "reddit", label: "Reddit", icon: "🤖" },
   { id: "indiehackers", label: "IndieHackers", icon: "🛠️" },
 ];
+
+function PriorityBadge({ priority }: { priority?: string }) {
+  if (!priority) return null;
+  if (priority === "high") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-rose-500 text-white border-2 border-rose-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(136,19,55,1)]">
+        High
+      </span>
+    );
+  }
+  if (priority === "medium") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-amber-500 text-white border-2 border-amber-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(120,53,15,1)]">
+        Medium
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-blue-500 text-white border-2 border-blue-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]">
+      Low
+    </span>
+  );
+}
 
 export default function LaunchHubAdminPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
@@ -111,12 +136,24 @@ export default function LaunchHubAdminPage() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="relative min-h-screen p-5 md:p-8 space-y-8">
+      {/* Ambient orbs */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] animate-pulse-slow" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-[100px] animate-pulse-slow" />
+      </div>
+
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Launch Hub & Reviews</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <div className="inline-flex items-center gap-1.5 mb-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <Rocket className="w-3.5 h-3.5" />
+            Growth
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+            Launch Hub
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
             Track launch checklists for Product Hunt, G2, Capterra, Reddit, and IndieHackers with AI-assisted copy.
           </p>
         </div>
@@ -124,67 +161,82 @@ export default function LaunchHubAdminPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowReviewModal(true)}
-            className="px-3.5 py-2 rounded-lg border border-slate-700 bg-slate-800 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
           >
-            ⭐ Send Review Request
+            <Star className="w-4 h-4" />
+            Send Review Request
           </button>
           <button
             onClick={() => setShowNewTaskModal(true)}
-            className="px-4 py-2 rounded-lg font-bold text-xs text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-300 hover:brightness-110 shadow-md shadow-cyan-500/20 transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
           >
-            + New Task
+            <Plus className="w-4 h-4" />
+            Add Task
           </button>
         </div>
       </div>
 
-      {/* Progress & Stats Cards */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400 font-medium">Launch Progress</div>
-          <div className="text-2xl font-bold text-cyan-400 mt-1">{completionRate}%</div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+        {/* Progress */}
+        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(37,99,235,0.8)] rounded-2xl p-5 group">
+          <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-blue-500/8 dark:bg-blue-500/10" />
+          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Launch Progress</div>
+          <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-1">
+            <span className="text-blue-600 dark:text-blue-400">{completedTasks}</span>
+            <span className="text-slate-400 text-lg font-bold">/{totalTasks}</span>
+          </div>
+          <div className="mt-2 w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden border border-slate-300 dark:border-slate-600">
             <div
-              className="bg-gradient-to-r from-cyan-500 to-teal-400 h-full rounded-full transition-all duration-500"
+              className="bg-blue-500 h-full rounded-full transition-all duration-500"
               style={{ width: `${completionRate}%` }}
             />
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-emerald-400 font-medium">Done</div>
-          <div className="text-2xl font-bold text-emerald-400 mt-1">{completedTasks}</div>
-          <div className="text-[10px] text-slate-500 mt-1">Verified & submitted</div>
+        {/* Done */}
+        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(16,185,129,0.6)] rounded-2xl p-5 group">
+          <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-emerald-500/8 dark:bg-emerald-500/10" />
+          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Done</div>
+          <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight mt-1">{completedTasks}</div>
+          <div className="font-medium text-xs text-slate-400 mt-1">Verified &amp; submitted</div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-amber-400 font-medium">In Progress</div>
-          <div className="text-2xl font-bold text-amber-400 mt-1">{inProgressTasks}</div>
-          <div className="text-[10px] text-slate-500 mt-1">Copy & assets ready</div>
+        {/* In Progress */}
+        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(245,158,11,0.6)] rounded-2xl p-5 group">
+          <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-amber-500/8 dark:bg-amber-500/10" />
+          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">In Progress</div>
+          <div className="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight mt-1">{inProgressTasks}</div>
+          <div className="font-medium text-xs text-slate-400 mt-1">Copy &amp; assets ready</div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-          <div className="text-xs text-slate-400 font-medium">Review Requests Sent</div>
-          <div className="text-2xl font-bold text-white mt-1">{reviewRequests?.length || 0}</div>
-          <div className="text-[10px] text-slate-500 mt-1">G2 & Capterra campaigns</div>
+        {/* Review Requests */}
+        <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(99,102,241,0.6)] rounded-2xl p-5 group">
+          <div className="absolute top-0 right-0 w-24 h-24 rounded-bl-full bg-violet-500/8 dark:bg-violet-500/10" />
+          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Review Requests</div>
+          <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mt-1">{reviewRequests?.length || 0}</div>
+          <div className="font-medium text-xs text-slate-400 mt-1">G2 &amp; Capterra campaigns</div>
         </div>
       </div>
 
       {/* Platform Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-800/80 pb-3">
-        {PLATFORMS.map((p) => {
+      <div className="flex gap-0 border-2 border-slate-900 dark:border-slate-700 rounded-xl overflow-hidden w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)]">
+        {PLATFORMS.map((p, i) => {
           const isActive = selectedPlatform === p.id;
           return (
             <button
               key={p.id}
               onClick={() => setSelectedPlatform(p.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={clsx(
+                "font-bold text-sm px-4 py-2 flex items-center gap-1.5",
+                i > 0 && "border-l-2 border-slate-900 dark:border-slate-700",
                 isActive
-                  ? "bg-slate-800 text-white border border-slate-700 shadow-sm"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-              }`}
+                  ? "bg-slate-900 dark:bg-blue-600 text-white"
+                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+              )}
             >
               <span>{p.icon}</span>
-              <span>{p.label}</span>
+              <span className="hidden sm:inline">{p.label}</span>
             </button>
           );
         })}
@@ -193,15 +245,14 @@ export default function LaunchHubAdminPage() {
       {/* Kanban Board */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Column: Pending */}
-        <div className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-4 flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/60 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-slate-500" />
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-1 h-6 rounded-full bg-slate-400" />
+            <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
               Pending ({filterTasksByStatus("pending").length})
-            </span>
+            </h2>
           </div>
-
-          <div className="space-y-3 flex-1 overflow-y-auto max-h-[600px] pr-1">
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
             {filterTasksByStatus("pending").map((task) => (
               <TaskCard
                 key={task.id}
@@ -212,21 +263,21 @@ export default function LaunchHubAdminPage() {
               />
             ))}
             {filterTasksByStatus("pending").length === 0 && (
-              <div className="p-4 text-center text-slate-600 text-xs italic">No pending tasks</div>
+              <div className="p-4 text-center font-medium text-xs text-slate-400 italic">No pending tasks</div>
             )}
           </div>
         </div>
 
         {/* Column: In Progress */}
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b border-amber-500/20 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+        <div className="bg-white dark:bg-slate-900 border-2 border-amber-500 dark:border-amber-500/60 shadow-[4px_4px_0px_0px_rgba(217,119,6,0.5)] rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-1 h-6 rounded-full bg-amber-500" />
+            <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
               In Progress ({filterTasksByStatus("in_progress").length})
-            </span>
+            </h2>
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
           </div>
-
-          <div className="space-y-3 flex-1 overflow-y-auto max-h-[600px] pr-1">
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
             {filterTasksByStatus("in_progress").map((task) => (
               <TaskCard
                 key={task.id}
@@ -237,21 +288,20 @@ export default function LaunchHubAdminPage() {
               />
             ))}
             {filterTasksByStatus("in_progress").length === 0 && (
-              <div className="p-4 text-center text-slate-600 text-xs italic">No tasks in progress</div>
+              <div className="p-4 text-center font-medium text-xs text-slate-400 italic">No tasks in progress</div>
             )}
           </div>
         </div>
 
         {/* Column: Completed */}
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+        <div className="bg-white dark:bg-slate-900 border-2 border-emerald-500 dark:border-emerald-500/60 shadow-[4px_4px_0px_0px_rgba(16,185,129,0.5)] rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-1 h-6 rounded-full bg-emerald-500" />
+            <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
               Completed ({filterTasksByStatus("done").length})
-            </span>
+            </h2>
           </div>
-
-          <div className="space-y-3 flex-1 overflow-y-auto max-h-[600px] pr-1">
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
             {filterTasksByStatus("done").map((task) => (
               <TaskCard
                 key={task.id}
@@ -262,7 +312,7 @@ export default function LaunchHubAdminPage() {
               />
             ))}
             {filterTasksByStatus("done").length === 0 && (
-              <div className="p-4 text-center text-slate-600 text-xs italic">No completed tasks yet</div>
+              <div className="p-4 text-center font-medium text-xs text-slate-400 italic">No completed tasks yet</div>
             )}
           </div>
         </div>
@@ -271,15 +321,26 @@ export default function LaunchHubAdminPage() {
       {/* Send Review Request Modal */}
       {showReviewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-2">⭐ Send Review Request Email</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Sends an honest review invitation email to an active customer with direct links to G2 or Capterra.
-            </p>
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 mb-1 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                  <Star className="w-3.5 h-3.5" />
+                  Reviews
+                </div>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Send Review Request</h3>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
+                  Sends an honest review invitation email with direct links to G2 or Capterra.
+                </p>
+              </div>
+              <button onClick={() => setShowReviewModal(false)} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
 
             <form onSubmit={handleSendReview} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
                   Customer Email
                 </label>
                 <input
@@ -287,19 +348,19 @@ export default function LaunchHubAdminPage() {
                   value={reviewEmail}
                   onChange={(e) => setReviewEmail(e.target.value)}
                   placeholder="client@agency.com"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
                   Review Platform
                 </label>
                 <select
                   value={reviewPlatform}
                   onChange={(e) => setReviewPlatform(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
+                  className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
                 >
                   <option value="g2">G2 Crowd</option>
                   <option value="capterra">Capterra / Gartner</option>
@@ -307,23 +368,23 @@ export default function LaunchHubAdminPage() {
               </div>
 
               {reviewMsg && (
-                <div className="text-xs p-2 rounded bg-slate-800 text-cyan-300">
-                  {reviewMsg}
+                <div className="flex gap-3 p-4 bg-blue-50 dark:bg-blue-500/10 border-l-4 border-blue-500 border border-blue-200 dark:border-blue-500/30 rounded-xl">
+                  <p className="font-medium text-sm text-blue-700 dark:text-blue-300">{reviewMsg}</p>
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+              <div className="flex justify-end gap-2 pt-2 border-t-2 border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowReviewModal(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={sendReviewMutation.isPending}
-                  className="px-4 py-2 rounded-lg text-xs font-bold text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-300 hover:brightness-110"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
                 >
                   {sendReviewMutation.isPending ? "Sending..." : "Send Request"}
                 </button>
@@ -336,39 +397,39 @@ export default function LaunchHubAdminPage() {
       {/* Asset Generator Modal */}
       {activeAssetTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-slate-100 dark:border-slate-800 mb-4">
               <div>
-                <span className="text-[10px] uppercase font-bold text-cyan-400 tracking-wider">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-blue-500 text-white border-2 border-blue-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)] mb-1">
                   {activeAssetTask.platform.replace("_", " ")} Assets
                 </span>
-                <h3 className="text-base font-bold text-white">{activeAssetTask.title}</h3>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">{activeAssetTask.title}</h3>
               </div>
               <button
                 onClick={() => {
                   setActiveAssetTask(null);
                   setGeneratedAssets(null);
                 }}
-                className="text-slate-400 hover:text-white text-lg font-bold"
+                className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
               >
-                ✕
+                <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
 
             <div className="space-y-4 text-xs">
               {generatedAssets ? (
-                <div className="p-4 rounded-xl border border-slate-800 bg-slate-950/60 space-y-3">
+                <div className="bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] space-y-3">
                   {Object.entries(generatedAssets).map(([key, val]) => (
                     <div key={key}>
-                      <div className="font-bold text-slate-300 uppercase tracking-wider text-[10px] mb-1">
+                      <div className="font-black text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
                         {key.replace(/_/g, " ")}:
                       </div>
                       {typeof val === "string" ? (
-                        <div className="p-2.5 rounded bg-slate-900 border border-slate-800 text-slate-200 whitespace-pre-line font-mono text-[11px]">
+                        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 whitespace-pre-line font-mono text-xs">
                           {val}
                         </div>
                       ) : (
-                        <pre className="p-2.5 rounded bg-slate-900 border border-slate-800 text-slate-200 overflow-x-auto text-[11px]">
+                        <pre className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 overflow-x-auto text-xs">
                           {JSON.stringify(val, null, 2)}
                         </pre>
                       )}
@@ -376,17 +437,20 @@ export default function LaunchHubAdminPage() {
                   ))}
                 </div>
               ) : (
-                <div className="p-8 text-center text-slate-400">Loading AI assets...</div>
+                <div className="p-8 text-center">
+                  <Sparkles className="w-8 h-8 text-blue-400 mx-auto mb-2 animate-pulse" />
+                  <p className="font-medium text-sm text-slate-400">Loading AI assets...</p>
+                </div>
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-slate-800 mt-6">
+            <div className="flex justify-end gap-2 pt-4 border-t-2 border-slate-100 dark:border-slate-800 mt-6">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(JSON.stringify(generatedAssets, null, 2));
                   alert("Copied assets to clipboard!");
                 }}
-                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
               >
                 Copy All Assets
               </button>
@@ -395,7 +459,7 @@ export default function LaunchHubAdminPage() {
                   setActiveAssetTask(null);
                   setGeneratedAssets(null);
                 }}
-                className="px-4 py-2 rounded-lg text-xs font-bold text-slate-950 bg-cyan-400 hover:brightness-110"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
               >
                 Done
               </button>
@@ -407,15 +471,27 @@ export default function LaunchHubAdminPage() {
       {/* New Task Modal */}
       {showNewTaskModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-2">Create Custom Launch Task</h3>
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-5 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 mb-1 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                  <Plus className="w-3.5 h-3.5" />
+                  New Task
+                </div>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Create Launch Task</h3>
+              </div>
+              <button onClick={() => setShowNewTaskModal(false)} className="p-2 rounded-xl border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
+
             <form onSubmit={handleCreateTask} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Platform</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Platform</label>
                 <select
                   value={newTaskPlatform}
                   onChange={(e) => setNewTaskPlatform(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
+                  className="w-full px-4 py-2.5 appearance-none cursor-pointer bg-white dark:bg-slate-900 text-sm font-semibold text-slate-800 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:border-blue-500 transition-all"
                 >
                   <option value="product_hunt">Product Hunt</option>
                   <option value="g2">G2 Crowd</option>
@@ -427,39 +503,39 @@ export default function LaunchHubAdminPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Title</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Title</label>
                 <input
                   type="text"
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   placeholder="e.g. Schedule launch morning AMA"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Description</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Description</label>
                 <textarea
                   value={newTaskDesc}
                   onChange={(e) => setNewTaskDesc(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-xs text-white"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all resize-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+              <div className="flex justify-end gap-2 pt-2 border-t-2 border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowNewTaskModal(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createTaskMutation.isPending}
-                  className="px-4 py-2 rounded-lg text-xs font-bold text-slate-950 bg-cyan-400 hover:brightness-110"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
                 >
                   Add Task
                 </button>
@@ -483,16 +559,20 @@ function TaskCard({
   onOpenAsset: (task: LaunchTaskItem) => void;
   onDelete: () => void;
 }) {
+  const isDone = task.status === "done";
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm hover:border-slate-700 transition-colors space-y-2.5">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-cyan-300">
+    <div className={clsx(
+      "bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.85)] dark:hover:shadow-[6px_6px_0px_0px_rgba(99,102,241,0.5)] transition-shadow space-y-2.5",
+      isDone && "opacity-60"
+    )}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-blue-500 text-white border-2 border-blue-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]">
           {task.platform.replace("_", " ")}
         </span>
         <select
           value={task.status}
           onChange={(e) => onStatusChange(task, e.target.value)}
-          className="text-[10px] font-semibold bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-slate-300"
+          className="text-xs font-semibold bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-lg px-2 py-1 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-all appearance-none cursor-pointer"
         >
           <option value="pending">Pending</option>
           <option value="in_progress">In Progress</option>
@@ -500,26 +580,32 @@ function TaskCard({
         </select>
       </div>
 
-      <h4 className="text-xs font-bold text-white leading-snug">{task.title}</h4>
+      <h4 className={clsx(
+        "font-bold text-sm text-slate-900 dark:text-white leading-snug",
+        isDone && "line-through text-slate-500 dark:text-slate-500"
+      )}>
+        {task.title}
+      </h4>
 
       {task.description && (
-        <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+        <p className="font-medium text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
           {task.description}
         </p>
       )}
 
-      <div className="flex items-center justify-between pt-2 border-t border-slate-800/60">
+      <div className="flex items-center justify-between pt-2 border-t-2 border-slate-100 dark:border-slate-800">
         <button
           onClick={() => onOpenAsset(task)}
-          className="text-[11px] text-cyan-400 hover:underline font-medium flex items-center gap-1"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
         >
-          ✨ View / Generate Assets
+          <Sparkles className="w-3.5 h-3.5" />
+          View / Generate Assets
         </button>
         <button
           onClick={onDelete}
-          className="text-[10px] text-slate-600 hover:text-rose-400 transition-colors"
+          className="p-1.5 rounded-lg border-2 border-transparent hover:border-red-200 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 transition-all"
         >
-          Delete
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

@@ -26,23 +26,26 @@ const PLATFORM_ICONS: Record<string, { icon: string; color: string }> = {
   youtube: { icon: "▶", color: "bg-red-600 text-white" },
 };
 
-const FORMAT_BADGE: Record<string, { label: string; color: string }> = {
-  carousel: { label: "Carousel", color: "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300" },
-  reel: { label: "Reel", color: "bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300" },
-  text: { label: "Text Post", color: "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300" },
-  image: { label: "Image", color: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300" },
+const FORMAT_BADGE: Record<string, { label: string; bg: string; border: string }> = {
+  carousel: { label: "Carousel", bg: "bg-violet-500", border: "border-violet-900" },
+  reel:     { label: "Reel",     bg: "bg-pink-500",   border: "border-pink-900" },
+  text:     { label: "Text Post",bg: "bg-blue-500",   border: "border-blue-900" },
+  image:    { label: "Image",    bg: "bg-emerald-500",border: "border-emerald-900" },
 };
 
 function RelevanceBadge({ score }: { score: number | null | undefined }) {
   const s = score ?? 0;
   const color =
     s >= 8
-      ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 ring-emerald-300/30"
+      ? "bg-emerald-500 border-emerald-900"
       : s >= 5
-      ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 ring-amber-300/30"
-      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 ring-slate-200/30";
+      ? "bg-amber-500 border-amber-900"
+      : "bg-slate-400 border-slate-700";
   return (
-    <span className={clsx("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ring-1", color)}>
+    <span className={clsx(
+      "inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white border-2 rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]",
+      color
+    )}>
       <span className="text-[10px]">▲</span> {s}/10
     </span>
   );
@@ -55,7 +58,7 @@ function FreshnessTimer({ expires }: { expires: string | null | undefined }) {
   const diffH = Math.max(0, Math.floor((expiry.getTime() - now.getTime()) / 3600000));
   const urgent = diffH < 24;
   return (
-    <span className={clsx("inline-flex items-center gap-1 text-xs", urgent ? "text-amber-500 dark:text-amber-400" : "text-slate-400 dark:text-slate-500")}>
+    <span className={clsx("inline-flex items-center gap-1 text-xs font-medium", urgent ? "text-amber-500 dark:text-amber-400" : "text-slate-400 dark:text-slate-500")}>
       {urgent && (
         <span className="relative flex h-1.5 w-1.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
@@ -69,19 +72,19 @@ function FreshnessTimer({ expires }: { expires: string | null | undefined }) {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/40 bg-white/60 dark:bg-slate-800/40 backdrop-blur-sm p-5 animate-pulse">
+    <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 animate-pulse">
       <div className="flex gap-2 mb-3">
-        <div className="h-5 w-14 bg-slate-200 dark:bg-slate-700 rounded-full" />
-        <div className="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
+        <div className="h-5 w-14 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+        <div className="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded-lg" />
       </div>
-      <div className="h-5 w-full bg-slate-200 dark:bg-slate-700 rounded mb-2" />
-      <div className="h-4 w-4/5 bg-slate-200 dark:bg-slate-700 rounded mb-4" />
-      <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded mb-1" />
-      <div className="h-3 w-3/4 bg-slate-100 dark:bg-slate-800 rounded mb-5" />
+      <div className="h-5 w-full bg-slate-200 dark:bg-slate-700 rounded-lg mb-2" />
+      <div className="h-4 w-4/5 bg-slate-200 dark:bg-slate-700 rounded-lg mb-4" />
+      <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-lg mb-1" />
+      <div className="h-3 w-3/4 bg-slate-100 dark:bg-slate-800 rounded-lg mb-5" />
       <div className="flex gap-2 mt-4">
-        <div className="h-8 flex-1 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-        <div className="h-8 flex-1 bg-indigo-200 dark:bg-indigo-900/40 rounded-lg" />
-        <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+        <div className="h-9 flex-1 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+        <div className="h-9 flex-1 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+        <div className="h-9 w-9 bg-slate-200 dark:bg-slate-700 rounded-xl" />
       </div>
     </div>
   );
@@ -96,13 +99,13 @@ function IdeaCardUI({ card, onDismiss }: { card: IdeaCard; onDismiss: (id: strin
   if (dismissed) return null;
 
   const angleColor: Record<string, string> = {
-    educational: "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300",
-    contrarian: "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300",
-    "how-to": "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300",
+    educational: "bg-sky-500 border-sky-900",
+    contrarian:  "bg-rose-500 border-rose-900",
+    "how-to":    "bg-violet-500 border-violet-900",
   };
   const rawAngle = (card.angle_type ?? "").toLowerCase().replace(/[^a-z-]/g, "");
   const normalizedAngle = rawAngle === "howto" ? "how-to" : rawAngle;
-  const angleClass = angleColor[normalizedAngle] ?? "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400";
+  const angleClass = angleColor[normalizedAngle] ?? "bg-slate-500 border-slate-700";
 
   const platform = card.best_platform?.toLowerCase() ?? "";
   const platInfo = PLATFORM_ICONS[platform];
@@ -129,48 +132,56 @@ function IdeaCardUI({ card, onDismiss }: { card: IdeaCard; onDismiss: (id: strin
   };
 
   return (
-    <div
-      className={clsx(
-        "group relative rounded-2xl border p-5 flex flex-col gap-3 transition-all duration-200",
-        "border-slate-200/60 dark:border-slate-700/40",
-        "bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm",
-        "hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-0.5",
-        "hover:border-indigo-300/40 dark:hover:border-indigo-700/40"
-      )}
-    >
+    <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.85)] dark:hover:shadow-[6px_6px_0px_0px_rgba(99,102,241,0.5)] transition-shadow flex flex-col gap-3">
       {/* Top badges */}
       <div className="flex flex-wrap items-center gap-2">
         <RelevanceBadge score={card.relevance_score} />
-        <span className={clsx("px-2 py-0.5 rounded-full text-xs font-medium", angleClass)}>
+        <span className={clsx(
+          "inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white border-2 rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,0.5)]",
+          angleClass
+        )}>
           {card.angle_type ?? "General"}
         </span>
         {platInfo && (
-          <span className={clsx("inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-black", platInfo.color)}>
+          <span className={clsx("inline-flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-black border-2 border-black/20", platInfo.color)}>
             {platInfo.icon}
           </span>
         )}
         {formatInfo && (
-          <span className={clsx("px-2 py-0.5 rounded-full text-xs", formatInfo.color)}>
+          <span className={clsx(
+            "inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white border-2 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]",
+            formatInfo.bg, formatInfo.border
+          )}>
             {formatInfo.label}
           </span>
         )}
       </div>
 
+      {/* Status pill */}
+      {card.status === "saved" && (
+        <div className="w-fit">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-400/40 backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Saved
+          </span>
+        </div>
+      )}
+
       {/* Headline */}
-      <h3 className="font-semibold text-sm leading-snug text-slate-800 dark:text-slate-100 line-clamp-2">
+      <h3 className="font-bold text-sm leading-snug text-slate-800 dark:text-slate-100 line-clamp-2">
         {card.headline ?? "Untitled idea"}
       </h3>
 
       {/* Core insight */}
       {card.core_insight && (
-        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
+        <p className="text-xs font-medium text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
           {card.core_insight}
         </p>
       )}
 
       {/* Pain point */}
       {card.audience_pain_point && (
-        <p className="text-xs italic text-slate-400 dark:text-slate-500 line-clamp-2">
+        <p className="text-xs font-medium italic text-slate-400 dark:text-slate-500 line-clamp-2">
           💡 {card.audience_pain_point}
         </p>
       )}
@@ -180,7 +191,7 @@ function IdeaCardUI({ card, onDismiss }: { card: IdeaCard; onDismiss: (id: strin
         <FreshnessTimer expires={card.freshness_expires} />
         {card.risk_flags && card.risk_flags.length > 0 && (
           <span
-            className="flex items-center gap-1 text-xs text-amber-500"
+            className="flex items-center gap-1 text-xs font-semibold text-amber-500"
             title={card.risk_flags.join(", ")}
           >
             <AlertTriangle className="w-3 h-3" /> Risk
@@ -193,10 +204,10 @@ function IdeaCardUI({ card, onDismiss }: { card: IdeaCard; onDismiss: (id: strin
         <button
           onClick={handleSave}
           className={clsx(
-            "flex items-center justify-center gap-1 flex-1 py-2 rounded-xl text-xs font-medium transition-all",
+            "inline-flex items-center justify-center gap-1 flex-1 py-2 text-xs font-bold border-2 rounded-xl transition-all duration-100",
             saved
-              ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+              ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-400 dark:border-emerald-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.2)] hover:translate-x-[1px] hover:translate-y-[1px]"
+              : "bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-600 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px]"
           )}
         >
           <Bookmark className="w-3.5 h-3.5" fill={saved ? "currentColor" : "none"} />
@@ -204,13 +215,13 @@ function IdeaCardUI({ card, onDismiss }: { card: IdeaCard; onDismiss: (id: strin
         </button>
         <button
           onClick={() => router.push(`/admin/content-studio?idea_card_id=${card.id}`)}
-          className="flex items-center justify-center gap-1 flex-[2] py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-sm shadow-indigo-500/20"
+          className="inline-flex items-center justify-center gap-1 flex-[2] py-2 text-xs font-bold bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100"
         >
           <Sparkles className="w-3.5 h-3.5" /> Generate
         </button>
         <button
           onClick={handleDismiss}
-          className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-all"
+          className="p-2 rounded-xl border-2 border-transparent hover:border-red-200 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 transition-all"
         >
           <X className="w-3.5 h-3.5" />
         </button>
@@ -278,25 +289,26 @@ function NicheSetup({ onSaved }: { onSaved: () => void }) {
 
   if (!editing && niche) {
     return (
-      <div className="rounded-2xl border border-indigo-200/60 dark:border-indigo-800/40 bg-indigo-50/50 dark:bg-indigo-950/20 p-5 flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.85)] dark:hover:shadow-[6px_6px_0px_0px_rgba(99,102,241,0.5)] transition-shadow flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
-            <Target className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-blue-500 flex items-center justify-center border-2 border-slate-900 dark:border-blue-400">
+            <Target className="w-5 h-5 text-white dark:text-slate-900" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{niche.industry}</span>
+              <span className="font-bold text-slate-800 dark:text-slate-100 text-sm">{niche.industry}</span>
               {niche.sub_niche && (
-                <span className="text-xs text-slate-500 dark:text-slate-400">→ {niche.sub_niche}</span>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">→ {niche.sub_niche}</span>
               )}
-              <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs rounded-full font-medium">
-                Niche configured ✓
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-400/40 backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Niche configured
               </span>
             </div>
             {niche.pillars && niche.pillars.length > 0 && (
               <div className="flex gap-1 mt-1 flex-wrap">
                 {niche.pillars.slice(0, 4).map((p) => (
-                  <span key={p} className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md">
+                  <span key={p} className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md font-medium border border-slate-200 dark:border-slate-700">
                     {p}
                   </span>
                 ))}
@@ -306,7 +318,7 @@ function NicheSetup({ onSaved }: { onSaved: () => void }) {
         </div>
         <button
           onClick={() => setEditing(true)}
-          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-300 transition-all"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-xs border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
         >
           <Settings2 className="w-3 h-3" /> Edit Niche
         </button>
@@ -315,14 +327,14 @@ function NicheSetup({ onSaved }: { onSaved: () => void }) {
   }
 
   return (
-    <div className="rounded-2xl border border-indigo-300/50 dark:border-indigo-700/40 bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm p-6">
+    <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 md:p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-          <Target className="w-5 h-5 text-white" />
+        <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-blue-500 flex items-center justify-center border-2 border-slate-900 dark:border-blue-400">
+          <Target className="w-5 h-5 text-white dark:text-slate-900" />
         </div>
         <div>
           <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Configure Your Niche</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
             The engine matches live trends to your specific niche and audience
           </p>
         </div>
@@ -330,44 +342,44 @@ function NicheSetup({ onSaved }: { onSaved: () => void }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
             Industry <span className="text-red-400">*</span>
           </label>
           <input
             value={form.industry}
             onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))}
             placeholder="e.g. Real Estate, SaaS, Healthcare"
-            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Sub-niche</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Sub-niche</label>
           <input
             value={form.sub_niche}
             onChange={(e) => setForm((f) => ({ ...f, sub_niche: e.target.value }))}
             placeholder="e.g. Luxury condos in Dubai"
-            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Target Audience</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Target Audience</label>
           <textarea
             value={form.audience_description}
             onChange={(e) => setForm((f) => ({ ...f, audience_description: e.target.value }))}
             placeholder="Describe your ideal audience (e.g. B2B SaaS founders raising their Series A)"
             rows={2}
-            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
+            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all resize-none"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Content Pillars</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Content Pillars</label>
           <div className="flex flex-wrap gap-1.5 mb-1.5">
             {form.pillars.map((p) => (
-              <span key={p} className="flex items-center gap-1 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs rounded-full">
+              <span key={p} className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-blue-500 text-white border-2 border-blue-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(30,27,75,1)]">
                 {p}
                 <button
                   onClick={() => setForm((f) => ({ ...f, pillars: f.pillars.filter((x) => x !== p) }))}
-                  className="hover:text-red-500"
+                  className="hover:text-blue-200 transition-colors"
                 >
                   <X className="w-2.5 h-2.5" />
                 </button>
@@ -384,18 +396,18 @@ function NicheSetup({ onSaved }: { onSaved: () => void }) {
               }
             }}
             placeholder="Type a pillar, press Enter"
-            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Competitors to track</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">Competitors to track</label>
           <div className="flex flex-wrap gap-1.5 mb-1.5">
             {form.competitors.map((c) => (
-              <span key={c} className="flex items-center gap-1 px-2 py-0.5 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-xs rounded-full">
+              <span key={c} className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider bg-rose-500 text-white border-2 border-rose-900 rounded-lg shadow-[2px_2px_0px_0px_rgba(136,19,55,1)]">
                 {c}
                 <button
                   onClick={() => setForm((f) => ({ ...f, competitors: f.competitors.filter((x) => x !== c) }))}
-                  className="hover:text-red-500"
+                  className="hover:text-rose-200 transition-colors"
                 >
                   <X className="w-2.5 h-2.5" />
                 </button>
@@ -412,7 +424,7 @@ function NicheSetup({ onSaved }: { onSaved: () => void }) {
               }
             }}
             placeholder="Competitor name or URL, press Enter"
-            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm font-medium border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)] placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-all"
           />
         </div>
       </div>
@@ -421,7 +433,7 @@ function NicheSetup({ onSaved }: { onSaved: () => void }) {
         <button
           onClick={handleSave}
           disabled={upsert.isPending}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all shadow-sm shadow-indigo-500/20 disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
         >
           {upsert.isPending ? (
             <>
@@ -436,7 +448,7 @@ function NicheSetup({ onSaved }: { onSaved: () => void }) {
         {niche && (
           <button
             onClick={() => setEditing(false)}
-            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
           >
             Cancel
           </button>
@@ -468,36 +480,45 @@ export default function TrendRadarPage() {
   });
 
   const SOURCE_TABS = [
-    { id: "all", label: "All Sources", icon: Globe },
-    { id: "rss", label: "RSS / News", icon: Rss },
-    { id: "hackernews", label: "Hacker News", icon: FlameKindling },
-    { id: "youtube", label: "YouTube", icon: Youtube },
+    { id: "all",         label: "All",      icon: Globe },
+    { id: "rss",         label: "RSS",       icon: Rss },
+    { id: "hackernews",  label: "HN",        icon: FlameKindling },
+    { id: "youtube",     label: "YouTube",   icon: Youtube },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="relative min-h-screen p-5 md:p-8 space-y-8">
+      {/* Ambient orbs */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-violet-500/10 dark:bg-violet-500/5 blur-[100px] animate-pulse" />
+      </div>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <TrendingUp className="w-5 h-5 text-white" />
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-1.5 mb-2 text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            <TrendingUp className="w-3.5 h-3.5" />
+            AI Engine
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Trend Radar</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Live signals matched to your niche — updated hourly</p>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+            Trend Radar
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
+            Live signals matched to your niche — updated hourly
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => refetch()}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-transparent text-slate-800 dark:text-slate-200 font-semibold text-sm border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-[3px_3px_0px_0px_rgba(0,0,0,0.12)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,0.12)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-100"
           >
             <RefreshCw className="w-3.5 h-3.5" /> Refresh
           </button>
           <button
             onClick={handleIngest}
             disabled={ingest.isPending}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
           >
             <Zap className="w-3.5 h-3.5" /> {ingest.isPending ? "Ingesting..." : "Trigger Ingest"}
           </button>
@@ -508,29 +529,30 @@ export default function TrendRadarPage() {
       <NicheSetup onSaved={() => refetch()} />
 
       {/* Source filter tabs */}
-      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl w-fit">
-        {SOURCE_TABS.map((tab) => (
+      <div className="flex gap-0 border-2 border-slate-900 dark:border-slate-700 rounded-xl overflow-hidden w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,0.5)]">
+        {SOURCE_TABS.map((tab, i) => (
           <button
             key={tab.id}
             onClick={() => setSourceFilter(tab.id)}
             className={clsx(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+              "flex items-center gap-1.5 font-bold text-sm px-4 py-2 transition-colors",
+              i > 0 && "border-l-2 border-slate-900 dark:border-slate-700",
               sourceFilter === tab.id
-                ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                ? "bg-slate-900 dark:bg-blue-600 text-white"
+                : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
             )}
           >
-            <tab.icon className="w-3 h-3" /> {tab.label}
+            <tab.icon className="w-3.5 h-3.5" /> {tab.label}
           </button>
         ))}
       </div>
 
       {/* Idea Cards */}
       {!niche ? (
-        <div className="text-center py-20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 md:p-6 text-center py-20">
           <Lightbulb className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-          <h3 className="text-base font-semibold text-slate-600 dark:text-slate-400 mb-2">Configure your niche first</h3>
-          <p className="text-sm text-slate-400 dark:text-slate-500">
+          <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-2">Configure your niche first</h3>
+          <p className="text-sm font-medium text-slate-400 dark:text-slate-500">
             Set your industry and audience above to see trend-matched ideas
           </p>
         </div>
@@ -541,16 +563,16 @@ export default function TrendRadarPage() {
           ))}
         </div>
       ) : filteredCards.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.85)] dark:shadow-[4px_4px_0px_0px_rgba(99,102,241,0.4)] rounded-2xl p-5 md:p-6 text-center py-20">
           <TrendingUp className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-          <h3 className="text-base font-semibold text-slate-600 dark:text-slate-400 mb-2">No trend ideas yet</h3>
-          <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">
+          <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-2">No trend ideas yet</h3>
+          <p className="text-sm font-medium text-slate-400 dark:text-slate-500 mb-6">
             Click &ldquo;Trigger Ingest&rdquo; to fetch the latest signals and generate your idea feed
           </p>
           <button
             onClick={handleIngest}
             disabled={ingest.isPending}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-blue-500 text-white dark:text-slate-900 font-bold text-sm border-2 border-slate-900 dark:border-blue-400 rounded-xl shadow-[3px_3px_0px_0px_rgba(37,99,235,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,0.25)] hover:shadow-[1px_1px_0px_0px_rgba(37,99,235,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
           >
             <Zap className="w-4 h-4" /> {ingest.isPending ? "Ingesting..." : "Trigger Ingest Now"}
           </button>
