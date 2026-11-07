@@ -12,6 +12,13 @@ import {
   clearTokens,
   setTokens,
   UserResponse,
+  nicheApi,
+  trendApi,
+  contentStudioApi,
+  hashtagsApi,
+  accountAuditApi,
+  metricsApi,
+  NicheProfileUpdate,
 } from "./api-client";
 
 // ─── Query keys ──────────────────────────────────────────────────────────────
@@ -930,4 +937,205 @@ export function useSendReviewRequest() {
 }
 
 
+// ─── Trend Engine Query Keys ──────────────────────────────────────────────────
+
+const trendKeys = {
+  niche: ["niche"] as const,
+  feed: (limit: number) => ["trend", "feed", limit] as const,
+  signals: (source?: string) => ["trend", "signals", source] as const,
+  clusters: ["trend", "clusters"] as const,
+  contentPacks: (params?: object) => ["content-studio", "packs", params] as const,
+  hashtagSets: ["hashtags", "sets"] as const,
+  audit: (platform: string) => ["account-audit", platform] as const,
+  bestTimes: (platform: string) => ["account-audit", "best-times", platform] as const,
+  memo: ["account-audit", "memo"] as const,
+  tasks: ["account-audit", "tasks"] as const,
+  insights: ["metrics", "insights"] as const,
+};
+
+// ─── Niche Hooks ─────────────────────────────────────────────────────────────
+
+export function useNicheProfile() {
+  return useQuery({
+    queryKey: trendKeys.niche,
+    queryFn: nicheApi.get,
+    retry: false,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function useUpsertNicheProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: NicheProfileUpdate) => nicheApi.upsert(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: trendKeys.niche }),
+  });
+}
+
+// ─── Trend Feed Hooks ─────────────────────────────────────────────────────────
+
+export function useTrendFeed(limit = 20) {
+  return useQuery({
+    queryKey: trendKeys.feed(limit),
+    queryFn: () => trendApi.feed(limit),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useTrendSignals(source?: string, limit = 50) {
+  return useQuery({
+    queryKey: trendKeys.signals(source),
+    queryFn: () => trendApi.signals(source, limit),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useTrendClusters(limit = 20) {
+  return useQuery({
+    queryKey: trendKeys.clusters,
+    queryFn: () => trendApi.clusters(limit),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useTriggerIngest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: trendApi.ingest,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["trend"] });
+      qc.invalidateQueries({ queryKey: trendKeys.niche });
+    },
+  });
+}
+
+export function useUpdateCardStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: "saved" | "dismissed" | "new" | "generated" }) =>
+      trendApi.updateCardStatus(id, status),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["trend"] }),
+  });
+}
+
+// ─── Content Studio Hooks ─────────────────────────────────────────────────────
+
+export function useGenerateContentPack() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { idea_card_id?: string; idea_id?: string; platform: string; verified_facts?: string }) =>
+      contentStudioApi.generate(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["content-studio"] }),
+  });
+}
+
+export function useContentPacks(params?: { platform?: string; status?: string; limit?: number }) {
+  return useQuery({
+    queryKey: trendKeys.contentPacks(params),
+    queryFn: () => contentStudioApi.listPacks(params),
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useUpdatePackStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      contentStudioApi.updatePackStatus(id, status),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["content-studio"] }),
+  });
+}
+
+// ─── Hashtag Hooks ────────────────────────────────────────────────────────────
+
+export function useOptimizeHashtags() {
+  return useMutation({
+    mutationFn: (data: { post_text: string; platform: string; niche_summary?: string; candidate_tags?: string[]; content_pack_id?: string }) =>
+      hashtagsApi.optimize(data),
+  });
+}
+
+export function useHashtagSets(limit = 20) {
+  return useQuery({
+    queryKey: trendKeys.hashtagSets,
+    queryFn: () => hashtagsApi.listSets(limit),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// ─── Account Audit Hooks ──────────────────────────────────────────────────────
+
+export function useAccountAudit(platform: string) {
+  return useQuery({
+    queryKey: trendKeys.audit(platform),
+    queryFn: () => accountAuditApi.getAudit(platform),
+    enabled: !!platform,
+    retry: false,
+    staleTime: 15 * 60 * 1000,
+  });
+}
+
+export function useRunAccountAudit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ platform, profileData }: { platform: string; profileData?: Record<string, unknown> }) =>
+      accountAuditApi.runAudit(platform, profileData),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: trendKeys.audit(vars.platform) });
+    },
+  });
+}
+
+export function useBestTimes(platform: string) {
+  return useQuery({
+    queryKey: trendKeys.bestTimes(platform),
+    queryFn: () => accountAuditApi.getBestTimes(platform),
+    enabled: !!platform,
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useStrategyMemo() {
+  return useQuery({
+    queryKey: trendKeys.memo,
+    queryFn: accountAuditApi.getMemo,
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function useEngagementTasks() {
+  return useQuery({
+    queryKey: trendKeys.tasks,
+    queryFn: accountAuditApi.getTasks,
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+// ─── Metrics Hooks ────────────────────────────────────────────────────────────
+
+export function useMetricsInsights() {
+  return useQuery({
+    queryKey: trendKeys.insights,
+    queryFn: metricsApi.insights,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function useIngestMetrics() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      post_id: string;
+      platform: string;
+      reach?: number;
+      impressions?: number;
+      saves?: number;
+      shares?: number;
+      comments?: number;
+      likes?: number;
+      watch_time_seconds?: number;
+    }) => metricsApi.ingest(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: trendKeys.insights }),
+  });
+}
 

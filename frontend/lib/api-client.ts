@@ -937,3 +937,242 @@ export const reviewsApi = {
 };
 
 
+// ─── Trend Engine (Prompt 5) Types ────────────────────────────────────────────
+
+export interface NicheProfile {
+  id: string;
+  industry: string;
+  sub_niche?: string | null;
+  audience_description?: string | null;
+  pillars?: string[] | null;
+  competitors?: string[] | null;
+  tone_notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NicheProfileUpdate {
+  industry: string;
+  sub_niche?: string;
+  audience_description?: string;
+  pillars?: string[];
+  competitors?: string[];
+  tone_notes?: string;
+}
+
+export interface TrendSignal {
+  id: string;
+  source: string;
+  title: string;
+  url?: string | null;
+  velocity?: number | null;
+  first_seen?: string | null;
+}
+
+export interface TrendCluster {
+  id: string;
+  label: string;
+  category?: string | null;
+  created_at: string;
+}
+
+export interface IdeaCard {
+  id: string;
+  angle_type?: string | null;
+  headline?: string | null;
+  core_insight?: string | null;
+  suggested_format?: "carousel" | "reel" | "text" | "image" | null;
+  best_platform?: string | null;
+  relevance_score?: number | null;
+  freshness_hours?: number | null;
+  freshness_expires?: string | null;
+  risk_flags?: string[] | null;
+  status: "new" | "saved" | "dismissed" | "generated";
+  audience_pain_point?: string | null;
+  created_at: string;
+}
+
+export interface HookItem {
+  text: string;
+  rationale: string;
+}
+
+export interface LintItem {
+  rule: string;
+  pass: boolean;
+  fix: string;
+}
+
+export interface ContentPack {
+  id: string;
+  idea_card_id?: string | null;
+  idea_id?: string | null;
+  platform: string;
+  hooks?: HookItem[] | null;
+  body?: string | null;
+  slides?: Record<string, any>[] | null;
+  script?: Record<string, any>[] | null;
+  caption?: string | null;
+  cta?: string | null;
+  alt_text?: string[] | null;
+  first_comment?: string | null;
+  claims_to_verify?: string[] | null;
+  lint_report?: LintItem[] | null;
+  quality_score?: number | null;
+  status: "draft" | "approved" | "rejected" | "scheduled" | "published";
+  created_at: string;
+}
+
+export interface HashtagItem {
+  tag: string;
+  tier: "broad" | "mid" | "niche" | "branded";
+  reason: string;
+}
+
+export interface HashtagSet {
+  id: string;
+  platform: string;
+  hashtags?: HashtagItem[] | null;
+  keywords?: string[] | null;
+  risk_flags?: string[] | null;
+  reach_score?: number | null;
+  reach_breakdown?: Record<string, number> | null;
+  created_at: string;
+}
+
+export interface AccountAuditFinding {
+  field: string;
+  score: number;
+  issue: string;
+  suggestion: string;
+  rewrite?: string;
+}
+
+export interface AccountAudit {
+  id: string;
+  platform: string;
+  score?: number | null;
+  findings?: AccountAuditFinding[] | null;
+  best_posting_hours?: number[] | null;
+  engagement_tasks?: Array<{ platform: string; task: string; draft: string }> | null;
+  created_at: string;
+}
+
+export interface PostMetrics {
+  id: string;
+  post_id?: string | null;
+  platform?: string | null;
+  reach?: number | null;
+  impressions?: number | null;
+  saves?: number | null;
+  shares?: number | null;
+  comments?: number | null;
+  likes?: number | null;
+  watch_time_seconds?: number | null;
+  engagement_rate?: number | null;
+  collected_at?: string | null;
+}
+
+export interface MetricsInsights {
+  avg_reach: number;
+  avg_engagement_rate?: number | null;
+  total_posts_tracked: number;
+  total_posts?: number | null;
+  best_platform: string;
+  top_posts: Array<{ post_id: string; reach: number; platform: string }>;
+  insights: string[];
+}
+
+export interface BestTimesResponse {
+  platform: string;
+  recommended_hours_utc: number[];
+  reasoning: string;
+  heatmap?: number[][] | null;
+  top_slots?: Array<{ day: string; time: string; score: number; rationale?: string }> | null;
+}
+
+export interface StrategyMemo {
+  week: string;
+  what_worked: string[];
+  what_flopped: string[];
+  next_week_ideas: Array<{ topic: string; format: string; platform: string; angle: string }>;
+  content_mix: { educational: number; story: number; trend_jacking: number; promotional: number };
+  engagement_tasks: Array<{ platform: string; task: string; draft: string }>;
+}
+
+// ─── Trend Engine APIs ────────────────────────────────────────────────────────
+
+export const nicheApi = {
+  get: () => apiFetch<NicheProfile>("/niche"),
+  upsert: (data: NicheProfileUpdate) =>
+    apiFetch<NicheProfile>("/niche", { method: "POST", body: JSON.stringify(data) }),
+  delete: () => apiFetch<void>("/niche", { method: "DELETE" }),
+};
+
+export const trendApi = {
+  feed: (limit = 10) =>
+    apiFetch<IdeaCard[]>(`/trend/feed?limit=${limit}`),
+  signals: (source?: string, limit = 50) => {
+    const sp = new URLSearchParams();
+    if (source) sp.set("source", source);
+    sp.set("limit", String(limit));
+    return apiFetch<TrendSignal[]>(`/trend/signals?${sp.toString()}`);
+  },
+  clusters: (limit = 20) =>
+    apiFetch<TrendCluster[]>(`/trend/clusters?limit=${limit}`),
+  ingest: () =>
+    apiFetch<{ signals_ingested: number; clusters_created: number }>("/trend/ingest", { method: "POST" }),
+  updateCardStatus: (id: string, status: "saved" | "dismissed" | "new" | "generated") =>
+    apiFetch<IdeaCard>(`/trend/cards/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+};
+
+export const contentStudioApi = {
+  generate: (data: { idea_card_id?: string; idea_id?: string; platform: string; verified_facts?: string }) =>
+    apiFetch<ContentPack>("/content-studio/generate", { method: "POST", body: JSON.stringify(data) }),
+  listPacks: (params?: { platform?: string; status?: string; limit?: number }) => {
+    const sp = new URLSearchParams();
+    if (params?.platform) sp.set("platform", params.platform);
+    if (params?.status) sp.set("status", params.status);
+    if (params?.limit) sp.set("limit", String(params.limit));
+    const qs = sp.toString() ? `?${sp.toString()}` : "";
+    return apiFetch<ContentPack[]>(`/content-studio/packs${qs}`);
+  },
+  getPack: (id: string) => apiFetch<ContentPack>(`/content-studio/packs/${id}`),
+  updatePackStatus: (id: string, status: string) =>
+    apiFetch<ContentPack>(`/content-studio/packs/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+};
+
+export const hashtagsApi = {
+  optimize: (data: { post_text: string; platform: string; niche_summary?: string; candidate_tags?: string[]; content_pack_id?: string }) =>
+    apiFetch<HashtagSet>("/hashtags/optimize", { method: "POST", body: JSON.stringify(data) }),
+  listSets: (limit = 20) =>
+    apiFetch<HashtagSet[]>(`/hashtags/sets?limit=${limit}`),
+};
+
+export const accountAuditApi = {
+  getAudit: (platform: string) =>
+    apiFetch<AccountAudit>(`/account-audit/${platform}`),
+  runAudit: (platform: string, profileData?: Record<string, any>) =>
+    apiFetch<AccountAudit>("/account-audit/run", {
+      method: "POST",
+      body: JSON.stringify({ platform, profile_data: profileData }),
+    }),
+  getBestTimes: (platform: string) =>
+    apiFetch<BestTimesResponse>(`/account-audit/best-times?platform=${encodeURIComponent(platform)}`),
+  getMemo: () => apiFetch<StrategyMemo>("/account-audit/memo"),
+  getTasks: () => apiFetch<{ tasks: Array<{ platform: string; task: string; draft: string }> }>("/account-audit/tasks"),
+};
+
+export const metricsApi = {
+  ingest: (data: { post_id: string; platform: string; reach?: number; impressions?: number; saves?: number; shares?: number; comments?: number; likes?: number; watch_time_seconds?: number }) =>
+    apiFetch<PostMetrics>("/metrics", { method: "POST", body: JSON.stringify(data) }),
+  getPostMetrics: (postId: string) =>
+    apiFetch<PostMetrics[]>(`/metrics/${postId}`),
+  insights: () => apiFetch<MetricsInsights>("/metrics/insights"),
+};
