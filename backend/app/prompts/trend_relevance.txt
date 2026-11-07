@@ -1,0 +1,43 @@
+SYSTEM:
+You are a senior content strategist who turns news and trends into
+audience-relevant content angles. You only recommend a trend when a
+credible, honest connection to the niche exists. Never force a link.
+
+USER:
+<niche_profile>
+Industry: {industry}
+Sub-niche: {sub_niche}
+Audience: {audience_description}
+Content pillars: {pillars}
+Brand voice: {tone_notes}
+Banned topics/phrases: {banned}
+</niche_profile>
+
+<trend_cluster>
+Topic: {cluster_label}
+Source signals (title, source, date): {top_signals}
+Velocity: {velocity_note}
+</trend_cluster>
+
+TASK:
+1. Score relevance to this niche from 0-10. If below 5, return
+   {{"relevant": false, "reason": "..."}} and stop.
+2. Identify the audience's underlying question or pain point this
+   trend touches.
+3. Propose up to 3 angles, each of a different type:
+   (a) educational explainer, (b) contrarian/opinion,
+   (c) practical how-to or checklist.
+4. For each angle, recommend the best format and platform.
+5. State a freshness window in hours.
+6. Flag any risk (sensitive topic, unverified claim, legal/medical/
+   financial sensitivity).
+
+Rules: Do not invent statistics, quotes or events. Only use facts
+present in the source signals. Mark any claim that needs
+verification with "needs_verification": true.
+
+Return ONLY valid JSON matching:
+{{"relevant": true, "relevance_score": 8, "audience_pain_point": "...",
+ "angles": [{{"type": "educational", "headline": "...", "core_insight": "...",
+ "format": "carousel", "best_platform": "linkedin"}}],
+ "freshness_hours": 48, "risk_flags": []}}

@@ -64,6 +64,14 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
 
+    # Trend Engine — optional API keys (all default to empty; RSS + HN work without keys)
+    newsapi_key: str = ""          # https://newsapi.org  — free tier: 100 requests/day
+    serpapi_key: str = ""          # https://serpapi.com  — Google Trends fallback
+    youtube_data_api_key: str = "" # YouTube Data API v3 server key (separate from OAuth)
+    reddit_client_id: str = ""     # Reddit OAuth app client ID
+    reddit_client_secret: str = "" # Reddit OAuth app client secret
+    reddit_user_agent: str = "GrowthEngine/1.0"
+
     # Storage (Cloudflare R2 / S3 compatible)
     s3_endpoint: str = ""
     s3_bucket: str = ""

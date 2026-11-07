@@ -35,6 +35,13 @@ from app.routers import (
     tools,
     videos,
     webhooks,
+    # Prompt 5 — AI Content & Trend Engine
+    niche,
+    trend,
+    content_studio,
+    hashtags,
+    account_audit,
+    metrics,
 )
 from app.schemas.auth import UserResponse
 
@@ -55,14 +62,40 @@ if settings.sentry_dsn:
 
 
 async def _background_scheduler():
-    """Periodic scheduler loop for executing due social posts and due emails in environments without an external Redis worker."""
+    """Periodic scheduler loop for executing due social posts and due emails in environments without an external Redis worker.
+
+    Cadence:
+      - Every tick (30s): publish due posts + send due emails
+      - Every 120 ticks (~60 min): run trend ingest + cluster
+      - Every 2880 ticks (~24 h, at approx 06:00 UTC): run daily idea feed
+    """
+    tick = 0
     while True:
         try:
             await asyncio.sleep(30)
+            tick += 1
+
             from worker.jobs.social import publish_due_posts
             from worker.jobs.email import send_due_emails
             await publish_due_posts()
             await send_due_emails()
+
+            # Hourly: ingest trend signals and cluster
+            if tick % 120 == 0:
+                try:
+                    from worker.jobs.trend import run_trend_ingest
+                    await run_trend_ingest()
+                except Exception as _exc:
+                    logger.error("[background_scheduler] Trend ingest error: %s", _exc)
+
+            # Daily (~06:00 UTC): generate idea feed for all niche profiles
+            if tick % 2880 == 0:
+                try:
+                    from worker.jobs.trend import run_daily_idea_feed
+                    await run_daily_idea_feed()
+                except Exception as _exc:
+                    logger.error("[background_scheduler] Daily idea feed error: %s", _exc)
+
         except asyncio.CancelledError:
             break
         except Exception as exc:
@@ -184,6 +217,17 @@ app.include_router(tools.router)  # also public at /public/tools
 app.include_router(tools.admin_tools_router, prefix=API_PREFIX)
 app.include_router(launch.router, prefix=API_PREFIX)
 app.include_router(reviews.router, prefix=API_PREFIX)
+
+# Prompt 5 — AI Content & Trend Engine
+app.include_router(niche.router, prefix=API_PREFIX)
+app.include_router(trend.router, prefix=API_PREFIX)
+app.include_router(content_studio.router, prefix=API_PREFIX)
+app.include_router(hashtags.router, prefix=API_PREFIX)
+app.include_router(account_audit.router, prefix=API_PREFIX)
+app.include_router(metrics.router, prefix=API_PREFIX)
+# NOTE: Trend worker jobs (run_trend_ingest, run_daily_idea_feed, run_performance_ingest)
+# are in worker/jobs/trend.py and can be wired into the _background_scheduler or an
+# external task queue (e.g. ARQ/Celery) for hourly/daily execution.
 
 import os
 from fastapi.staticfiles import StaticFiles

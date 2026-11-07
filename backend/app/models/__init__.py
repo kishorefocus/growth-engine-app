@@ -10,6 +10,10 @@ from app.models.social import ContentIdea, Post, VideoProject
 from app.models.seo import SEOTemplate, SEOPage, ToolUsage
 from app.models.launch import LaunchTask, ReviewRequest
 from app.models.analytics import LinkClick, SignupAttribution, AuditLog
+from app.models.trend import (
+    NicheProfile, TrendSignal, TrendCluster, IdeaCard,
+    ContentPack, HashtagSet, PostMetrics, AccountAudit,
+)
 
 __all__ = [
     "Base",
@@ -25,4 +29,7 @@ __all__ = [
     "LaunchTask", "ReviewRequest",
     # Analytics
     "LinkClick", "SignupAttribution", "AuditLog",
+    # Trend Engine
+    "NicheProfile", "TrendSignal", "TrendCluster", "IdeaCard",
+    "ContentPack", "HashtagSet", "PostMetrics", "AccountAudit",
 ]
