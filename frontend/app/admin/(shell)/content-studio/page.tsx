@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import {
   Sparkles, Copy, Check, ChevronDown, ChevronUp, AlertTriangle,
   CheckCircle2, XCircle, Hash, Zap, ThumbsUp, ThumbsDown,
@@ -192,6 +192,21 @@ function PackCard({ pack, onApprove, onReject }: {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function ContentStudioPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen p-4 md:p-8 space-y-8 animate-pulse">
+          <div className="h-8 w-64 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+          <div className="h-48 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl" />
+        </div>
+      }
+    >
+      <ContentStudioContent />
+    </Suspense>
+  );
+}
+
+function ContentStudioContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
