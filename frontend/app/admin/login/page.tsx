@@ -4,226 +4,358 @@ import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLogin } from "@/lib/hooks";
 import { clearTokens, getAccessToken, hasAuthCookie, setTokens } from "@/lib/api-client";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { toast } from "sonner";
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Loader2,
-  TrendingUp,
-  Zap,
-  CheckCircle2,
-  Shield,
-  BarChart3,
-  Globe,
-} from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowRight, Shield, Lock } from "lucide-react";
 
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════ */
+const T = {
+  bg: "#05060D",
+  bg2: "#0A0B1A",
+  violet: "#7C5CFF",
+  blue: "#3B82F6",
+  cyan: "#22D3EE",
+  pink: "#FF3D8B",
+  lavender: "#C9B8FF",
+  muted: "#A1A6C0",
+  grad: "linear-gradient(135deg,#7C5CFF,#3B82F6,#22D3EE)",
+};
+
+/* ═══════════════════════════════════════════════════════════
+   STATIC DATA
+═══════════════════════════════════════════════════════════ */
+const TESTIMONIALS = [
+  { initial: "S", name: "Sarah Chen", role: "Head of Growth · Prismatic", quote: "Tripled our outbound pipeline in 6 weeks. The automation is next-level.", color: T.violet },
+  { initial: "M", name: "Marcus Webb", role: "Founder · Stacklify", quote: "One platform replaced four tools. Our CAC dropped by 38% immediately.", color: T.blue },
+  { initial: "A", name: "Aisha Okonkwo", role: "CMO · Velox Agency", quote: "The LinkedIn + cold email combo is unmatched. Clients love the ROI reports.", color: T.cyan },
+];
+
+const PHONE_CARDS = [
+  { emoji: "📸", platform: "Instagram", preview: "Post published · +2.4K reach", rot: "-14deg", anim: "float-a", delay: "0s", bg: `linear-gradient(145deg,#1a0533,#2d1060)`, accent: T.violet },
+  { emoji: "💼", platform: "LinkedIn", preview: "Founder post · 847 impressions", rot: "-4deg", anim: "float-b", delay: "1.4s", bg: `linear-gradient(145deg,#001233,#0a2a6e)`, accent: T.blue },
+  { emoji: "𝕏", platform: "X / Twitter", preview: "Thread live · 312 retweets", rot: "8deg", anim: "float-c", delay: "0.8s", bg: `linear-gradient(145deg,#0d0d0d,#1a1a2e)`, accent: "#fff" },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   ROOT EXPORT
+═══════════════════════════════════════════════════════════ */
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f0f2ff] dark:bg-[#0a0a0f] flex items-center justify-center text-slate-500">Loading...</div>}>
+    <Suspense fallback={
+      <div style={{ minHeight: "100vh", background: T.bg, display: "flex", alignItems: "center", justifyContent: "center", color: T.muted }}>
+        Loading…
+      </div>
+    }>
       <LoginForm />
     </Suspense>
   );
 }
 
+/* ═══════════════════════════════════════════════════════════
+   LOGIN FORM
+═══════════════════════════════════════════════════════════ */
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/admin/dashboard";
   const login = useLogin();
 
+  /* —— Auth state —— */
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [emailErr, setEmailErr] = useState("");
+  const [pwErr, setPwErr] = useState("");
+  const [shake, setShake] = useState(false);
 
+  /* —— Testimonial rotator —— */
+  const [tIdx, setTIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTIdx(i => (i + 1) % TESTIMONIALS.length), 4000);
+    return () => clearInterval(id);
+  }, []);
+
+  /* —— Auth redirect —— */
   useEffect(() => {
     const isFromMiddleware = searchParams.has("next");
-    const token = getAccessToken();
-    const hasCookie = hasAuthCookie();
-    if (isFromMiddleware) {
-      if (!hasCookie) clearTokens();
-      return;
-    }
-    if (token && hasCookie) router.replace(next);
+    if (isFromMiddleware) { if (!hasAuthCookie()) clearTokens(); return; }
+    if (getAccessToken() && hasAuthCookie()) router.replace(next);
   }, [next, router, searchParams]);
 
+  /* —— Validation —— */
+  function validate() {
+    let ok = true;
+    setEmailErr(""); setPwErr("");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailErr("Please enter a valid email address"); ok = false; }
+    if (password.length < 6) { setPwErr("Password must be at least 6 characters"); ok = false; }
+    return ok;
+  }
+
+  /* —— Submit —— */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) { setShake(true); setTimeout(() => setShake(false), 600); return; }
     try {
       const data = await login.mutateAsync({ email, password });
       setTokens(data.access_token, data.refresh_token);
-      toast.success("Login successful! Redirecting...");
+      toast.success("Login successful! Redirecting…");
       window.location.href = next;
     } catch (err: any) {
       toast.error(err.message || "Login failed. Check your credentials.");
+      setShake(true); setTimeout(() => setShake(false), 600);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f2ff] dark:bg-[#0a0a0f] flex transition-colors">
+    <div style={{ minHeight: "100vh", display: "flex", background: T.bg, fontFamily: "system-ui,sans-serif" }}>
 
-      {/* ── Left panel — Vibrant Branding ─────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden flex-col justify-between p-12">
-        {/* Light mode: vibrant gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 dark:from-[#0d0f1c] dark:via-[#0d0f1c] dark:to-[#0d0f1c]" />
-        {/* Light mode accent shapes */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 dark:bg-violet-600/15 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-400/20 dark:bg-indigo-600/15 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3" />
-        {/* Dot grid overlay */}
-        <div className="absolute inset-0 dot-grid opacity-20 dark:opacity-10" />
+      {/* ══════════════ LEFT — Glass Login Card ══════════════ */}
+      <div style={{ flex: "0 0 50%", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem", position: "relative", overflow: "hidden" }} className="login-left">
 
-        {/* Logo */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 dark:bg-violet-500/20 border border-white/30 dark:border-violet-500/40 flex items-center justify-center backdrop-blur-sm">
-              <TrendingUp className="w-5 h-5 text-white dark:text-violet-400" />
+        {/* Mesh gradient orbs */}
+        <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: `radial-gradient(circle,${T.violet}30,transparent 70%)`, top: "-10%", left: "-15%", filter: "blur(60px)", animation: "orb-drift-1 25s ease-in-out infinite", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle,${T.pink}20,transparent 70%)`, bottom: "5%", right: "-10%", filter: "blur(70px)", animation: "orb-drift-2 30s ease-in-out infinite", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: 350, height: 350, borderRadius: "50%", background: `radial-gradient(circle,${T.cyan}18,transparent 70%)`, bottom: "30%", left: "60%", filter: "blur(55px)", animation: "orb-drift-3 20s ease-in-out infinite", pointerEvents: "none" }} />
+        {/* Dot grid */}
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `radial-gradient(circle, rgba(161,166,192,0.12) 1px, transparent 1px)`, backgroundSize: "28px 28px", pointerEvents: "none" }} />
+
+        {/* Glass card */}
+        <div
+          style={{
+            width: "100%", maxWidth: 440, position: "relative", zIndex: 1,
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)",
+            backdropFilter: "blur(24px)", borderRadius: 28, padding: "2.5rem",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
+            animation: shake ? "input-shake 0.55s ease" : "none",
+          }}
+        >
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: T.grad, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 18, boxShadow: `0 4px 20px ${T.violet}60` }}>G</div>
+            <div>
+              <div style={{ color: "#fff", fontWeight: 800, fontSize: 14, fontFamily: "'Space Grotesk',sans-serif" }}>GetYourClientsB2B</div>
+              <div style={{ display: "inline-flex", alignItems: "center", marginTop: 2, padding: "1px 8px", borderRadius: 999, fontSize: 10, fontWeight: 700, background: `${T.violet}22`, border: `1px solid ${T.violet}44`, color: T.lavender }}>Growth Engine v2.0</div>
             </div>
-            <span className="text-white dark:text-white font-bold text-lg tracking-tight">GetYourClientsB2B</span>
-          </div>
-          <span className="text-white/60 dark:text-violet-400/70 text-xs font-mono ml-[52px]">Growth Engine v2.0</span>
-        </div>
-
-        {/* Main pitch */}
-        <div className="relative z-10 space-y-7">
-          <div>
-            <h1 className="text-4xl font-extrabold text-white leading-tight drop-shadow-sm">
-              One platform.<br />
-              <span className="text-white/80 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-violet-400 dark:to-indigo-400">
-                Every growth channel.
-              </span>
-            </h1>
-            <p className="text-white/75 dark:text-slate-300 text-base leading-relaxed max-w-sm mt-3">
-              Cold email outreach, social content automation, programmatic SEO, video planning, and launch tracking — all in one admin.
-            </p>
           </div>
 
-          {/* Feature grid */}
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { icon: "📧", label: "Cold Email", desc: "CAN-SPAM compliant", color: "bg-white/15 dark:bg-white/[0.04] border-white/25 dark:border-white/[0.08]" },
-              { icon: "📱", label: "Social Auto", desc: "Official APIs only", color: "bg-white/15 dark:bg-white/[0.04] border-white/25 dark:border-white/[0.08]" },
-              { icon: "🔍", label: "SEO Pages", desc: "Programmatic at scale", color: "bg-white/15 dark:bg-white/[0.04] border-white/25 dark:border-white/[0.08]" },
-              { icon: "🚀", label: "Launch Hub", desc: "PH, G2, Capterra", color: "bg-white/15 dark:bg-white/[0.04] border-white/25 dark:border-white/[0.08]" },
-            ].map((item) => (
-              <div key={item.label} className={`p-3.5 rounded-2xl border ${item.color} flex items-start gap-3 backdrop-blur-sm`}>
-                <span className="text-lg">{item.icon}</span>
-                <div>
-                  <p className="text-xs font-bold text-white">{item.label}</p>
-                  <p className="text-[11px] text-white/60 dark:text-slate-400">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center gap-6">
-            {[
-              { icon: CheckCircle2, value: "99.9%", label: "Uptime SLA" },
-              { icon: BarChart3, value: "142K+", label: "Monthly Reach" },
-              { icon: Globe, value: "5", label: "Platforms" },
-            ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="text-center">
-                <p className="text-xl font-black text-white">{value}</p>
-                <p className="text-[10px] text-white/60 mt-0.5">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* DRY_RUN notice */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-400/20 dark:bg-amber-500/10 border border-amber-300/40 dark:border-amber-500/20 w-fit backdrop-blur-sm">
-            <Zap className="w-3.5 h-3.5 text-amber-300 dark:text-amber-400" />
-            <span className="text-xs text-amber-200 dark:text-amber-300 font-medium">DRY_RUN mode active — no sends until you enable live mode</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Right panel — Login Form ───────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center p-8 relative bg-white/70 dark:bg-[#0a0a0f] backdrop-blur-sm transition-colors">
-        {/* Subtle background gradient for light mode */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/60 via-transparent to-violet-50/40 dark:from-transparent dark:to-transparent pointer-events-none" />
-
-        {/* Theme toggle */}
-        <div className="absolute top-6 right-6 z-10">
-          <ThemeToggle />
-        </div>
-
-        <div className="w-full max-w-md relative z-10">
-          {/* Mobile logo */}
-          <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <TrendingUp className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-slate-900 dark:text-white font-bold text-lg">GetYourClientsB2B Growth Engine</span>
-          </div>
-
-          {/* Header */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-1.5 tracking-tight">Welcome back</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
+          <div style={{ marginBottom: 28, marginTop: 20 }}>
+            <h1 style={{ color: "#fff", fontWeight: 900, fontSize: 28, fontFamily: "'Space Grotesk',sans-serif", letterSpacing: "-0.5px", margin: 0 }}>Welcome back</h1>
+            <p style={{ color: T.muted, fontSize: 13.5, marginTop: 6 }}>
               Access your growth engine dashboard.{" "}
-              <a href="/admin/register" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-semibold transition-colors">
-                First time? Register →
-              </a>
+              <a href="/admin/register" style={{ color: T.lavender, fontWeight: 600, textDecoration: "none" }}>New Client Setup →</a>
             </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Email address
-              </label>
+              <label style={{ display: "block", color: T.muted, fontSize: 12, fontWeight: 600, marginBottom: 6, letterSpacing: "0.3px" }}>EMAIL ADDRESS</label>
               <input
-                id="email" type="email" value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required autoComplete="email"
-                className="w-full bg-white/90 dark:bg-white/[0.04] border border-indigo-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/15 focus:bg-white dark:focus:bg-white/[0.06] transition-all shadow-sm"
-                placeholder="you@company.com"
+                type="email" value={email} onChange={e => { setEmail(e.target.value); setEmailErr(""); }}
+                placeholder="you@company.com" autoComplete="email"
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  background: "rgba(255,255,255,0.04)", border: `1px solid ${emailErr ? "#EF4444" : "rgba(255,255,255,0.1)"}`,
+                  borderRadius: 14, padding: "12px 16px", color: "#fff", fontSize: 14,
+                  outline: "none", transition: "all 0.2s",
+                }}
+                onFocus={e => { e.target.style.borderColor = T.violet; e.target.style.boxShadow = `0 0 0 3px ${T.violet}25`; }}
+                onBlur={e => { e.target.style.borderColor = emailErr ? "#EF4444" : "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
               />
+              {emailErr && <p style={{ color: "#F87171", fontSize: 11.5, marginTop: 5, marginLeft: 2 }}>{emailErr}</p>}
             </div>
 
+            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
+              <label style={{ display: "block", color: T.muted, fontSize: 12, fontWeight: 600, marginBottom: 6, letterSpacing: "0.3px" }}>PASSWORD</label>
+              <div style={{ position: "relative" }}>
                 <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required autoComplete="current-password"
-                  className="w-full bg-white/90 dark:bg-white/[0.04] border border-indigo-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/15 focus:bg-white dark:focus:bg-white/[0.06] transition-all shadow-sm pr-12"
-                  placeholder="••••••••"
+                  type={showPw ? "text" : "password"} value={password} onChange={e => { setPassword(e.target.value); setPwErr(""); }}
+                  placeholder="••••••••" autoComplete="current-password"
+                  style={{
+                    width: "100%", boxSizing: "border-box",
+                    background: "rgba(255,255,255,0.04)", border: `1px solid ${pwErr ? "#EF4444" : "rgba(255,255,255,0.1)"}`,
+                    borderRadius: 14, padding: "12px 44px 12px 16px", color: "#fff", fontSize: 14,
+                    outline: "none", transition: "all 0.2s",
+                  }}
+                  onFocus={e => { e.target.style.borderColor = T.violet; e.target.style.boxShadow = `0 0 0 3px ${T.violet}25`; }}
+                  onBlur={e => { e.target.style.borderColor = pwErr ? "#EF4444" : "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                <button type="button" onClick={() => setShowPw(!showPw)}
+                  style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 0, display: "flex" }}>
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {pwErr && <p style={{ color: "#F87171", fontSize: 11.5, marginTop: 5, marginLeft: 2 }}>{pwErr}</p>}
             </div>
 
+            {/* Remember me + forgot */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: T.violet, cursor: "pointer" }} />
+                <span style={{ color: T.muted, fontSize: 13 }}>Remember me</span>
+              </label>
+              <a href="#" style={{ color: T.lavender, fontSize: 13, textDecoration: "none", fontWeight: 500 }}>Forgot password?</a>
+            </div>
+
+            {/* Sign In button */}
             <button type="submit" disabled={login.isPending}
-              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:brightness-110 text-white text-sm font-bold transition-all shadow-lg shadow-indigo-500/30 disabled:opacity-60 disabled:cursor-not-allowed mt-2 active:scale-[0.98] group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              {login.isPending ? (
-                <><Loader2 className="w-4 h-4 animate-spin" />Signing in...</>
-              ) : (
-                <><span>Sign in to Dashboard</span><ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></>
-              )}
+              style={{
+                width: "100%", padding: "14px", borderRadius: 14, border: "none", cursor: login.isPending ? "not-allowed" : "pointer",
+                background: login.isPending ? "rgba(124,92,255,0.5)" : T.grad,
+                color: "#fff", fontWeight: 800, fontSize: 15, fontFamily: "'Space Grotesk',sans-serif",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                boxShadow: `0 8px 32px ${T.violet}44`, transition: "all 0.2s", position: "relative", overflow: "hidden",
+              }}
+              onMouseEnter={e => { if (!login.isPending) (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+            >
+              <span className="shimmer-sweep" style={{ position: "absolute", inset: 0, background: "linear-gradient(105deg,transparent 38%,rgba(255,255,255,0.18) 50%,transparent 62%)", transform: "translateX(-100%)" }} />
+              {login.isPending ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />Signing in…</> : <><Lock size={15} />Sign In<ArrowRight size={15} /></>}
             </button>
+
+            {/* Divider */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "4px 0" }}>
+              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+              <span style={{ color: T.muted, fontSize: 12 }}>or continue with</span>
+              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+            </div>
+
+            {/* SSO buttons */}
+            <div style={{ display: "flex", gap: 10 }}>
+              {[
+                { label: "Google", icon: "🔵" },
+                { label: "SSO / SAML", icon: "🏢" },
+              ].map(({ label, icon }) => (
+                <button key={label} type="button"
+                  style={{
+                    flex: 1, padding: "11px", borderRadius: 12, cursor: "pointer",
+                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+                    color: T.muted, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={e => { const el = e.currentTarget; el.style.background = "rgba(255,255,255,0.08)"; el.style.color = "#fff"; }}
+                  onMouseLeave={e => { const el = e.currentTarget; el.style.background = "rgba(255,255,255,0.04)"; el.style.color = T.muted; }}
+                >
+                  <span>{icon}</span>{label}
+                </button>
+              ))}
+            </div>
           </form>
 
           {/* Security note */}
-          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-            <Shield className="w-3.5 h-3.5" />
-            <span>Internal tool — secured with JWT + 30-day refresh tokens</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 20, color: "rgba(161,166,192,0.5)", fontSize: 11.5 }}>
+            <Shield size={12} /><span>Secured with JWT + 30-day refresh tokens</span>
           </div>
         </div>
       </div>
+
+      {/* ══════════════ RIGHT — Animated Panel ══════════════ */}
+      <div style={{ flex: "0 0 50%", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem" }} className="login-right">
+        {/* Background */}
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(145deg, ${T.bg2} 0%, #0D0F1E 60%, ${T.bg} 100%)` }} />
+        <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", background: `radial-gradient(circle,${T.violet}15,transparent 65%)`, top: "-20%", right: "-10%", filter: "blur(80px)", animation: "orb-drift-1 28s ease-in-out infinite" }} />
+        <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle,${T.cyan}10,transparent 65%)`, bottom: "10%", left: "-5%", filter: "blur(70px)", animation: "orb-drift-2 22s ease-in-out infinite" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `radial-gradient(circle, rgba(161,166,192,0.07) 1px, transparent 1px)`, backgroundSize: "24px 24px" }} />
+
+        {/* Headline */}
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", marginBottom: 48 }}>
+          <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 900, fontSize: 32, color: "#fff", lineHeight: 1.2, margin: 0 }}>
+            One Platform.{" "}<br />
+            <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              Every Growth Channel.
+            </span>
+          </h2>
+          {/* Stat pills */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
+            {["142,800+ Reach", "1,200+ Keywords", "9,500+ Leads"].map(s => (
+              <span key={s} style={{ padding: "5px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: T.muted }}>
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* 3 tilted phone cards */}
+        <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "flex-end", gap: -12, marginBottom: 48, height: 220 }}>
+          {PHONE_CARDS.map((card, i) => (
+            <div key={card.platform}
+              style={{
+                width: 150, height: 200, borderRadius: 20, background: card.bg,
+                border: `1px solid rgba(255,255,255,0.12)`, backdropFilter: "blur(12px)",
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 16,
+                transform: `rotate(${card.rot}) translateY(${i === 1 ? 0 : 20}px)`,
+                animation: `${card.anim} 6s ease-in-out ${card.delay} infinite`,
+                boxShadow: `0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)`,
+                transition: "transform 0.3s ease",
+                cursor: "default",
+                position: "relative",
+                flexShrink: 0,
+                marginLeft: i === 0 ? 0 : -20,
+              }}
+              onMouseEnter={e => { const el = e.currentTarget; el.style.transform = "rotate(0deg) scale(1.06) translateY(-8px)"; el.style.zIndex = "10"; el.style.boxShadow = `0 30px 60px rgba(0,0,0,0.6), 0 0 20px ${card.accent}44`; }}
+              onMouseLeave={e => { const el = e.currentTarget; el.style.transform = `rotate(${card.rot}) translateY(${i === 1 ? 0 : 20}px)`; el.style.zIndex = "1"; el.style.boxShadow = "0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)"; }}
+            >
+              <div style={{ fontSize: 28, marginBottom: 10 }}>{card.emoji}</div>
+              <div style={{ color: "#fff", fontWeight: 700, fontSize: 12, textAlign: "center", fontFamily: "'Space Grotesk',sans-serif" }}>{card.platform}</div>
+              <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, textAlign: "center", marginTop: 6, lineHeight: 1.5 }}>{card.preview}</div>
+              <div style={{ position: "absolute", bottom: 10, right: 10, width: 8, height: 8, borderRadius: "50%", background: "#10B981", boxShadow: "0 0 6px #10B981" }} />
+            </div>
+          ))}
+        </div>
+
+        {/* Rotating testimonial */}
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 380, width: "100%" }}>
+          {TESTIMONIALS.map((t, i) => (
+            <div key={t.name}
+              style={{
+                position: i === tIdx ? "relative" : "absolute",
+                opacity: i === tIdx ? 1 : 0,
+                transform: i === tIdx ? "translateY(0)" : "translateY(10px)",
+                transition: "all 0.6s ease",
+                pointerEvents: i === tIdx ? "auto" : "none",
+                background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 20, padding: "20px 24px", backdropFilter: "blur(16px)",
+              }}
+            >
+              <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 14, lineHeight: 1.65, margin: 0, fontStyle: "italic" }}>"{t.quote}"</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: `linear-gradient(135deg,${t.color},${T.cyan})`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff", fontSize: 14 }}>{t.initial}</div>
+                <div>
+                  <div style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>{t.name}</div>
+                  <div style={{ color: T.muted, fontSize: 11 }}>{t.role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+          {/* Testimonial dots */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 16 }}>
+            {TESTIMONIALS.map((_, i) => (
+              <button key={i} onClick={() => setTIdx(i)}
+                style={{ width: i === tIdx ? 24 : 8, height: 8, borderRadius: 999, border: "none", cursor: "pointer", transition: "all 0.3s", background: i === tIdx ? T.violet : "rgba(255,255,255,0.2)", padding: 0 }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════ KEYFRAMES ══════════════ */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes orb-drift-1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,-30px)} }
+        @keyframes orb-drift-2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,40px)} }
+        @keyframes orb-drift-3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,20px)} }
+        @keyframes float-a { 0%,100%{transform:translateY(0) rotate(-14deg)} 50%{transform:translateY(-14px) rotate(-14deg)} }
+        @keyframes float-b { 0%,100%{transform:translateY(-6px) rotate(-4deg)} 50%{transform:translateY(10px) rotate(-4deg)} }
+        @keyframes float-c { 0%,100%{transform:translateY(4px) rotate(8deg)} 50%{transform:translateY(-10px) rotate(8deg)} }
+        @keyframes input-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .shimmer-btn:hover .shimmer-sweep { transform:translateX(220%); transition:transform 0.65s ease; }
+        @media (max-width:768px) { .login-right{display:none!important} .login-left{flex:1!important} }
+        input::placeholder { color: rgba(161,166,192,0.4); }
+        input { color-scheme: dark; }
+      ` }} />
     </div>
   );
 }

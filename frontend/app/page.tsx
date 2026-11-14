@@ -2517,7 +2517,7 @@ export default function HomePage() {
           {/* Row 3: Copyright */}
           <div style={{ height: 1, background: "rgba(255,255,255,0.05)", marginBottom: 24 }} />
           <p className="text-center text-xs" style={{ color: "rgba(161,166,192,0.5)" }}>
-            © {new Date().getFullYear()} GetYourClientsB2B Inc. All rights reserved. · Built with FastAPI + Next.js 14
+            © 2026 GetYourClientsB2B Inc. All rights reserved. · Built with FastAPI + Next.js 14
           </p>
         </div>
       </footer>
@@ -2525,9 +2525,7 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════
           GLOBAL KEYFRAME ANIMATIONS
       ══════════════════════════════════════════════════════════ */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
-
+      <style dangerouslySetInnerHTML={{ __html: `
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after {
             animation-duration: 0.01ms !important;
@@ -2702,7 +2700,7 @@ export default function HomePage() {
           0%,100% { transform: translateY(4px) rotate(-8deg); }
           50%     { transform: translateY(-12px) rotate(-4deg); }
         }
-      `}</style>
+      ` }} />
     </div>
   );
 }
