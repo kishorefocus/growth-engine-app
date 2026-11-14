@@ -6,6 +6,8 @@ import {
   useRef,
   useCallback,
   useMemo,
+  type ReactNode,
+  type MouseEvent as ReactMouseEvent,
 } from "react";
 import Link from "next/link";
 import {
@@ -888,7 +890,7 @@ function DashboardPreview(_props: DashboardPreviewProps) {
   }, []);
 
   /* 3D tilt on mouse move */
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
     const rect = windowRef.current?.getBoundingClientRect();
     if (!rect) return;
     const cx = rect.left + rect.width / 2;
@@ -1242,7 +1244,7 @@ function useJitter(base: number, online: boolean, interval = 1800) {
    TELEMETRY CARD  — individual glass service card
 ═══════════════════════════════════════════════════════════════ */
 type TelemetryCardProps = {
-  icon: React.ReactNode;
+  icon: ReactNode;
   grad: string;
   glow: string;
   title: string;
@@ -1562,6 +1564,211 @@ function TelemetrySection({ health, isBackendOk, isDbOk, pingLatency, loadingHea
         </div>
       </div>
     </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPARISON TABLE — Save counter + animated row reveals
+═══════════════════════════════════════════════════════════════ */
+function AnimatedCheck() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" style={{ flexShrink: 0 }}>
+      <circle cx="10" cy="10" r="9" fill="rgba(16,185,129,0.15)" stroke="#10B981" strokeWidth="1.5" />
+      <path d="M6 10.5l2.8 2.8 5-5.5" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        style={{ strokeDasharray: 14, strokeDashoffset: 14, animation: "check-draw 0.5s ease forwards" }} />
+    </svg>
+  );
+}
+
+function CrossIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" style={{ flexShrink: 0 }}>
+      <circle cx="10" cy="10" r="9" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.3)" strokeWidth="1.5" />
+      <path d="M7 7l6 6M13 7l-6 6" stroke="rgba(239,68,68,0.5)" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ComparisonTable() {
+  const [visibleRows, setVisibleRows] = useState<boolean[]>([false, false, false, false, false]);
+  const [saveCount, setSaveCount] = useState(0);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const hasRun = useRef(false);
+
+  useEffect(() => {
+    const el = tableRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !hasRun.current) {
+        hasRun.current = true;
+        // Animate save counter
+        let n = 0;
+        const target = 2000;
+        const step = Math.ceil(target / 60);
+        const timer = setInterval(() => {
+          n = Math.min(n + step, target);
+          setSaveCount(n);
+          if (n >= target) clearInterval(timer);
+        }, 24);
+        // Stagger row reveals
+        [0, 1, 2, 3, 4].forEach((i) => {
+          setTimeout(() => setVisibleRows(prev => { const next = [...prev]; next[i] = true; return next; }), i * 180);
+        });
+      }
+    }, { threshold: 0.2 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const rows = [
+    { feat: "Social Media Scheduling",  old: "Buffer / Hootsuite ($120/mo)", ge: "Included — Meta, LinkedIn, X, YT" },
+    { feat: "Programmatic SEO Engine",  old: "Custom engineering ($2,000+)", ge: "Built-in 1-Click Page Generator" },
+    { feat: "Cold Email Outreach",       old: "Instantly / Smartlead ($100/mo)", ge: "Included — Warmup + Validation" },
+    { feat: "Video Script Planning",     old: "Notion / ChatGPT copy-paste",  ge: "Integrated Script-to-Social Studio" },
+    { feat: "Backend Engine",            old: "Disconnected Zapier webhooks", ge: "FastAPI + PostgreSQL 16 (18ms SLA)" },
+  ];
+
+  return (
+    <section className="py-20 relative z-10 border-t" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" ref={tableRef}>
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border mb-5"
+            style={{ background: "rgba(124,92,255,0.1)", borderColor: "rgba(124,92,255,0.3)", color: T.lavender }}>
+            PLATFORM COMPARISON
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3"
+            style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
+            Why Agencies Choose{" "}
+            <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              GetYourClientsB2B
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base" style={{ color: T.muted }}>
+            Consolidate your stack into one reliable, high-speed ecosystem.
+          </p>
+        </div>
+
+        {/* Save counter */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl border"
+            style={{ background: "rgba(16,185,129,0.06)", borderColor: "rgba(16,185,129,0.2)" }}>
+            <span className="text-xs font-bold" style={{ color: "rgba(16,185,129,0.7)" }}>YOU SAVE</span>
+            <span className="text-3xl font-black" style={{
+              background: "linear-gradient(135deg,#10B981,#34D399)", WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent", backgroundClip: "text", fontFamily: "'Space Grotesk',sans-serif"
+            }}>
+              ${saveCount.toLocaleString()}+
+            </span>
+            <span className="text-xs font-semibold" style={{ color: "rgba(16,185,129,0.7)" }}>PER MONTH</span>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+          {/* Column headers */}
+          <div className="grid grid-cols-3 text-xs font-bold"
+            style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="p-4 text-white">Capability / Feature</div>
+            <div className="p-4" style={{ color: T.muted }}>Traditional Stack (6 Tools)</div>
+            {/* Growth Engine header with gradient border + Best Value badge */}
+            <div className="p-4 relative" style={{ background: "rgba(124,92,255,0.07)" }}>
+              <div style={{
+                position: "absolute", inset: 0,
+                background: `linear-gradient(135deg,${T.violet}22,${T.cyan}22)`,
+                borderLeft: `2px solid ${T.violet}66`,
+              }} />
+              <div className="relative flex items-center justify-between">
+                <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                  Growth Engine Platform
+                </span>
+                <span className="ml-2 px-2 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
+                  style={{ background: `linear-gradient(135deg,${T.violet},${T.cyan})`, color: "#fff" }}>
+                  BEST VALUE
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Data rows */}
+          {rows.map((row, idx) => (
+            <div key={idx} className="grid grid-cols-3 text-xs sm:text-sm"
+              style={{
+                borderBottom: idx < rows.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                opacity: visibleRows[idx] ? 1 : 0,
+                transform: visibleRows[idx] ? "translateY(0)" : "translateY(16px)",
+                transition: "opacity 0.45s ease, transform 0.45s ease",
+                background: idx % 2 === 0 ? "rgba(255,255,255,0.01)" : "transparent",
+              }}>
+              <div className="p-4 font-semibold text-white self-center">{row.feat}</div>
+              <div className="p-4 flex items-center gap-2.5 self-center" style={{ color: T.muted }}>
+                <CrossIcon />
+                <span className="line-through opacity-70">{row.old}</span>
+              </div>
+              <div className="p-4 flex items-center gap-2.5 self-center font-semibold"
+                style={{ color: "#10B981", background: "rgba(124,92,255,0.04)", borderLeft: `1px solid ${T.violet}22` }}>
+                {visibleRows[idx] && <AnimatedCheck />}
+                {row.ge}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BENTO CARD — cursor spotlight + lift + glow border
+═══════════════════════════════════════════════════════════════ */
+function BentoCard({ children, glow, id }: { children: ReactNode; glow: string; id?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [spot, setSpot] = useState<{ x: number; y: number } | null>(null);
+  const [hovered, setHovered] = useState(false);
+
+  function handleMove(e: ReactMouseEvent<HTMLDivElement>) {
+    const rect = ref.current!.getBoundingClientRect();
+    setSpot({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  }
+
+  return (
+    <div
+      ref={ref}
+      id={id}
+      className="group relative p-7 rounded-[28px] border flex flex-col overflow-hidden transition-all duration-300"
+      style={{
+        background: "rgba(255,255,255,0.025)",
+        borderColor: hovered ? `${glow}55` : "rgba(255,255,255,0.07)",
+        backdropFilter: "blur(16px)",
+        boxShadow: hovered ? `0 24px 60px ${glow}33, 0 0 0 1px ${glow}22` : "none",
+        transform: hovered ? "translateY(-6px) scale(1.015)" : "translateY(0) scale(1)",
+      }}
+      onMouseMove={handleMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setSpot(null); }}
+    >
+      {/* Rotating conic border on hover */}
+      {hovered && (
+        <div style={{
+          position: "absolute", inset: -1, borderRadius: 28, zIndex: 0,
+          background: `conic-gradient(from 0deg, ${glow}, ${T.cyan}, ${glow}, ${T.violet}, ${glow})`,
+          padding: 1,
+          animation: "conic-spin 3s linear infinite",
+        }}>
+          <div style={{ borderRadius: 27, background: "#0A0B1A", width: "100%", height: "100%" }} />
+        </div>
+      )}
+      {/* Spotlight overlay */}
+      {spot && (
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: 28, zIndex: 1, pointerEvents: "none",
+          background: `radial-gradient(circle 180px at ${spot.x}px ${spot.y}px, ${glow}18, transparent 70%)`,
+        }} />
+      )}
+      <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", height: "100%" }}>
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -2064,6 +2271,15 @@ export default function HomePage() {
               title: "Multi-Platform Social Auto-Publishing",
               desc: "Connect official Meta Graph API (Facebook Pages & Instagram Business), LinkedIn v2 API, and Twitter/X. Auto-schedule, syndicate, and auto-publish content with zero friction.",
               bullets: ["Cross-posting from Facebook to Instagram", "AI Hook, caption & hashtag generator", "Autonomous background worker publishing"],
+              microAnim: "post-schedule",
+              microEl: (
+                <div style={{ position:"relative", width:40, height:40 }}>
+                  <div style={{ position:"absolute", inset:0, borderRadius:10, background:"rgba(124,92,255,0.18)", display:"flex", alignItems:"center", justifyContent:"center", animation:"post-schedule 3s ease-in-out infinite" }}>
+                    <span style={{ fontSize:18 }}>📅</span>
+                  </div>
+                  <div style={{ position:"absolute", bottom:-4, right:-4, width:14, height:14, borderRadius:"50%", background:"#10B981", display:"flex", alignItems:"center", justifyContent:"center", fontSize:8, color:"white", fontWeight:800 }}>✓</div>
+                </div>
+              ),
             },
             {
               icon: Search, grad: `linear-gradient(135deg,${T.cyan},${T.teal})`, glow: T.cyan,
@@ -2071,6 +2287,14 @@ export default function HomePage() {
               title: "Autonomous SEO Page Generator",
               desc: "Generate thousands of high-converting, Google-compliant comparison and location pages. Automated JSON-LD schema, quality score vetting, and instant XML sitemap indexing.",
               bullets: ["Zero keyword cannibalization engine", "Full Google Search Console auto-ping", "Built-in lead capture & conversion forms"],
+              microEl: (
+                <div style={{ position:"relative", width:40, height:40, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  {[0,1,2].map(i => (
+                    <div key={i} style={{ position:"absolute", width:40, height:40, borderRadius:"50%", border:`1.5px solid ${T.cyan}`, opacity:0, animation:`ping-ripple 2.4s ease-out ${i*0.8}s infinite` }} />
+                  ))}
+                  <span style={{ fontSize:16, position:"relative", zIndex:1 }}>🌐</span>
+                </div>
+              ),
             },
             {
               icon: MessageSquare, grad: `linear-gradient(135deg,${T.pink},#F472B6)`, glow: T.pink,
@@ -2078,40 +2302,58 @@ export default function HomePage() {
               title: "CAN-SPAM Cold Outreach Engine",
               desc: "Run ultra-personalized, deliverability-optimized email sequences with domain warmup, real-time MX validation, and automated reply sentiment analysis.",
               bullets: ["Mailbox rotation & daily sending caps", "One-click unsubscribe compliance", "Automated positive reply routing to CRM"],
+              microEl: (
+                <div style={{ width:48, height:32, position:"relative", overflow:"hidden" }}>
+                  <div style={{ position:"absolute", left:0, top:"50%", transform:"translateY(-50%)", fontSize:20, animation:"envelope-fly 2.2s ease-in-out infinite" }}>✉️</div>
+                </div>
+              ),
             },
             {
               icon: Video, grad: `linear-gradient(135deg,${T.blue},${T.violet})`, glow: T.blue,
               title: "Viral Video & Shorts Script Studio",
               desc: "Plan high-retention video scripts for YouTube, TikTok, and Instagram Reels. Hook libraries, pacing indicators, and visual cue annotations included.",
               bullets: ["Script to multi-format repurposing", "Automated description & tag generator", "Visual storyboard direction"],
+              microEl: (
+                <div style={{ width:52, height:10, background:"rgba(255,255,255,0.08)", borderRadius:5, overflow:"hidden", position:"relative" }}>
+                  <div style={{ position:"absolute", top:0, left:0, height:"100%", background:`linear-gradient(90deg,${T.blue},${T.violet})`, borderRadius:5, animation:"timeline-scrub 2.4s linear infinite" }} />
+                </div>
+              ),
             },
             {
               icon: Bot, grad: `linear-gradient(135deg,${T.lavender},${T.violet})`, glow: T.lavender,
               title: "Brand Voice & ICP Guardrails",
               desc: "Enforce brand guidelines across every channel. Set banned phrases, target persona criteria, and unique value propositions so all content matches your tone exactly.",
               bullets: ["Centralized Brand Profile & Tone matrix", "Automated banned phrase filter", "Customer persona tailored messaging"],
+              microEl: (
+                <div style={{ fontSize:24, animation:"shield-check 2.6s ease-in-out infinite", display:"inline-block" }}>🛡️</div>
+              ),
             },
             {
               icon: TrendingUp, grad: `linear-gradient(135deg,${T.teal},${T.cyan})`, glow: T.teal,
               title: "Multi-Channel Growth Attribution",
               desc: "Track clicks, conversions, and client acquisitions across social posts, SEO pages, and cold email campaigns with unified first-party tracking links.",
               bullets: ["Custom shortlink redirect router (/r/code)", "Real-time conversion funnel tracking", "Executive revenue & pipeline dashboards"],
+              microEl: (
+                <div style={{ display:"flex", alignItems:"flex-end", gap:3, height:28 }}>
+                  {[40,65,50,80,70,100].map((h, i) => (
+                    <div key={i} style={{ width:5, borderRadius:3, background:`linear-gradient(to top,${T.teal},${T.cyan})`, height:`${h}%`, animation:`bars-rise 2s ease-in-out ${i*0.15}s infinite` }} />
+                  ))}
+                </div>
+              ),
             },
-          ].map(({ icon: Icon, grad, glow, title, desc, bullets, id }) => (
-            <div key={title} id={id}
-              className="group p-7 rounded-[28px] border flex flex-col justify-between transition-all hover:scale-[1.02]"
-              style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)", backdropFilter: "blur(16px)" }}
-              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.boxShadow = `0 20px 60px ${glow}44`; el.style.borderColor = `${glow}44`; }}
-              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.boxShadow = "none"; el.style.borderColor = "rgba(255,255,255,0.07)"; }}
-            >
-              <div>
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg mb-6 group-hover:scale-110 transition-transform"
+          ].map(({ icon: Icon, grad, glow, title, desc, bullets, id, microEl }) => (
+            <BentoCard key={title} id={id} glow={glow}>
+              <div className="flex items-start justify-between mb-5">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
                   style={{ background: grad, boxShadow: `0 4px 20px ${glow}44` }}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-3" style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>{title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: T.muted }}>{desc}</p>
+                <div className="flex items-center justify-center" style={{ minWidth:52, minHeight:32 }}>
+                  {microEl}
+                </div>
               </div>
+              <h3 className="text-lg font-bold text-white mb-3" style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>{title}</h3>
+              <p className="text-sm leading-relaxed flex-1" style={{ color: T.muted }}>{desc}</p>
               <ul className="mt-6 pt-5 border-t space-y-2" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 {bullets.map((b) => (
                   <li key={b} className="flex items-center gap-2.5 text-xs font-medium" style={{ color: T.muted }}>
@@ -2119,7 +2361,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </BentoCard>
           ))}
         </div>
       </section>
@@ -2137,66 +2379,48 @@ export default function HomePage() {
       />
 
       {/* ══════════════════════════════════════════════════════════
-          COMPARISON TABLE
+          COMPARISON TABLE — Premium with Save counter + animated rows
       ══════════════════════════════════════════════════════════ */}
-      <section className="py-20 relative z-10 border-t" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="reveal-up text-3xl sm:text-4xl font-extrabold text-white"
-            style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
-            Why Agencies Choose{" "}
-            <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              GetYourClientsB2B
-            </span>
-          </h2>
-          <p className="reveal-up mt-3 text-sm sm:text-base" style={{ color: T.muted }}>
-            Consolidate your marketing tech stack into one reliable, high-speed ecosystem.
-          </p>
-
-          <div className="reveal-up mt-12 rounded-2xl border overflow-hidden text-left"
-            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
-            <div className="grid grid-cols-3 p-4 border-b text-xs font-bold"
-              style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.07)" }}>
-              <span className="text-white">Capability / Feature</span>
-              <span style={{ color: T.muted }}>Traditional Stack (6 Tools)</span>
-              <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Growth Engine Platform
-              </span>
-            </div>
-            {[
-              { feat: "Social Media Scheduling", old: "Buffer / Hootsuite (\$120/mo)", ge: "Included (Meta, LinkedIn, X, YT)" },
-              { feat: "Programmatic SEO Engine", old: "Custom engineering (\$2,000+)", ge: "Built-in 1-Click Page Generator" },
-              { feat: "Cold Email Outreach", old: "Instantly / Smartlead (\$100/mo)", ge: "Included (Warmup + Validation)" },
-              { feat: "Video Script Planning", old: "Notion / ChatGPT copy-paste", ge: "Integrated Script-to-Social Studio" },
-              { feat: "Backend Engine", old: "Disconnected Zapier webhooks", ge: "FastAPI + PostgreSQL 16 (18ms SLA)" },
-            ].map((row, idx) => (
-              <div key={idx} className="grid grid-cols-3 p-4 border-b text-xs sm:text-sm transition-colors hover:bg-white/[0.02]"
-                style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-                <span className="font-semibold text-white">{row.feat}</span>
-                <span style={{ color: T.muted }}>{row.old}</span>
-                <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />{row.ge}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ComparisonTable />
 
       {/* ══════════════════════════════════════════════════════════
-          FINAL CTA
+          FINAL CTA — Full-width with animated orb + drifting phones
       ══════════════════════════════════════════════════════════ */}
-      <section className="py-24 relative z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="relative p-10 sm:p-16 rounded-3xl overflow-hidden">
-            <div className="absolute inset-0 rounded-3xl"
-              style={{ background: `linear-gradient(135deg, ${T.midnight} 0%, ${T.navy} 40%, #0A0B1A 100%)` }} />
-            <div className="absolute inset-0 rounded-3xl border" style={{ borderColor: "rgba(124,92,255,0.25)" }} />
-            {/* Inner orbs */}
+      <section className="py-28 relative z-10 overflow-hidden">
+        {/* Animated conic gradient orb */}
+        <div style={{
+          position: "absolute", top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 700, height: 700, borderRadius: "50%",
+          background: `conic-gradient(from 0deg, ${T.violet}, ${T.blue}, ${T.cyan}, ${T.pink}, ${T.violet})`,
+          filter: "blur(96px)", opacity: 0.18,
+          animation: "cta-orb-spin 18s linear infinite",
+        }} />
+        {/* Drifting mini phone cards */}
+        {[
+          { emoji: "📱", rot: -15, top: "10%", left: "5%", anim: "phone-drift-1 7s ease-in-out infinite" },
+          { emoji: "📲", rot: 12, top: "60%", left: "2%", anim: "phone-drift-2 9s ease-in-out infinite" },
+          { emoji: "📱", rot: -8, top: "15%", right: "4%", anim: "phone-drift-3 8s ease-in-out infinite" },
+          { emoji: "📲", rot: 18, top: "65%", right: "6%", anim: "phone-drift-1 10s ease-in-out 1.5s infinite" },
+        ].map((p, i) => (
+          <div key={i} style={{
+            position: "absolute", top: p.top, left: (p as any).left, right: (p as any).right,
+            width: 72, height: 100, borderRadius: 18,
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+            backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 28, animation: p.anim, zIndex: 0,
+          }}>{p.emoji}</div>
+        ))}
+
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="relative p-10 sm:p-16 rounded-3xl overflow-hidden"
+            style={{ background: `linear-gradient(135deg, ${T.midnight} 0%, ${T.navy} 40%, #0A0B1A 100%)`, border: "1px solid rgba(124,92,255,0.25)" }}>
+            {/* Inner corner orbs */}
             <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full blur-3xl opacity-35"
               style={{ background: `radial-gradient(circle, ${T.violet}, transparent)` }} />
             <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full blur-3xl opacity-25"
               style={{ background: `radial-gradient(circle, ${T.cyan}, transparent)` }} />
-            {/* Grid */}
+            {/* Dot grid */}
             <div className="absolute inset-0 opacity-10"
               style={{ backgroundImage: `radial-gradient(circle, ${T.muted} 1px, transparent 1px)`, backgroundSize: "24px 24px" }} />
 
@@ -2206,13 +2430,16 @@ export default function HomePage() {
                 <Shield className="w-3.5 h-3.5" />
                 PROVEN B2B GROWTH INFRASTRUCTURE
               </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight"
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight"
                 style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
-                Ready to Put Your Social & SEO<br />Growth on Autopilot?
+                Ready to Put Your Social &amp; SEO<br />Growth on{" "}
+                <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                  Autopilot?
+                </span>
               </h2>
               <p className="text-sm sm:text-base max-w-2xl mx-auto leading-relaxed" style={{ color: T.muted }}>
                 Log in to your command center — configure social connections, trigger programmatic SEO pages,
-                and deploy high-converting campaigns.
+                and deploy high-converting campaigns from one unified dashboard.
               </p>
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href={isLoggedIn ? "/admin/dashboard" : "/admin/login"}
@@ -2226,8 +2453,9 @@ export default function HomePage() {
                 <Link href="/admin/register"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-4 rounded-2xl text-base font-semibold border transition-all"
                   style={{ borderColor: "rgba(255,255,255,0.14)", color: T.muted }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = T.muted; }}>
+                  <Zap className="w-4 h-4" />
                   New Client Setup
                 </Link>
               </div>
@@ -2237,37 +2465,60 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          FOOTER
+          FOOTER — Premium with gradient divider
       ══════════════════════════════════════════════════════════ */}
-      <footer className="border-t py-12 relative z-10"
-        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(5,6,13,0.85)" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white text-sm"
-              style={{ background: T.grad, boxShadow: "0 0 16px rgba(124,92,255,0.4)" }}>G</div>
-            <div>
-              <span className="font-bold text-white text-sm block" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>
+      <footer className="relative z-10" style={{ background: "rgba(5,6,13,0.92)" }}>
+        {/* Gradient top divider */}
+        <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${T.violet}55, ${T.cyan}55, transparent)` }} />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          {/* Row 1: Brand */}
+          <div className="flex flex-col items-center text-center mb-10">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm"
+                style={{ background: T.grad, boxShadow: "0 0 20px rgba(124,92,255,0.5)" }}>G</div>
+              <span className="font-black text-white text-lg" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>
                 GetYourClientsB2B Growth Engine
               </span>
-              <p className="text-[11px]" style={{ color: T.muted }}>Autonomous Social & SEO Infrastructure</p>
             </div>
+            <p className="text-sm font-medium" style={{
+              background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
+            }}>
+              Autonomous Social &amp; SEO Infrastructure
+            </p>
           </div>
-          <div className="flex items-center gap-6 text-xs font-medium flex-wrap justify-center">
+
+          {/* Row 2: Nav links */}
+          <div className="flex items-center justify-center gap-8 flex-wrap mb-10">
             {[
               { href: "/admin/login", label: "Client Login" },
               { href: "/tools/subject-line-grader", label: "Free Tools" },
               { href: "/alternatives/apollo/agencies", label: "Comparisons" },
             ].map(({ href, label }) => (
-              <Link key={label} href={href} className="transition-all hover:text-white" style={{ color: T.muted }}>{label}</Link>
+              <Link key={label} href={href}
+                className="text-sm font-medium transition-all duration-200"
+                style={{ color: T.muted }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#fff"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.muted; }}>
+                {label}
+              </Link>
             ))}
             <a href={`${process.env.NEXT_PUBLIC_API_URL || "https://growth-api.getyourclientsb2b.com"}/docs`}
-              target="_blank" rel="noreferrer" className="transition-all hover:text-white" style={{ color: T.muted }}>
+              target="_blank" rel="noreferrer"
+              className="text-sm font-medium flex items-center gap-1.5 transition-all duration-200"
+              style={{ color: T.muted }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#fff"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.muted; }}>
               API Docs
+              <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-          <div className="text-xs" style={{ color: T.muted }}>
-            © {new Date().getFullYear()} GetYourClientsB2B Inc. All rights reserved.
-          </div>
+
+          {/* Row 3: Copyright */}
+          <div style={{ height: 1, background: "rgba(255,255,255,0.05)", marginBottom: 24 }} />
+          <p className="text-center text-xs" style={{ color: "rgba(161,166,192,0.5)" }}>
+            © {new Date().getFullYear()} GetYourClientsB2B Inc. All rights reserved. · Built with FastAPI + Next.js 14
+          </p>
         </div>
       </footer>
 
@@ -2387,6 +2638,69 @@ export default function HomePage() {
         @keyframes health-appear {
           from { opacity:0; transform:translateY(-8px); }
           to   { opacity:1; transform:translateY(0); }
+        }
+
+        /* ─── Bento card: Conic border spin ─── */
+        @keyframes conic-spin {
+          from { filter: hue-rotate(0deg); }
+          to   { filter: hue-rotate(360deg); }
+        }
+
+        /* ─── Bento micro-animations ─── */
+        @keyframes post-schedule {
+          0%,100% { transform: rotate(0deg) scale(1); }
+          40%     { transform: rotate(14deg) scale(1.1); }
+          70%     { transform: rotate(-6deg) scale(0.95); }
+        }
+        @keyframes ping-ripple {
+          0%   { transform: scale(0.6); opacity: 1; }
+          100% { transform: scale(2.6); opacity: 0; }
+        }
+        @keyframes envelope-fly {
+          0%   { transform: translateX(0px) rotate(0deg); opacity: 1; }
+          55%  { transform: translateX(28px) rotate(6deg); opacity: 0.3; }
+          56%  { transform: translateX(-8px) rotate(-4deg); opacity: 0; }
+          70%  { transform: translateX(0px) rotate(0deg); opacity: 0; }
+          85%  { transform: translateX(0px) rotate(0deg); opacity: 1; }
+          100% { transform: translateX(0px) rotate(0deg); opacity: 1; }
+        }
+        @keyframes timeline-scrub {
+          0%   { width: 0%; }
+          80%  { width: 100%; }
+          100% { width: 100%; }
+        }
+        @keyframes shield-check {
+          0%,100% { transform: scale(0.9); filter: drop-shadow(0 0 0px #7C5CFF); }
+          50%     { transform: scale(1.12); filter: drop-shadow(0 0 8px #7C5CFF); }
+        }
+        @keyframes bars-rise {
+          0%,100% { transform: scaleY(0.4); transform-origin: bottom; }
+          50%     { transform: scaleY(1);   transform-origin: bottom; }
+        }
+
+        /* ─── Comparison table: animated check draw ─── */
+        @keyframes check-draw {
+          to { stroke-dashoffset: 0; }
+        }
+
+        /* ─── CTA section: rotating gradient orb ─── */
+        @keyframes cta-orb-spin {
+          from { transform: translate(-50%,-50%) rotate(0deg); }
+          to   { transform: translate(-50%,-50%) rotate(360deg); }
+        }
+
+        /* ─── CTA: drifting mini phone cards ─── */
+        @keyframes phone-drift-1 {
+          0%,100% { transform: translateY(0px) rotate(-15deg); }
+          50%     { transform: translateY(-20px) rotate(-11deg); }
+        }
+        @keyframes phone-drift-2 {
+          0%,100% { transform: translateY(-8px) rotate(12deg); }
+          50%     { transform: translateY(14px) rotate(16deg); }
+        }
+        @keyframes phone-drift-3 {
+          0%,100% { transform: translateY(4px) rotate(-8deg); }
+          50%     { transform: translateY(-12px) rotate(-4deg); }
         }
       `}</style>
     </div>
