@@ -23,8 +23,9 @@ const config: Config = {
         border: "var(--border)",
       },
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "Inter", "var(--font-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "monospace"],
+        sans: ["var(--font-sans)", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        display: ["var(--font-display)", "Fraunces", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "IBM Plex Mono", "monospace"],
       },
       animation: {
         "slide-in-left": "slide-in-left 0.28s cubic-bezier(0.22, 1, 0.36, 1) both",

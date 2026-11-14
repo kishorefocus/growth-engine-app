@@ -915,27 +915,21 @@ function DashboardPreview(_props: DashboardPreviewProps) {
       {/* Section header */}
       <div className="text-center mb-12">
         <div
-          className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 border"
+          className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase mb-5 border"
           style={{ background: "rgba(59,130,246,0.1)", borderColor: "rgba(59,130,246,0.3)", color: "#7FE0D3" }}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" style={{ boxShadow: "0 0 6px #4ade80" }} />
           LIVE DASHBOARD PREVIEW
         </div>
         <h2
-          className="reveal-up text-3xl sm:text-5xl font-black text-white tracking-tight"
-          style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}
+          className="reveal-up font-display text-3xl sm:text-5xl font-bold text-white tracking-tight leading-[1.12]"
         >
           One Command Center.{" "}
-          <span
-            style={{
-              background: "linear-gradient(135deg,#7C5CFF,#3B82F6,#22D3EE)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-            }}
-          >
+          <span className="gradient-text italic font-display">
             Everything.
           </span>
         </h2>
-        <p className="reveal-up mt-4 text-base sm:text-lg max-w-2xl mx-auto" style={{ color: "#A1A6C0" }}>
+        <p className="reveal-up mt-4 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#A1A6C0" }}>
           Your entire B2B growth operation — social, SEO, and outreach — monitored from a single glass dashboard.
         </p>
       </div>
@@ -1303,7 +1297,7 @@ function TelemetryCard({
               {icon}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white leading-tight" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>{title}</h3>
+              <h3 className="text-sm font-semibold text-white leading-tight font-display tracking-tight">{title}</h3>
               <p className="text-[11px] mt-0.5" style={{ color: "#A1A6C0" }}>{subtitle}</p>
             </div>
           </div>
@@ -1457,7 +1451,7 @@ function TelemetrySection({ health, isBackendOk, isDbOk, pingLatency, loadingHea
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <div>
             <div
-              className="reveal-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border mb-4"
+              className="reveal-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase border mb-4"
               style={{ background: "rgba(74,222,128,0.1)", borderColor: "rgba(74,222,128,0.3)", color: "#4ade80" }}
             >
               <span
@@ -1467,8 +1461,7 @@ function TelemetrySection({ health, isBackendOk, isDbOk, pingLatency, loadingHea
               ENTERPRISE HIGH-PERFORMANCE CLOUD ARCHITECTURE
             </div>
             <h2
-              className="reveal-up text-2xl sm:text-4xl font-extrabold text-white tracking-tight"
-              style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}
+              className="reveal-up font-display text-2xl sm:text-4xl font-bold text-white tracking-tight leading-[1.12]"
             >
               Live Backend Engine &amp; Database Telemetry
             </h2>
@@ -1633,18 +1626,17 @@ function ComparisonTable() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" ref={tableRef}>
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border mb-5"
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase border mb-5"
             style={{ background: "rgba(124,92,255,0.1)", borderColor: "rgba(124,92,255,0.3)", color: T.lavender }}>
             PLATFORM COMPARISON
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3"
-            style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-3 tracking-tight leading-[1.12]">
             Why Agencies Choose{" "}
-            <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+            <span className="gradient-text italic font-display">
               GetYourClientsB2B
             </span>
           </h2>
-          <p className="text-sm sm:text-base" style={{ color: T.muted }}>
+          <p className="text-sm sm:text-base leading-relaxed" style={{ color: T.muted }}>
             Consolidate your stack into one reliable, high-speed ecosystem.
           </p>
         </div>
@@ -1653,14 +1645,14 @@ function ComparisonTable() {
         <div className="flex justify-center mb-8">
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl border"
             style={{ background: "rgba(16,185,129,0.06)", borderColor: "rgba(16,185,129,0.2)" }}>
-            <span className="text-xs font-bold" style={{ color: "rgba(16,185,129,0.7)" }}>YOU SAVE</span>
-            <span className="text-3xl font-black" style={{
+            <span className="text-xs font-mono font-semibold tracking-wider" style={{ color: "rgba(16,185,129,0.7)" }}>YOU SAVE</span>
+            <span className="font-display text-3xl font-black tracking-tight" style={{
               background: "linear-gradient(135deg,#10B981,#34D399)", WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent", backgroundClip: "text", fontFamily: "'Space Grotesk',sans-serif"
+              WebkitTextFillColor: "transparent", backgroundClip: "text"
             }}>
               ${saveCount.toLocaleString()}+
             </span>
-            <span className="text-xs font-semibold" style={{ color: "rgba(16,185,129,0.7)" }}>PER MONTH</span>
+            <span className="text-xs font-mono font-semibold tracking-wider" style={{ color: "rgba(16,185,129,0.7)" }}>PER MONTH</span>
           </div>
         </div>
 
@@ -1932,10 +1924,10 @@ export default function HomePage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-[17px] tracking-tight text-white" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>
+                <span className="font-display font-bold text-[18px] tracking-tight text-white">
                   GetYourClientsB2B
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider border"
                   style={{ background: "rgba(124,92,255,0.15)", borderColor: "rgba(124,92,255,0.4)", color: T.lavender }}>
                   Growth OS
                 </span>
@@ -2000,7 +1992,7 @@ export default function HomePage() {
       <section className="relative z-10 pt-20 pb-10 md:pt-28 md:pb-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
 
         {/* Eyebrow pill */}
-        <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-8 border"
+        <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono font-medium tracking-wide mb-8 border"
           style={{ background: "rgba(124,92,255,0.12)", borderColor: "rgba(124,92,255,0.35)", color: T.lavender, boxShadow: "0 0 24px rgba(124,92,255,0.14)" }}>
           <span className="w-2 h-2 rounded-full bg-[#7C5CFF] animate-pulse" style={{ boxShadow: "0 0 8px rgba(124,92,255,0.8)" }} />
           Omnichannel B2B Growth Operating System
@@ -2009,20 +2001,17 @@ export default function HomePage() {
         </div>
 
         {/* H1 */}
-        <h1 className="reveal-up text-4xl sm:text-6xl md:text-[80px] font-black tracking-tight max-w-5xl leading-[1.06]"
-          style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif", animationDelay: "0.1s" }}>
+        <h1 className="reveal-up font-display text-4xl sm:text-6xl md:text-[80px] font-bold tracking-tight max-w-5xl leading-[1.05]"
+          style={{ animationDelay: "0.1s" }}>
           Automate All{" "}
-          <span style={{
-            background: `linear-gradient(135deg, ${T.violet} 0%, ${T.blue} 50%, ${T.cyan} 100%)`,
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-          }}>
+          <span className="gradient-text italic font-display">
             Social & SEO
           </span>
           <br />in One Unified Engine
         </h1>
 
         {/* Subtext */}
-        <p className="reveal-up mt-7 text-base sm:text-xl max-w-2xl leading-relaxed" style={{ color: T.muted, animationDelay: "0.18s" }}>
+        <p className="reveal-up mt-7 text-base sm:text-xl max-w-2xl leading-relaxed text-slate-300/80 font-sans" style={{ animationDelay: "0.18s" }}>
           Autonomous social publishing, programmatic SEO, CAN-SPAM cold outreach and video planning,
           from one developer-grade admin dashboard.
         </p>
@@ -2085,19 +2074,18 @@ export default function HomePage() {
           style={{ background: `linear-gradient(90deg, transparent, ${T.violet}, ${T.cyan}, transparent)` }} />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-14">
-          <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 border"
+          <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase mb-5 border"
             style={{ background: "rgba(34,211,238,0.1)", borderColor: "rgba(34,211,238,0.3)", color: T.teal }}>
             <Zap className="w-3.5 h-3.5" />
             LIVE PLATFORM AUTO-PUBLISHING
           </div>
-          <h2 className="reveal-up text-3xl sm:text-5xl font-black text-white tracking-tight"
-            style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
+          <h2 className="reveal-up font-display text-3xl sm:text-5xl font-bold text-white tracking-tight leading-[1.12]">
             One Engine.{" "}
-            <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+            <span className="gradient-text italic font-display">
               Every Platform.
             </span>
           </h2>
-          <p className="reveal-up mt-4 text-base sm:text-lg max-w-2xl mx-auto" style={{ color: T.muted }}>
+          <p className="reveal-up mt-4 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: T.muted }}>
             Watch the engine auto-generate and publish B2B content across all five platforms simultaneously.
           </p>
         </div>
@@ -2155,11 +2143,11 @@ export default function HomePage() {
                   style={{ background: grad, boxShadow: `0 4px 20px ${glow}44` }}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-3xl font-black"
+                <p className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight"
                   style={{ background: grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                   {value.toLocaleString()}{suffix}
                 </p>
-                <p className="text-xs font-medium mt-2" style={{ color: T.muted }}>{label}</p>
+                <p className="text-xs font-mono font-medium tracking-wide uppercase mt-2" style={{ color: T.muted }}>{label}</p>
               </div>
             ))}
           </div>
@@ -2192,15 +2180,14 @@ export default function HomePage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
-            <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 border"
+            <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase mb-5 border"
               style={{ background: "rgba(255,61,139,0.1)", borderColor: "rgba(255,61,139,0.3)", color: T.pink }}>
               <Zap className="w-3.5 h-3.5" />
               AUTOMATION PIPELINE
             </div>
-            <h2 className="reveal-up text-3xl sm:text-5xl font-black text-white tracking-tight"
-              style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
+            <h2 className="reveal-up font-display text-3xl sm:text-5xl font-bold text-white tracking-tight leading-[1.12]">
               From Brief to{" "}
-              <span style={{ background: T.gradPink, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              <span className="gradient-text italic font-display">
                 Published in Seconds
               </span>
             </h2>
@@ -2234,7 +2221,7 @@ export default function HomePage() {
                     <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full text-[9px] font-black flex items-center justify-center"
                       style={{ background: color, color: "#000" }}>{step}</span>
                   </div>
-                  <h3 className="font-bold text-white text-sm mb-1" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>{label}</h3>
+                  <h3 className="font-display font-bold text-white text-sm mb-1 tracking-tight">{label}</h3>
                   <p className="text-xs leading-relaxed" style={{ color: T.muted }}>{desc}</p>
                 </div>
               ))}
@@ -2248,18 +2235,17 @@ export default function HomePage() {
       ══════════════════════════════════════════════════════════ */}
       <section id="social-automation" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border mb-5"
+          <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase border mb-5"
             style={{ background: "rgba(124,92,255,0.1)", borderColor: "rgba(124,92,255,0.3)", color: T.lavender }}>
             ENTERPRISE AUTOMATION SUITE
           </div>
-          <h2 className="reveal-up text-3xl sm:text-5xl font-black text-white mt-5 tracking-tight"
-            style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
+          <h2 className="reveal-up font-display text-3xl sm:text-5xl font-bold text-white mt-5 tracking-tight leading-[1.12]">
             Everything to Scale{" "}
-            <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+            <span className="gradient-text italic font-display">
               B2B Client Growth
             </span>
           </h2>
-          <p className="reveal-up mt-4 text-base sm:text-lg" style={{ color: T.muted }}>
+          <p className="reveal-up mt-4 text-base sm:text-lg leading-relaxed text-slate-300/80" style={{ color: T.muted }}>
             Replace 6 disjointed SaaS tools with one automated, developer-grade engine.
           </p>
         </div>
@@ -2352,7 +2338,7 @@ export default function HomePage() {
                   {microEl}
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-white mb-3" style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>{title}</h3>
+              <h3 className="font-display text-lg font-bold text-white mb-3 tracking-tight">{title}</h3>
               <p className="text-sm leading-relaxed flex-1" style={{ color: T.muted }}>{desc}</p>
               <ul className="mt-6 pt-5 border-t space-y-2" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 {bullets.map((b) => (
@@ -2425,15 +2411,14 @@ export default function HomePage() {
               style={{ backgroundImage: `radial-gradient(circle, ${T.muted} 1px, transparent 1px)`, backgroundSize: "24px 24px" }} />
 
             <div className="relative z-10 space-y-7">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border"
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase border"
                 style={{ background: "rgba(124,92,255,0.15)", borderColor: "rgba(124,92,255,0.35)", color: T.lavender }}>
                 <Shield className="w-3.5 h-3.5" />
                 PROVEN B2B GROWTH INFRASTRUCTURE
               </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight"
-                style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
+              <h2 className="font-display text-3xl sm:text-5xl font-bold text-white tracking-tight leading-[1.12]">
                 Ready to Put Your Social &amp; SEO<br />Growth on{" "}
-                <span style={{ background: T.grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                <span className="gradient-text italic font-display">
                   Autopilot?
                 </span>
               </h2>
@@ -2477,7 +2462,7 @@ export default function HomePage() {
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm"
                 style={{ background: T.grad, boxShadow: "0 0 20px rgba(124,92,255,0.5)" }}>G</div>
-              <span className="font-black text-white text-lg" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>
+              <span className="font-display font-bold text-white text-lg tracking-tight">
                 GetYourClientsB2B Growth Engine
               </span>
             </div>

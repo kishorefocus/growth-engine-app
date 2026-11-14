@@ -1,8 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ─── Modern Typography Stack (getyourclientsb2b.com style) ──────── */
+.font-display {
+  font-family: var(--font-display), "Fraunces", Georgia, serif;
+}
+.font-sans {
+  font-family: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.font-mono {
+  font-family: var(--font-mono), "IBM Plex Mono", monospace;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #FF3D8B 0%, #7C5CFF 45%, #22D3EE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
 /* ─── Light Theme — Vibrant: Blue, White, Green, Pink, Red, Yellow ─── */
 :root {
@@ -88,7 +106,7 @@ body {
     radial-gradient(ellipse at 50% 90%, rgba(34,197,94,0.06) 0%, transparent 50%),
     radial-gradient(ellipse at 70% 55%, rgba(234,179,8,0.05) 0%, transparent 42%);
   min-height: 100vh;
-  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans), 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

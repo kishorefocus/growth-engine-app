@@ -1,16 +1,25 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, Fraunces, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +34,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased selection:bg-violet-500/30 selection:text-violet-200`}>
+      <body className={`${inter.variable} ${fraunces.variable} ${ibmPlexMono.variable} font-sans antialiased selection:bg-violet-500/30 selection:text-violet-200`}>
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
+
