@@ -651,6 +651,921 @@ function YTScreen({ phone, display, likes }: { phone: (typeof PHONES)[0]; displa
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   SPARKLINE COMPONENT  — draws itself on mount
+═══════════════════════════════════════════════════════════════ */
+function Sparkline({ data, color, height = 32 }: { data: number[]; color: string; height?: number }) {
+  const pathRef = useRef<SVGPathElement>(null);
+  const [drawn, setDrawn] = useState(false);
+
+  const w = 120, h = height;
+  const min = Math.min(...data), max = Math.max(...data);
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / (max - min || 1)) * (h - 4) - 2;
+    return `${x},${y}`;
+  });
+  const d = `M ${pts.join(" L ")}`;
+
+  useEffect(() => {
+    const t = setTimeout(() => setDrawn(true), 120);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!pathRef.current) return;
+    const len = pathRef.current.getTotalLength();
+    if (!drawn) {
+      pathRef.current.style.strokeDasharray = `${len}`;
+      pathRef.current.style.strokeDashoffset = `${len}`;
+    } else {
+      pathRef.current.style.transition = "stroke-dashoffset 1.6s cubic-bezier(0.4,0,0.2,1)";
+      pathRef.current.style.strokeDashoffset = "0";
+    }
+  }, [drawn]);
+
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible">
+      <defs>
+        <linearGradient id={`spk-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* Fill area */}
+      <path
+        d={`${d} L ${w},${h} L 0,${h} Z`}
+        fill={`url(#spk-${color.replace("#", "")})`}
+        opacity={drawn ? 1 : 0}
+        style={{ transition: "opacity 0.6s ease 0.8s" }}
+      />
+      {/* Line */}
+      <path
+        ref={pathRef}
+        d={d}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* End dot */}
+      <circle
+        cx={w}
+        cy={parseFloat(pts[pts.length - 1].split(",")[1])}
+        r="3"
+        fill={color}
+        opacity={drawn ? 1 : 0}
+        style={{ transition: "opacity 0.3s ease 1.4s", filter: `drop-shadow(0 0 4px ${color})` }}
+      />
+    </svg>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEARTBEAT LINE  — continuous animated SVG pulse
+═══════════════════════════════════════════════════════════════ */
+function HeartbeatLine({ color, online = true }: { color: string; online?: boolean }) {
+  return (
+    <svg width="80" height="24" viewBox="0 0 80 24" className="overflow-visible">
+      <polyline
+        points="0,12 10,12 15,4 20,20 25,12 35,12 40,2 45,22 50,12 60,12 65,8 70,16 75,12 80,12"
+        fill="none"
+        stroke={online ? color : "#ef4444"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{
+          strokeDasharray: 200,
+          strokeDashoffset: 200,
+          animation: online ? "hb-draw 1.2s ease forwards, hb-pulse 2.4s ease 1.2s infinite" : "none",
+          opacity: online ? 1 : 0.5,
+        }}
+      />
+    </svg>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PIPELINE ROW  — single animated distribution row
+═══════════════════════════════════════════════════════════════ */
+type PipelineRowData = {
+  icon: string;
+  platform: string;
+  title: string;
+  time: string;
+  color: string;
+  stage: 0 | 1 | 2; /* 0=Scheduled 1=Publishing 2=Published */
+};
+
+const STAGE_LABELS = ["Scheduled", "Publishing…", "Published ✓"];
+const STAGE_COLORS = ["#A1A6C0", "#F59E0B", "#4ade80"];
+const STAGE_BG    = ["rgba(161,166,192,0.1)", "rgba(245,158,11,0.15)", "rgba(74,222,128,0.12)"];
+
+function PipelineRow({ row, entering }: { row: PipelineRowData; entering: boolean }) {
+  const [stage, setStage] = useState<0 | 1 | 2>(row.stage);
+  const [progPct, setProgPct] = useState(row.stage === 2 ? 100 : row.stage === 1 ? 55 : 0);
+
+  /* Advance stage once on mount */
+  useEffect(() => {
+    if (stage === 2) return;
+    const t1 = setTimeout(() => { setStage(1); setProgPct(55); }, 1800);
+    const t2 = setTimeout(() => { setStage(2); setProgPct(100); }, 3600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div
+      className="rounded-xl border overflow-hidden"
+      style={{
+        background: "rgba(255,255,255,0.025)",
+        borderColor: `${row.color}25`,
+        animation: entering ? "row-slide-in 0.5s cubic-bezier(0.22,1,0.36,1) both" : "none",
+      }}
+    >
+      {/* Progress track */}
+      <div className="h-[2px] w-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+        <div
+          className="h-full"
+          style={{
+            width: `${progPct}%`,
+            background: `linear-gradient(90deg, ${row.color}, ${STAGE_COLORS[stage]})`,
+            transition: "width 1.1s cubic-bezier(0.4,0,0.2,1)",
+            boxShadow: `0 0 6px ${row.color}`,
+          }}
+        />
+      </div>
+
+      <div className="p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Platform icon */}
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
+            style={{ background: `${row.color}18`, border: `1px solid ${row.color}35` }}
+          >
+            {row.icon}
+          </div>
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] font-bold" style={{ color: row.color }}>{row.platform}</span>
+              {/* Stage chip */}
+              <span
+                className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide transition-all"
+                style={{
+                  background: STAGE_BG[stage],
+                  color: STAGE_COLORS[stage],
+                  border: `1px solid ${STAGE_COLORS[stage]}40`,
+                }}
+              >
+                {STAGE_LABELS[stage]}
+              </span>
+            </div>
+            <p className="text-xs truncate mt-0.5" style={{ color: "#A1A6C0" }}>{row.title}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[10px] font-mono" style={{ color: "#A1A6C0" }}>{row.time}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DASHBOARD PREVIEW COMPONENT
+═══════════════════════════════════════════════════════════════ */
+const SPARKLINE_DATA = [28, 42, 38, 55, 48, 61, 58, 72, 68, 85, 79, 95, 88, 104, 112, 128, 142];
+
+const ALL_PIPELINE_ROWS: PipelineRowData[] = [
+  { icon: "📘", platform: "Facebook + Instagram Business", title: "🚀 How top B2B agencies automate client acquisition with zero manual ad spend", time: "Today, 4:00 PM", color: "#4267B2", stage: 2 },
+  { icon: "💼", platform: "LinkedIn Company & Founder", title: "The playbook we used to scale 15 client accounts past $50k MRR", time: "Tomorrow, 9:00 AM", color: "#0A66C2", stage: 1 },
+  { icon: "▶️", platform: "YouTube Shorts & Video Hub", title: "3 AI Automation tools every agency owner must deploy in 2026", time: "Draft Ready", color: "#FF0000", stage: 0 },
+  { icon: "𝕏", platform: "X (Twitter) Thread", title: "Cold email that books 5 meetings/week — full breakdown 🧵", time: "Today, 6:00 PM", color: "#E7E9EA", stage: 2 },
+  { icon: "📸", platform: "Instagram Reel", title: "5 ways agencies land clients on autopilot 🤖 #B2BGrowth", time: "Tomorrow, 11:00 AM", color: "#E1306C", stage: 1 },
+];
+
+type DashboardPreviewProps = {
+  isLoggedIn: boolean;
+  isBackendOk: boolean;
+  isDbOk: boolean;
+  pingLatency: number;
+  health: HealthResponse | null;
+  loadingHealth: boolean;
+  checkConnection: () => void;
+};
+
+function DashboardPreview(_props: DashboardPreviewProps) {
+  const [activeTab, setActiveTab] = useState<"social" | "seo" | "leads">("social");
+  const [tabOffset, setTabOffset] = useState(0);
+  const [visibleRows, setVisibleRows] = useState<number[]>([0, 1, 2]);
+  const [enteringIdx, setEnteringIdx] = useState<number | null>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const windowRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  /* Sliding underline offset */
+  useEffect(() => {
+    const el = tabRefs.current[activeTab];
+    if (el) {
+      const parent = el.parentElement;
+      if (parent) setTabOffset(el.offsetLeft - parent.offsetLeft);
+    }
+  }, [activeTab]);
+
+  /* Rotate pipeline row every 5s */
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setVisibleRows((prev) => {
+        const next = (prev[prev.length - 1] + 1) % ALL_PIPELINE_ROWS.length;
+        setEnteringIdx(next);
+        setTimeout(() => setEnteringIdx(null), 600);
+        return [...prev.slice(1), next];
+      });
+    }, 5000);
+    return () => clearInterval(iv);
+  }, []);
+
+  /* 3D tilt on mouse move */
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = windowRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    setTilt({ x: dy * -4, y: dx * 5 });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setTilt({ x: 0, y: 0 });
+  }, []);
+
+  const TABS = [
+    { id: "social" as const, label: "Social" },
+    { id: "seo"    as const, label: "SEO" },
+    { id: "leads"  as const, label: "Outreach" },
+  ];
+
+  return (
+    <section className="py-20 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Section header */}
+      <div className="text-center mb-12">
+        <div
+          className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 border"
+          style={{ background: "rgba(59,130,246,0.1)", borderColor: "rgba(59,130,246,0.3)", color: "#7FE0D3" }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" style={{ boxShadow: "0 0 6px #4ade80" }} />
+          LIVE DASHBOARD PREVIEW
+        </div>
+        <h2
+          className="reveal-up text-3xl sm:text-5xl font-black text-white tracking-tight"
+          style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}
+        >
+          One Command Center.{" "}
+          <span
+            style={{
+              background: "linear-gradient(135deg,#7C5CFF,#3B82F6,#22D3EE)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+            }}
+          >
+            Everything.
+          </span>
+        </h2>
+        <p className="reveal-up mt-4 text-base sm:text-lg max-w-2xl mx-auto" style={{ color: "#A1A6C0" }}>
+          Your entire B2B growth operation — social, SEO, and outreach — monitored from a single glass dashboard.
+        </p>
+      </div>
+
+      {/* 3D browser window */}
+      <div
+        ref={windowRef}
+        className="reveal-up"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          perspective: "1200px",
+          animationDelay: "0.08s",
+        }}
+      >
+        <div
+          style={{
+            transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1.005)`,
+            transition: "transform 0.18s ease-out",
+            transformStyle: "preserve-3d",
+            borderRadius: 24,
+            boxShadow: "0 0 0 1px rgba(124,92,255,0.25), 0 40px 100px rgba(0,0,0,0.65), 0 0 80px rgba(124,92,255,0.12)",
+          }}
+        >
+          {/* ── Window chrome bar ── */}
+          <div
+            className="rounded-t-[24px] px-5 py-3.5 flex items-center justify-between"
+            style={{
+              background: "rgba(14,16,30,0.98)",
+              borderBottom: "1px solid rgba(255,255,255,0.07)",
+              backdropFilter: "blur(32px)",
+            }}
+          >
+            {/* Traffic lights */}
+            <div className="flex items-center gap-5">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#FF5F57] shadow-sm" style={{ boxShadow: "0 0 6px rgba(255,95,87,0.6)" }} />
+                <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
+                <div className="w-3 h-3 rounded-full bg-[#28C840]" style={{ boxShadow: "0 0 6px rgba(40,200,64,0.5)" }} />
+              </div>
+
+              {/* URL bar */}
+              <div
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "#A1A6C0", minWidth: 320 }}
+              >
+                <span className="text-emerald-400 text-[10px]">🔒</span>
+                <span>growth.getyourclientsb2b.com</span>
+                <span style={{ color: "rgba(161,166,192,0.5)" }}>/admin/dashboard</span>
+              </div>
+            </div>
+
+            {/* Animated tab bar with sliding underline */}
+            <div className="relative flex items-center gap-0.5 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.04)" }}>
+              {/* Sliding underline pill */}
+              <span
+                className="absolute bottom-1 h-[3px] rounded-full"
+                style={{
+                  left: tabOffset + 4,
+                  width: tabRefs.current[activeTab]?.offsetWidth ? tabRefs.current[activeTab]!.offsetWidth - 8 : 48,
+                  background: "linear-gradient(90deg,#7C5CFF,#22D3EE)",
+                  transition: "left 0.32s cubic-bezier(0.4,0,0.2,1), width 0.32s cubic-bezier(0.4,0,0.2,1)",
+                  boxShadow: "0 0 8px rgba(124,92,255,0.6)",
+                }}
+              />
+              {TABS.map(({ id, label }) => (
+                <button
+                  key={id}
+                  ref={(el) => { tabRefs.current[id] = el; }}
+                  onClick={() => setActiveTab(id)}
+                  className="relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                  style={{ color: activeTab === id ? "#fff" : "#A1A6C0", zIndex: 1 }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Window body ── */}
+          <div
+            className="rounded-b-[24px] p-6 md:p-8"
+            style={{ background: "rgba(5,6,13,0.97)", backdropFilter: "blur(32px)" }}
+          >
+
+            {/* ══ SOCIAL TAB ══ */}
+            {activeTab === "social" && (
+              <div className="space-y-6 animate-fade-in">
+
+                {/* Stat cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Meta Connected */}
+                  <div className="p-4 rounded-2xl border text-left group hover:scale-[1.02] transition-all"
+                    style={{ background: "rgba(66,103,178,0.08)", borderColor: "rgba(66,103,178,0.25)" }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" style={{ boxShadow: "0 0 5px #4ade80" }} />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#A1A6C0" }}>Meta Connected</span>
+                    </div>
+                    <p className="text-sm font-black text-emerald-400">FB &amp; Instagram</p>
+                    <p className="text-[10px] mt-1 font-mono" style={{ color: "#A1A6C0" }}>Page ID: 1125229983597930</p>
+                  </div>
+
+                  {/* Scheduled Posts */}
+                  <div className="p-4 rounded-2xl border text-left group hover:scale-[1.02] transition-all"
+                    style={{ background: "rgba(124,92,255,0.08)", borderColor: "rgba(124,92,255,0.25)" }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Zap className="w-3 h-3" style={{ color: "#7C5CFF" }} />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#A1A6C0" }}>Scheduled Posts</span>
+                    </div>
+                    <p className="text-sm font-black" style={{ color: "#C9B8FF" }}>48 Due Today</p>
+                    <p className="text-[10px] mt-1" style={{ color: "#A1A6C0" }}>Auto-publish active</p>
+                  </div>
+
+                  {/* Cross-Network */}
+                  <div className="p-4 rounded-2xl border text-left group hover:scale-[1.02] transition-all"
+                    style={{ background: "rgba(34,211,238,0.07)", borderColor: "rgba(34,211,238,0.22)" }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Network className="w-3 h-3" style={{ color: "#22D3EE" }} />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#A1A6C0" }}>Cross-Network</span>
+                    </div>
+                    <p className="text-sm font-black" style={{ color: "#7FE0D3" }}>5 Channels</p>
+                    <p className="text-[10px] mt-1" style={{ color: "#A1A6C0" }}>FB, IG, LinkedIn, YT, X</p>
+                  </div>
+
+                  {/* Monthly Reach — with self-drawing sparkline */}
+                  <div className="p-4 rounded-2xl border text-left group hover:scale-[1.02] transition-all"
+                    style={{ background: "rgba(124,92,255,0.08)", borderColor: "rgba(124,92,255,0.25)" }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <TrendingUp className="w-3 h-3" style={{ color: "#7C5CFF" }} />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#A1A6C0" }}>Monthly Reach</span>
+                    </div>
+                    <div className="flex items-end justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-black" style={{ color: "#C9B8FF" }}>142,800+</p>
+                        <span className="text-[10px] font-bold text-emerald-400">↑ 34% this month</span>
+                      </div>
+                      <Sparkline data={SPARKLINE_DATA} color="#7C5CFF" height={28} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Distribution Pipeline */}
+                <div
+                  className="rounded-2xl border p-4"
+                  style={{ background: "rgba(124,92,255,0.04)", borderColor: "rgba(124,92,255,0.14)" }}
+                >
+                  {/* Pipeline header */}
+                  <div
+                    className="flex items-center justify-between pb-3 mb-3 border-b"
+                    style={{ borderColor: "rgba(255,255,255,0.07)" }}
+                  >
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                        Autonomous Content Distribution Pipeline
+                      </h3>
+                      <p className="text-[10px] mt-0.5" style={{ color: "#A1A6C0" }}>
+                        Auto-generating → Quality gate → Scheduling → Publishing
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {/* Pulsing "Worker Active" badge */}
+                      <span
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border"
+                        style={{
+                          background: "rgba(74,222,128,0.12)",
+                          borderColor: "rgba(74,222,128,0.35)",
+                          color: "#4ade80",
+                          boxShadow: "0 0 12px rgba(74,222,128,0.2)",
+                        }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                          style={{ animation: "worker-pulse 1.4s ease-in-out infinite", boxShadow: "0 0 6px #4ade80" }}
+                        />
+                        Worker Active
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Stage progress legend */}
+                  <div className="flex items-center gap-4 mb-3 px-1">
+                    {STAGE_LABELS.map((s, i) => (
+                      <div key={s} className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full" style={{ background: STAGE_COLORS[i] }} />
+                        <span className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: STAGE_COLORS[i] }}>{s}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Rows — slide in on rotation */}
+                  <div className="space-y-2">
+                    {visibleRows.map((rowIdx) => (
+                      <PipelineRow
+                        key={`${rowIdx}-${visibleRows.join(",")}`}
+                        row={ALL_PIPELINE_ROWS[rowIdx]}
+                        entering={enteringIdx === rowIdx}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ══ SEO TAB ══ */}
+            {activeTab === "seo" && (
+              <div className="space-y-5 animate-fade-in">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: "Programmatic Pages", value: "3,000+", cls: "text-[#7FE0D3]", sub: "Locations & Niches" },
+                    { label: "Avg Quality Score",   value: "94.8 / 100", cls: "text-emerald-400", sub: "Zero duplicate content" },
+                    { label: "Keywords in Top 10",  value: "1,200+", cls: "text-[#C9B8FF]", sub: "↑ 18 this week" },
+                    { label: "Organic Traffic Value", value: "$24,900 /mo", cls: "text-[#C9B8FF]", sub: "Equivalent Google Ads" },
+                  ].map(({ label, value, cls, sub }) => (
+                    <div key={label} className="p-4 rounded-2xl border"
+                      style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.07)" }}>
+                      <span className="text-[11px] font-medium" style={{ color: "#A1A6C0" }}>{label}</span>
+                      <p className={`text-base font-bold mt-1 ${cls}`}>{value}</p>
+                      <span className="text-[11px]" style={{ color: "#A1A6C0" }}>{sub}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-2xl border p-4 space-y-3"
+                  style={{ background: "rgba(34,211,238,0.04)", borderColor: "rgba(34,211,238,0.12)" }}>
+                  <p className="text-xs font-bold uppercase tracking-wider text-white pb-2 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+                    Programmatic Landing Page Matrix
+                  </p>
+                  {[
+                    { slug: "/alternatives/apollo/agencies", kw: "Best Apollo alternative for B2B agencies", score: 98, status: "Top 3 Rank" },
+                    { slug: "/find-leads/technology/austin", kw: "Austin tech startup B2B decision makers", score: 95, status: "Indexed" },
+                    { slug: "/tools/subject-line-grader",   kw: "Free cold email subject line analyzer", score: 99, status: "Top 3 Rank" },
+                  ].map((item, i) => (
+                    <div key={i} className="p-3 rounded-xl border flex items-center justify-between text-xs"
+                      style={{ background: "rgba(255,255,255,0.025)", borderColor: "rgba(255,255,255,0.05)" }}>
+                      <div>
+                        <span className="font-mono font-semibold" style={{ color: "#C9B8FF" }}>{item.slug}</span>
+                        <p className="text-[11px] mt-0.5" style={{ color: "#A1A6C0" }}>{item.kw}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-emerald-400 font-bold">Score: {item.score}</span>
+                        <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold"
+                          style={{ background: "rgba(74,222,128,0.1)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.2)" }}>
+                          {item.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ══ OUTREACH TAB ══ */}
+            {activeTab === "leads" && (
+              <div className="space-y-5 animate-fade-in">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: "Total B2B Leads",    value: "9,500+",        cls: "text-[#C9B8FF]",   sub: "100% Verified MX" },
+                    { label: "Email Reply Rate",   value: "8.4%",          cls: "text-emerald-400", sub: "Industry avg: 1.8%" },
+                    { label: "Bounce Rate",        value: "0.3%",          cls: "text-[#7FE0D3]",   sub: "CAN-SPAM compliant" },
+                    { label: "Active Sequences",   value: "14 Workflows",  cls: "text-[#C9B8FF]",   sub: "Personalized vars" },
+                  ].map(({ label, value, cls, sub }) => (
+                    <div key={label} className="p-4 rounded-2xl border"
+                      style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.07)" }}>
+                      <span className="text-[11px] font-medium" style={{ color: "#A1A6C0" }}>{label}</span>
+                      <p className={`text-base font-bold mt-1 ${cls}`}>{value}</p>
+                      <span className="text-[11px]" style={{ color: "#A1A6C0" }}>{sub}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-5 rounded-2xl border"
+                  style={{ background: "rgba(255,61,139,0.05)", borderColor: "rgba(255,61,139,0.15)" }}>
+                  <p className="font-bold mb-2 flex items-center gap-2 text-white">
+                    <Bot className="w-4 h-4" style={{ color: "#FF3D8B" }} />
+                    Autonomous ICP Matching Engine
+                  </p>
+                  <p className="text-xs leading-relaxed" style={{ color: "#A1A6C0" }}>
+                    Custom filters for founder, CMO, VP Sales, revenue bracket (\$1M–\$20M), tech stack (HubSpot, Salesforce, Shopify),
+                    and geographic focus with real-time SMTP deliverability check before dispatching.
+                  </p>
+                </div>
+              </div>
+            )}
+
+          </div>{/* end window body */}
+        </div>{/* end 3D wrapper */}
+      </div>{/* end perspective div */}
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVE LATENCY TICKER — fluctuates ±2ms around a base
+═══════════════════════════════════════════════════════════════ */
+function useJitter(base: number, online: boolean, interval = 1800) {
+  const [val, setVal] = useState(base);
+  useEffect(() => {
+    if (!online) return;
+    const iv = setInterval(() => {
+      setVal(base + Math.round((Math.random() - 0.5) * 4));
+    }, interval);
+    return () => clearInterval(iv);
+  }, [base, online, interval]);
+  return val;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TELEMETRY CARD  — individual glass service card
+═══════════════════════════════════════════════════════════════ */
+type TelemetryCardProps = {
+  icon: React.ReactNode;
+  grad: string;
+  glow: string;
+  title: string;
+  subtitle: string;
+  online: boolean;
+  statusLabel: string;
+  latencyBase: number;
+  rows: [string, string][];
+  transitioning: boolean;
+};
+
+function TelemetryCard({
+  icon, grad, glow, title, subtitle, online, statusLabel, latencyBase, rows, transitioning,
+}: TelemetryCardProps) {
+  const liveLatency = useJitter(latencyBase, online);
+  const [hovered, setHovered] = useState(false);
+
+  /* Swap "latency" row value with live ticker */
+  const liveRows = rows.map(([k, v]) => {
+    if (k.toLowerCase().includes("latency") || k.toLowerCase().includes("state")) {
+      const displayVal = k.toLowerCase().includes("latency")
+        ? `${liveLatency} ms`
+        : online ? `Healthy (${liveLatency}ms Edge)` : "Offline";
+      return [k, displayVal] as [string, string];
+    }
+    return [k, v] as [string, string];
+  });
+
+  return (
+    <div
+      className="relative rounded-[28px] border overflow-hidden transition-all"
+      style={{
+        background: "rgba(255,255,255,0.02)",
+        borderColor: hovered ? glow.replace(")", ",0.45)").replace("rgb", "rgba") : "rgba(255,255,255,0.08)",
+        backdropFilter: "blur(20px)",
+        boxShadow: hovered ? `0 24px 72px ${glow}50` : "none",
+        transform: `scale(${hovered ? 1.025 : 1})`,
+        opacity: transitioning ? 0.6 : 1,
+        transition: "all 0.4s cubic-bezier(0.4,0,0.2,1)",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Top glow strip */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{ background: online ? grad : "linear-gradient(90deg,#ef4444,#f87171)", opacity: 0.8 }}
+      />
+
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
+              style={{ background: online ? grad : "linear-gradient(135deg,#ef4444,#b91c1c)" }}>
+              {icon}
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white leading-tight" style={{ fontFamily: "'Space Grotesk',sans-serif" }}>{title}</h3>
+              <p className="text-[11px] mt-0.5" style={{ color: "#A1A6C0" }}>{subtitle}</p>
+            </div>
+          </div>
+
+          {/* Status dot + badge */}
+          <div className="flex flex-col items-end gap-1.5">
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-all"
+              style={online
+                ? { background: "rgba(74,222,128,0.1)", borderColor: "rgba(74,222,128,0.3)", color: "#4ade80" }
+                : { background: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.3)", color: "#f87171" }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: online ? "#4ade80" : "#ef4444",
+                  boxShadow: online ? "0 0 6px #4ade80" : "0 0 6px #ef4444",
+                  animation: "worker-pulse 1.6s ease-in-out infinite",
+                }}
+              />
+              {statusLabel}
+            </span>
+            {/* Live latency number */}
+            <span
+              className="text-[11px] font-mono font-bold tabular-nums"
+              style={{ color: online ? "#4ade80" : "#f87171" }}
+            >
+              {online ? `${liveLatency}ms` : "—"}
+            </span>
+          </div>
+        </div>
+
+        {/* Animated heartbeat line */}
+        <div className="mb-5 flex items-center gap-3">
+          <span className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "#A1A6C0" }}>Signal</span>
+          <HeartbeatLine color={online ? glow : "#ef4444"} online={online} />
+        </div>
+
+        {/* Key-value rows */}
+        <div className="space-y-2.5 text-xs font-mono border-t pt-4" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          {liveRows.map(([k, v]) => {
+            const isGood = v.includes("Active") || v.includes("ms") || v.includes("Healthy") || v.includes("Connected");
+            return (
+              <div key={k} className="flex justify-between items-center">
+                <span style={{ color: "#A1A6C0" }}>{k}</span>
+                <span className={isGood ? "text-emerald-400 font-semibold" : "text-white"}>{v}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TELEMETRY SECTION
+═══════════════════════════════════════════════════════════════ */
+type TelemetrySectionProps = {
+  health: HealthResponse | null;
+  isBackendOk: boolean;
+  isDbOk: boolean;
+  pingLatency: number;
+  loadingHealth: boolean;
+  checkConnection: () => void;
+};
+
+function TelemetrySection({ health, isBackendOk, isDbOk, pingLatency, loadingHealth, checkConnection }: TelemetrySectionProps) {
+  const [verifyState, setVerifyState] = useState<"idle" | "loading" | "healthy" | "offline">("idle");
+  const [transitioning, setTransitioning] = useState(false);
+
+  const handleVerify = async () => {
+    setVerifyState("loading");
+    setTransitioning(true);
+    await checkConnection();
+    setTimeout(() => {
+      setTransitioning(false);
+      setVerifyState(isBackendOk && isDbOk ? "healthy" : "offline");
+      setTimeout(() => setVerifyState("idle"), 5000);
+    }, 800);
+  };
+
+  const cards: TelemetryCardProps[] = [
+    {
+      icon: <Layers className="w-5 h-5 text-white" />,
+      grad: "linear-gradient(135deg,#7C5CFF,#C9B8FF)",
+      glow: "#7C5CFF",
+      title: "Frontend Service",
+      subtitle: "Next.js 14 App Router · React 18 · TailwindCSS",
+      online: true,
+      statusLabel: "Edge CDN Active",
+      latencyBase: 0,
+      rows: [
+        ["Host:", "growth.getyourclientsb2b.com"],
+        ["SSL & CDN:", "HTTP/2 TLS 1.3 Active"],
+        ["Runtime:", "Next.js 14 / React 18"],
+        ["State:", "Healthy (0ms Edge)"],
+      ],
+      transitioning,
+    },
+    {
+      icon: <Server className="w-5 h-5 text-white" />,
+      grad: "linear-gradient(135deg,#22D3EE,#7FE0D3)",
+      glow: "#22D3EE",
+      title: "Backend Service",
+      subtitle: "Python FastAPI · Async · CORS · Port 8000",
+      online: isBackendOk,
+      statusLabel: isBackendOk ? "Online" : "Offline",
+      latencyBase: 42,
+      rows: [
+        ["Framework:", health?.backend?.framework || "FastAPI"],
+        ["Port:", "8000 (HTTPS Gateway)"],
+        ["Mode:", "Async + CORS enabled"],
+        ["Endpoint:", "growth-api.getyourclientsb2b.com"],
+      ],
+      transitioning,
+    },
+    {
+      icon: <Database className="w-5 h-5 text-white" />,
+      grad: "linear-gradient(135deg,#FF3D8B,#F472B6)",
+      glow: "#FF3D8B",
+      title: "Database Service",
+      subtitle: "PostgreSQL 16 · asyncpg · SQLAlchemy ORM",
+      online: isDbOk,
+      statusLabel: isDbOk ? "Connected" : "Disconnected",
+      latencyBase: pingLatency,
+      rows: [
+        ["Engine:", health?.database?.engine || "postgresql+asyncpg"],
+        ["Ping Latency:", `${pingLatency} ms`],
+        ["Driver Pool:", "Asyncpg (10 connections)"],
+        ["Version:", "PostgreSQL 16"],
+      ],
+      transitioning,
+    },
+  ];
+
+  return (
+    <section
+      id="infrastructure"
+      className="py-24 relative z-10 border-y"
+      style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(5,6,13,0.4)" }}
+    >
+      {/* Top glow divider */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[60vw] max-w-3xl h-px opacity-30"
+        style={{ background: "linear-gradient(90deg,transparent,#4ade80,transparent)" }}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+          <div>
+            <div
+              className="reveal-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border mb-4"
+              style={{ background: "rgba(74,222,128,0.1)", borderColor: "rgba(74,222,128,0.3)", color: "#4ade80" }}
+            >
+              <span
+                className="w-2 h-2 rounded-full bg-emerald-400"
+                style={{ boxShadow: "0 0 7px #4ade80", animation: "worker-pulse 1.4s ease-in-out infinite" }}
+              />
+              ENTERPRISE HIGH-PERFORMANCE CLOUD ARCHITECTURE
+            </div>
+            <h2
+              className="reveal-up text-2xl sm:text-4xl font-extrabold text-white tracking-tight"
+              style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}
+            >
+              Live Backend Engine &amp; Database Telemetry
+            </h2>
+            <p className="text-sm sm:text-base mt-2 max-w-2xl" style={{ color: "#A1A6C0" }}>
+              Real-time verification connecting the Next.js edge frontend, Python FastAPI async engine, and PostgreSQL 16 cluster.
+            </p>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Verify button — smooth state transition */}
+            <button
+              onClick={handleVerify}
+              disabled={verifyState === "loading" || loadingHealth}
+              className="relative overflow-hidden flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-60 active:scale-95 shimmer-btn"
+              style={{
+                background: verifyState === "healthy"
+                  ? "linear-gradient(135deg,#22c55e,#16a34a)"
+                  : verifyState === "offline"
+                  ? "linear-gradient(135deg,#ef4444,#dc2626)"
+                  : "linear-gradient(135deg,#7C5CFF,#3B82F6)",
+                boxShadow: verifyState === "healthy"
+                  ? "0 4px 20px rgba(34,197,94,0.4)"
+                  : "0 4px 20px rgba(124,92,255,0.35)",
+                transition: "background 0.5s ease, box-shadow 0.5s ease",
+              }}
+            >
+              {verifyState === "loading" || loadingHealth ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : verifyState === "healthy" ? (
+                <CheckCircle2 className="w-4 h-4" />
+              ) : verifyState === "offline" ? (
+                <span className="w-4 h-4 flex items-center justify-center font-black">✗</span>
+              ) : (
+                <Activity className="w-4 h-4" />
+              )}
+              <span className="relative z-10">
+                {verifyState === "loading" || loadingHealth
+                  ? "Querying SLA…"
+                  : verifyState === "healthy"
+                  ? "All Systems Healthy ✓"
+                  : verifyState === "offline"
+                  ? "Service Degraded"
+                  : "Verify Live Status"}
+              </span>
+              <span className="shimmer-sweep" />
+            </button>
+
+            {/* API Docs link */}
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL || "https://growth-api.getyourclientsb2b.com"}/docs`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all hover:border-[#7C5CFF]/50 hover:bg-[#7C5CFF]/08"
+              style={{ borderColor: "rgba(255,255,255,0.1)", color: "#A1A6C0" }}
+            >
+              <ExternalLink className="w-4 h-4" />
+              API Docs
+            </a>
+          </div>
+        </div>
+
+        {/* Overall health banner — appears after verify */}
+        {(verifyState === "healthy" || verifyState === "offline") && (
+          <div
+            className="mb-8 p-4 rounded-2xl border flex items-center gap-3 text-sm font-semibold"
+            style={{
+              background: verifyState === "healthy" ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)",
+              borderColor: verifyState === "healthy" ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
+              color: verifyState === "healthy" ? "#4ade80" : "#f87171",
+              animation: "fade-in-kf 0.4s ease both",
+            }}
+          >
+            {verifyState === "healthy" ? (
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <Activity className="w-5 h-5 flex-shrink-0" />
+            )}
+            <span>
+              {verifyState === "healthy"
+                ? "All systems operational — FastAPI backend, PostgreSQL 16, and Edge CDN are healthy."
+                : "One or more services returned a non-200 response. Check your API server logs."}
+            </span>
+            <span className="ml-auto font-mono text-xs opacity-60">{new Date().toLocaleTimeString()}</span>
+          </div>
+        )}
+
+        {/* Three glass cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {cards.map((card) => (
+            <TelemetryCard key={card.title} {...card} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    MAIN PAGE COMPONENT
 ═══════════════════════════════════════════════════════════════ */
 export default function HomePage() {
@@ -1049,175 +1964,17 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          DASHBOARD PREVIEW
+          DASHBOARD PREVIEW — 3D Browser Mockup
       ══════════════════════════════════════════════════════════ */}
-      <section className="py-20 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <div className="reveal-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-5 border"
-            style={{ background: "rgba(59,130,246,0.1)", borderColor: "rgba(59,130,246,0.3)", color: T.teal }}>
-            LIVE DASHBOARD PREVIEW
-          </div>
-          <h2 className="reveal-up text-3xl sm:text-4xl font-black text-white tracking-tight"
-            style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
-            One Command Center for Everything
-          </h2>
-        </div>
-
-        <div className="reveal-up rounded-3xl overflow-hidden border"
-          style={{ borderColor: "rgba(124,92,255,0.25)", boxShadow: "0 0 60px rgba(124,92,255,0.14), 0 24px 60px rgba(0,0,0,0.6)", animationDelay: "0.08s" }}>
-          {/* Title bar */}
-          <div className="px-5 py-3.5 border-b flex items-center justify-between"
-            style={{ background: "rgba(255,255,255,0.025)", borderColor: "rgba(255,255,255,0.07)" }}>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-rose-500/80" />
-              <span className="w-3 h-3 rounded-full bg-amber-400/80" />
-              <span className="w-3 h-3 rounded-full bg-emerald-400/80" />
-              <span className="ml-4 text-xs font-mono" style={{ color: T.muted }}>growth.getyourclientsb2b.com/admin/dashboard</span>
-            </div>
-            <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.05)" }}>
-              {(["social", "seo", "leads"] as const).map((tab) => (
-                <button key={tab} onClick={() => setActiveTab(tab)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize"
-                  style={activeTab === tab
-                    ? { background: T.grad, color: "#fff", boxShadow: "0 4px 14px rgba(124,92,255,0.4)" }
-                    : { color: T.muted }}>
-                  {tab === "seo" ? "SEO" : tab === "leads" ? "Outreach" : "Social"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tab content */}
-          <div className="p-6 md:p-8" style={{ background: "rgba(5,6,13,0.9)" }}>
-
-            {/* SOCIAL TAB */}
-            {activeTab === "social" && (
-              <div className="space-y-5 animate-fade-in">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: "Meta Connected", value: "FB & Instagram", cls: "text-emerald-400", sub: "Page ID: 1125229983597930", icon: CheckCircle2 },
-                    { label: "Scheduled Posts", value: "48 Due Today", cls: "text-[#C9B8FF]", sub: "Auto-publish active", icon: Zap },
-                    { label: "Cross-Network", value: "5 Channels", cls: "text-[#7FE0D3]", sub: "FB, IG, LinkedIn, YT, X", icon: Network },
-                    { label: "Monthly Reach", value: "142,800+", cls: "text-[#C9B8FF]", sub: "↑ 34% this month", icon: TrendingUp },
-                  ].map(({ label, value, cls, sub, icon: Icon }) => (
-                    <div key={label} className="p-4 rounded-2xl border text-left"
-                      style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.07)" }}>
-                      <span className="text-[11px] font-medium" style={{ color: T.muted }}>{label}</span>
-                      <p className={`text-base font-bold mt-1 flex items-center gap-1.5 ${cls}`}><Icon className="w-4 h-4" />{value}</p>
-                      <span className="text-[11px]" style={{ color: T.muted }}>{sub}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="rounded-2xl border p-4 space-y-3"
-                  style={{ background: "rgba(124,92,255,0.05)", borderColor: "rgba(124,92,255,0.14)" }}>
-                  <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-                    <span className="text-xs font-bold uppercase tracking-wider text-white">Autonomous Content Distribution Pipeline</span>
-                    <span className="flex items-center gap-1 text-emerald-400 text-xs font-semibold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Worker Active
-                    </span>
-                  </div>
-                  {[
-                    { ch: "Facebook + Instagram Business", caption: "🚀 How top B2B agencies automate client acquisition...", status: "Today, 4:00 PM", badge: "Sync Enabled", color: T.blue },
-                    { ch: "LinkedIn Company & Founder", caption: "The playbook we used to scale 15 client accounts past $50k MRR...", status: "Tomorrow, 9:00 AM", badge: "v2 API Ready", color: T.teal },
-                    { ch: "YouTube Shorts & Video Hub", caption: "3 AI Automation tools every agency owner must deploy in 2026.", status: "Draft Ready", badge: "Script Generated", color: T.pink },
-                  ].map((row, i) => (
-                    <div key={i} className="p-3.5 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all hover:border-[#7C5CFF]/30"
-                      style={{ background: "rgba(255,255,255,0.025)", borderColor: "rgba(255,255,255,0.05)" }}>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-lg text-[11px] font-bold border"
-                            style={{ color: row.color, borderColor: `${row.color}30`, background: `${row.color}10` }}>
-                            {row.ch}
-                          </span>
-                          <span className="text-xs text-emerald-400 font-mono">{row.badge}</span>
-                        </div>
-                        <p className="text-xs line-clamp-1" style={{ color: T.muted }}>{row.caption}</p>
-                      </div>
-                      <span className="text-xs font-mono shrink-0" style={{ color: T.muted }}>{row.status}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* SEO TAB */}
-            {activeTab === "seo" && (
-              <div className="space-y-5 text-left animate-fade-in">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: "Programmatic Pages", value: "3,000+ Generated", cls: "text-[#7FE0D3]", sub: "Locations & Niches" },
-                    { label: "Avg Quality Score", value: "94.8 / 100", cls: "text-emerald-400", sub: "Zero duplicate content" },
-                    { label: "Keywords in Top 10", value: "1,200+ Keywords", cls: "text-[#C9B8FF]", sub: "↑ 18 this week" },
-                    { label: "Organic Traffic Value", value: "$24,900 /mo", cls: "text-[#C9B8FF]", sub: "Equivalent Google Ads" },
-                  ].map(({ label, value, cls, sub }) => (
-                    <div key={label} className="p-4 rounded-2xl border"
-                      style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.07)" }}>
-                      <span className="text-[11px] font-medium" style={{ color: T.muted }}>{label}</span>
-                      <p className={`text-base font-bold mt-1 ${cls}`}>{value}</p>
-                      <span className="text-[11px]" style={{ color: T.muted }}>{sub}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="rounded-2xl border p-4 space-y-3"
-                  style={{ background: "rgba(34,211,238,0.04)", borderColor: "rgba(34,211,238,0.12)" }}>
-                  {[
-                    { slug: "/alternatives/apollo/agencies", kw: "Best Apollo alternative for B2B agencies", score: 98, status: "Top 3 Rank" },
-                    { slug: "/find-leads/technology/austin", kw: "Austin tech startup B2B decision makers", score: 95, status: "Indexed" },
-                    { slug: "/tools/subject-line-grader", kw: "Free cold email subject line analyzer", score: 99, status: "Top 3 Rank" },
-                  ].map((item, i) => (
-                    <div key={i} className="p-3 rounded-xl border flex items-center justify-between text-xs"
-                      style={{ background: "rgba(255,255,255,0.025)", borderColor: "rgba(255,255,255,0.05)" }}>
-                      <div>
-                        <span className="font-mono font-semibold" style={{ color: T.lavender }}>{item.slug}</span>
-                        <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>{item.kw}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-emerald-400 font-bold">Score: {item.score}</span>
-                        <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold"
-                          style={{ background: "rgba(74,222,128,0.1)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.2)" }}>
-                          {item.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* OUTREACH TAB */}
-            {activeTab === "leads" && (
-              <div className="space-y-5 text-left animate-fade-in">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: "Total B2B Leads", value: "9,500+", cls: "text-[#C9B8FF]", sub: "100% Verified MX" },
-                    { label: "Email Reply Rate", value: "8.4%", cls: "text-emerald-400", sub: "Industry avg: 1.8%" },
-                    { label: "Bounce Rate", value: "0.3%", cls: "text-[#7FE0D3]", sub: "CAN-SPAM compliant" },
-                    { label: "Active Sequences", value: "14 Workflows", cls: "text-[#C9B8FF]", sub: "Personalized vars" },
-                  ].map(({ label, value, cls, sub }) => (
-                    <div key={label} className="p-4 rounded-2xl border"
-                      style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.07)" }}>
-                      <span className="text-[11px] font-medium" style={{ color: T.muted }}>{label}</span>
-                      <p className={`text-base font-bold mt-1 ${cls}`}>{value}</p>
-                      <span className="text-[11px]" style={{ color: T.muted }}>{sub}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-5 rounded-2xl border"
-                  style={{ background: "rgba(255,61,139,0.05)", borderColor: "rgba(255,61,139,0.15)" }}>
-                  <p className="font-bold mb-2 flex items-center gap-2 text-white">
-                    <Bot className="w-4 h-4" style={{ color: T.pink }} />
-                    Autonomous ICP Matching Engine
-                  </p>
-                  <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
-                    Custom filters for founder, CMO, VP Sales, revenue bracket (\$1M–\$20M), tech stack (HubSpot, Salesforce, Shopify),
-                    and geographic focus with real-time SMTP deliverability check before dispatching.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+      <DashboardPreview
+        isLoggedIn={isLoggedIn}
+        isBackendOk={isBackendOk}
+        isDbOk={isDbOk}
+        pingLatency={pingLatency}
+        health={health}
+        loadingHealth={loadingHealth}
+        checkConnection={checkConnection}
+      />
 
       {/* ══════════════════════════════════════════════════════════
           PIPELINE SECTION
@@ -1368,98 +2125,16 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          INFRASTRUCTURE TELEMETRY
+          INFRASTRUCTURE TELEMETRY — Enhanced
       ══════════════════════════════════════════════════════════ */}
-      <section id="infrastructure" className="py-20 relative z-10 border-y"
-        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.01)" }}>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[50vw] h-px opacity-25"
-          style={{ background: `linear-gradient(90deg, transparent, #4ade80, transparent)` }} />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-            <div>
-              <div className="reveal-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border mb-4"
-                style={{ background: "rgba(74,222,128,0.1)", borderColor: "rgba(74,222,128,0.3)", color: "#4ade80" }}>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" style={{ boxShadow: "0 0 6px #4ade80" }} />
-                ENTERPRISE HIGH-PERFORMANCE CLOUD ARCHITECTURE
-              </div>
-              <h2 className="reveal-up text-2xl sm:text-4xl font-extrabold text-white tracking-tight"
-                style={{ fontFamily: "'Space Grotesk','Plus Jakarta Sans',sans-serif" }}>
-                Live Backend Engine & Database Telemetry
-              </h2>
-              <p className="text-sm sm:text-base mt-2 max-w-2xl" style={{ color: T.muted }}>
-                Real-time verification connecting the Next.js edge frontend, Python FastAPI async engine, and PostgreSQL 16 cluster.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button onClick={checkConnection} disabled={loadingHealth}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all disabled:opacity-50 active:scale-95 shimmer-btn"
-                style={{ background: T.grad, boxShadow: "0 4px 20px rgba(124,92,255,0.35)" }}>
-                <RefreshCw className={`w-4 h-4 ${loadingHealth ? "animate-spin" : ""}`} />
-                {loadingHealth ? "Querying SLA..." : "Test Live Ping"}
-              </button>
-              <a href={`${process.env.NEXT_PUBLIC_API_URL || "https://growth-api.getyourclientsb2b.com"}/docs`}
-                target="_blank" rel="noreferrer"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all hover:border-[#7C5CFF]/40"
-                style={{ borderColor: "rgba(255,255,255,0.1)", color: T.muted }}>
-                <ExternalLink className="w-4 h-4" />API Docs
-              </a>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Layers, grad: T.grad, glow: T.violet, title: "Frontend Service",
-                sub: "Next.js 14 App Router · React 18 · TailwindCSS",
-                badge: { label: "Edge CDN Active", ok: true },
-                rows: [["Host:", "growth.getyourclientsb2b.com"], ["SSL & CDN:", "HTTP/2 TLS 1.3 Active"], ["State:", "Healthy (0ms Edge)"]],
-              },
-              {
-                icon: Server, grad: `linear-gradient(135deg,${T.cyan},${T.teal})`, glow: T.cyan, title: "Backend Service",
-                sub: "Python FastAPI with CORS and Async Engine",
-                badge: { label: isBackendOk ? "Online" : "Offline", ok: isBackendOk },
-                rows: [["Framework:", health?.backend?.framework || "FastAPI"], ["Port:", "8000 (HTTPS Gateway)"], ["API Endpoint:", "growth-api.getyourclientsb2b.com"]],
-              },
-              {
-                icon: Database, grad: T.gradPink, glow: T.pink, title: "Database Service",
-                sub: "PostgreSQL 16 with asyncpg driver & SQLAlchemy",
-                badge: { label: isDbOk ? "Connected" : "Connecting...", ok: isDbOk },
-                rows: [["Dialect:", health?.database?.engine || "postgresql+asyncpg"], ["Ping Latency:", `${pingLatency} ms`], ["Driver Pool:", "Asyncpg (10 conns)"]],
-              },
-            ].map(({ icon: Icon, grad, glow, title, sub, badge, rows }) => (
-              <div key={title} className="p-6 rounded-[28px] border transition-all hover:scale-[1.02]"
-                style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.07)", backdropFilter: "blur(16px)" }}
-                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.boxShadow = `0 20px 60px ${glow}40`; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
-              >
-                <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: grad }}>
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
-                    style={badge.ok
-                      ? { background: "rgba(74,222,128,0.1)", borderColor: "rgba(74,222,128,0.25)", color: "#4ade80" }
-                      : { background: "rgba(248,113,113,0.1)", borderColor: "rgba(248,113,113,0.25)", color: "#f87171" }}>
-                    {badge.ok && <CheckCircle2 className="w-3.5 h-3.5" />}
-                    {badge.label}
-                  </span>
-                </div>
-                <h3 className="text-base font-bold text-white">{title}</h3>
-                <p className="text-xs mt-1" style={{ color: T.muted }}>{sub}</p>
-                <div className="mt-5 pt-4 border-t space-y-2.5 text-xs font-mono" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  {rows.map(([k, v]) => (
-                    <div key={k} className="flex justify-between">
-                      <span style={{ color: T.muted }}>{k}</span>
-                      <span className={v.includes("Active") || v.includes("ms") ? "text-emerald-400 font-semibold" : "text-white"}>{v}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TelemetrySection
+        health={health}
+        isBackendOk={isBackendOk}
+        isDbOk={isDbOk}
+        pingLatency={pingLatency}
+        loadingHealth={loadingHealth}
+        checkConnection={checkConnection}
+      />
 
       {/* ══════════════════════════════════════════════════════════
           COMPARISON TABLE
@@ -1679,6 +2354,39 @@ export default function HomePage() {
         .shimmer-btn:hover .shimmer-sweep {
           transform:translateX(220%);
           transition:transform 0.68s ease;
+        }
+
+        /* ─── Worker / status dot pulse ─── */
+        @keyframes worker-pulse {
+          0%,100% { opacity:1; transform:scale(1); }
+          50%      { opacity:0.45; transform:scale(0.75); }
+        }
+
+        /* ─── Heartbeat draw + loop ─── */
+        @keyframes hb-draw {
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes hb-pulse {
+          0%,100% { opacity:1; }
+          50%      { opacity:0.35; }
+        }
+
+        /* ─── Pipeline row slide-in ─── */
+        @keyframes row-slide-in {
+          from { opacity:0; transform:translateY(-14px) scaleY(0.88); }
+          to   { opacity:1; transform:translateY(0) scaleY(1); }
+        }
+
+        /* ─── Tab underline keyframe (fallback) ─── */
+        @keyframes underline-slide {
+          from { opacity:0; }
+          to   { opacity:1; }
+        }
+
+        /* ─── Health banner appear ─── */
+        @keyframes health-appear {
+          from { opacity:0; transform:translateY(-8px); }
+          to   { opacity:1; transform:translateY(0); }
         }
       `}</style>
     </div>
