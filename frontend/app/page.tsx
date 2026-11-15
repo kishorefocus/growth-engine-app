@@ -761,7 +761,7 @@ type PipelineRowData = {
 
 const STAGE_LABELS = ["Scheduled", "Publishing…", "Published ✓"];
 const STAGE_COLORS = ["#A1A6C0", "#F59E0B", "#4ade80"];
-const STAGE_BG    = ["rgba(161,166,192,0.1)", "rgba(245,158,11,0.15)", "rgba(74,222,128,0.12)"];
+const STAGE_BG = ["rgba(161,166,192,0.1)", "rgba(245,158,11,0.15)", "rgba(74,222,128,0.12)"];
 
 function PipelineRow({ row, entering }: { row: PipelineRowData; entering: boolean }) {
   const [stage, setStage] = useState<0 | 1 | 2>(row.stage);
@@ -773,7 +773,7 @@ function PipelineRow({ row, entering }: { row: PipelineRowData; entering: boolea
     const t1 = setTimeout(() => { setStage(1); setProgPct(55); }, 1800);
     const t2 = setTimeout(() => { setStage(2); setProgPct(100); }, 3600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -906,8 +906,8 @@ function DashboardPreview(_props: DashboardPreviewProps) {
 
   const TABS = [
     { id: "social" as const, label: "Social" },
-    { id: "seo"    as const, label: "SEO" },
-    { id: "leads"  as const, label: "Outreach" },
+    { id: "seo" as const, label: "SEO" },
+    { id: "leads" as const, label: "Outreach" },
   ];
 
   return (
@@ -1139,8 +1139,8 @@ function DashboardPreview(_props: DashboardPreviewProps) {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
                     { label: "Programmatic Pages", value: "3,000+", cls: "text-[#7FE0D3]", sub: "Locations & Niches" },
-                    { label: "Avg Quality Score",   value: "94.8 / 100", cls: "text-emerald-400", sub: "Zero duplicate content" },
-                    { label: "Keywords in Top 10",  value: "1,200+", cls: "text-[#C9B8FF]", sub: "↑ 18 this week" },
+                    { label: "Avg Quality Score", value: "94.8 / 100", cls: "text-emerald-400", sub: "Zero duplicate content" },
+                    { label: "Keywords in Top 10", value: "1,200+", cls: "text-[#C9B8FF]", sub: "↑ 18 this week" },
                     { label: "Organic Traffic Value", value: "$24,900 /mo", cls: "text-[#C9B8FF]", sub: "Equivalent Google Ads" },
                   ].map(({ label, value, cls, sub }) => (
                     <div key={label} className="p-4 rounded-2xl border"
@@ -1159,7 +1159,7 @@ function DashboardPreview(_props: DashboardPreviewProps) {
                   {[
                     { slug: "/alternatives/apollo/agencies", kw: "Best Apollo alternative for B2B agencies", score: 98, status: "Top 3 Rank" },
                     { slug: "/find-leads/technology/austin", kw: "Austin tech startup B2B decision makers", score: 95, status: "Indexed" },
-                    { slug: "/tools/subject-line-grader",   kw: "Free cold email subject line analyzer", score: 99, status: "Top 3 Rank" },
+                    { slug: "/tools/subject-line-grader", kw: "Free cold email subject line analyzer", score: 99, status: "Top 3 Rank" },
                   ].map((item, i) => (
                     <div key={i} className="p-3 rounded-xl border flex items-center justify-between text-xs"
                       style={{ background: "rgba(255,255,255,0.025)", borderColor: "rgba(255,255,255,0.05)" }}>
@@ -1185,10 +1185,10 @@ function DashboardPreview(_props: DashboardPreviewProps) {
               <div className="space-y-5 animate-fade-in">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { label: "Total B2B Leads",    value: "9,500+",        cls: "text-[#C9B8FF]",   sub: "100% Verified MX" },
-                    { label: "Email Reply Rate",   value: "8.4%",          cls: "text-emerald-400", sub: "Industry avg: 1.8%" },
-                    { label: "Bounce Rate",        value: "0.3%",          cls: "text-[#7FE0D3]",   sub: "CAN-SPAM compliant" },
-                    { label: "Active Sequences",   value: "14 Workflows",  cls: "text-[#C9B8FF]",   sub: "Personalized vars" },
+                    { label: "Total B2B Leads", value: "9,500+", cls: "text-[#C9B8FF]", sub: "100% Verified MX" },
+                    { label: "Email Reply Rate", value: "8.4%", cls: "text-emerald-400", sub: "Industry avg: 1.8%" },
+                    { label: "Bounce Rate", value: "0.3%", cls: "text-[#7FE0D3]", sub: "CAN-SPAM compliant" },
+                    { label: "Active Sequences", value: "14 Workflows", cls: "text-[#C9B8FF]", sub: "Personalized vars" },
                   ].map(({ label, value, cls, sub }) => (
                     <div key={label} className="p-4 rounded-2xl border"
                       style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.07)" }}>
@@ -1481,8 +1481,8 @@ function TelemetrySection({ health, isBackendOk, isDbOk, pingLatency, loadingHea
                 background: verifyState === "healthy"
                   ? "linear-gradient(135deg,#22c55e,#16a34a)"
                   : verifyState === "offline"
-                  ? "linear-gradient(135deg,#ef4444,#dc2626)"
-                  : "linear-gradient(135deg,#7C5CFF,#3B82F6)",
+                    ? "linear-gradient(135deg,#ef4444,#dc2626)"
+                    : "linear-gradient(135deg,#7C5CFF,#3B82F6)",
                 boxShadow: verifyState === "healthy"
                   ? "0 4px 20px rgba(34,197,94,0.4)"
                   : "0 4px 20px rgba(124,92,255,0.35)",
@@ -1502,10 +1502,10 @@ function TelemetrySection({ health, isBackendOk, isDbOk, pingLatency, loadingHea
                 {verifyState === "loading" || loadingHealth
                   ? "Querying SLA…"
                   : verifyState === "healthy"
-                  ? "All Systems Healthy ✓"
-                  : verifyState === "offline"
-                  ? "Service Degraded"
-                  : "Verify Live Status"}
+                    ? "All Systems Healthy ✓"
+                    : verifyState === "offline"
+                      ? "Service Degraded"
+                      : "Verify Live Status"}
               </span>
               <span className="shimmer-sweep" />
             </button>
@@ -1614,11 +1614,11 @@ function ComparisonTable() {
   }, []);
 
   const rows = [
-    { feat: "Social Media Scheduling",  old: "Buffer / Hootsuite ($120/mo)", ge: "Included — Meta, LinkedIn, X, YT" },
-    { feat: "Programmatic SEO Engine",  old: "Custom engineering ($2,000+)", ge: "Built-in 1-Click Page Generator" },
-    { feat: "Cold Email Outreach",       old: "Instantly / Smartlead ($100/mo)", ge: "Included — Warmup + Validation" },
-    { feat: "Video Script Planning",     old: "Notion / ChatGPT copy-paste",  ge: "Integrated Script-to-Social Studio" },
-    { feat: "Backend Engine",            old: "Disconnected Zapier webhooks", ge: "FastAPI + PostgreSQL 16 (18ms SLA)" },
+    { feat: "Social Media Scheduling", old: "Buffer / Hootsuite ($120/mo)", ge: "Included — Meta, LinkedIn, X, YT" },
+    { feat: "Programmatic SEO Engine", old: "Custom engineering ($2,000+)", ge: "Built-in 1-Click Page Generator" },
+    { feat: "Cold Email Outreach", old: "Instantly / Smartlead ($100/mo)", ge: "Included — Warmup + Validation" },
+    { feat: "Video Script Planning", old: "Notion / ChatGPT copy-paste", ge: "Integrated Script-to-Social Studio" },
+    { feat: "Backend Engine", old: "Disconnected Zapier webhooks", ge: "FastAPI + PostgreSQL 16 (18ms SLA)" },
   ];
 
   return (
@@ -1838,9 +1838,9 @@ export default function HomePage() {
   /* Memoised parallax style so renders don't thrash */
   const orbStyle = useMemo(() => ({
     violet: { transform: `translate(${mouse.x * 20}px, ${mouse.y * 14}px)` },
-    pink:   { transform: `translate(${mouse.x * -16}px, ${mouse.y * 12}px)` },
-    cyan:   { transform: `translate(${mouse.x * 12}px, ${mouse.y * -10}px)` },
-    grid:   { transform: `translate(${mouse.x * 7}px, ${mouse.y * 5}px)` },
+    pink: { transform: `translate(${mouse.x * -16}px, ${mouse.y * 12}px)` },
+    cyan: { transform: `translate(${mouse.x * 12}px, ${mouse.y * -10}px)` },
+    grid: { transform: `translate(${mouse.x * 7}px, ${mouse.y * 5}px)` },
   }), [mouse]);
 
   return (
@@ -1942,7 +1942,6 @@ export default function HomePage() {
               { href: "#phone-showcase", label: "Platform", color: T.lavender },
               { href: "#social-automation", label: "Social", color: T.teal },
               { href: "#seo-manager", label: "SEO", color: T.cyan },
-              { href: "#infrastructure", label: "Live Status", color: T.blue },
             ].map(({ href, label, color }) => (
               <a key={label} href={href} className="opacity-65 hover:opacity-100 transition-all"
                 style={{ color }}
@@ -2025,13 +2024,6 @@ export default function HomePage() {
             <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             <span className="shimmer-sweep" />
           </Link>
-
-          <a href="#infrastructure"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-4 rounded-2xl font-semibold text-sm border transition-all hover:border-[#22D3EE]/40 hover:bg-white/[0.04]"
-            style={{ borderColor: "rgba(255,255,255,0.1)", color: T.muted }}>
-            <Activity className="w-4 h-4 text-emerald-400" />
-            Verify Live Backend & DB SLA
-          </a>
         </div>
 
         {/* Rating strip */}
@@ -2099,7 +2091,7 @@ export default function HomePage() {
               phone={phone}
               isHovered={hoveredPhone === i}
               isActive={hoveredPhone === null || hoveredPhone === i}
-              // @ts-ignore — event delegation via wrapper
+            // @ts-ignore — event delegation via wrapper
             />
           ))}
           {/* Invisible hover zones */}
@@ -2259,11 +2251,11 @@ export default function HomePage() {
               bullets: ["Cross-posting from Facebook to Instagram", "AI Hook, caption & hashtag generator", "Autonomous background worker publishing"],
               microAnim: "post-schedule",
               microEl: (
-                <div style={{ position:"relative", width:40, height:40 }}>
-                  <div style={{ position:"absolute", inset:0, borderRadius:10, background:"rgba(124,92,255,0.18)", display:"flex", alignItems:"center", justifyContent:"center", animation:"post-schedule 3s ease-in-out infinite" }}>
-                    <span style={{ fontSize:18 }}>📅</span>
+                <div style={{ position: "relative", width: 40, height: 40 }}>
+                  <div style={{ position: "absolute", inset: 0, borderRadius: 10, background: "rgba(124,92,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", animation: "post-schedule 3s ease-in-out infinite" }}>
+                    <span style={{ fontSize: 18 }}>📅</span>
                   </div>
-                  <div style={{ position:"absolute", bottom:-4, right:-4, width:14, height:14, borderRadius:"50%", background:"#10B981", display:"flex", alignItems:"center", justifyContent:"center", fontSize:8, color:"white", fontWeight:800 }}>✓</div>
+                  <div style={{ position: "absolute", bottom: -4, right: -4, width: 14, height: 14, borderRadius: "50%", background: "#10B981", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "white", fontWeight: 800 }}>✓</div>
                 </div>
               ),
             },
@@ -2274,11 +2266,11 @@ export default function HomePage() {
               desc: "Generate thousands of high-converting, Google-compliant comparison and location pages. Automated JSON-LD schema, quality score vetting, and instant XML sitemap indexing.",
               bullets: ["Zero keyword cannibalization engine", "Full Google Search Console auto-ping", "Built-in lead capture & conversion forms"],
               microEl: (
-                <div style={{ position:"relative", width:40, height:40, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                  {[0,1,2].map(i => (
-                    <div key={i} style={{ position:"absolute", width:40, height:40, borderRadius:"50%", border:`1.5px solid ${T.cyan}`, opacity:0, animation:`ping-ripple 2.4s ease-out ${i*0.8}s infinite` }} />
+                <div style={{ position: "relative", width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {[0, 1, 2].map(i => (
+                    <div key={i} style={{ position: "absolute", width: 40, height: 40, borderRadius: "50%", border: `1.5px solid ${T.cyan}`, opacity: 0, animation: `ping-ripple 2.4s ease-out ${i * 0.8}s infinite` }} />
                   ))}
-                  <span style={{ fontSize:16, position:"relative", zIndex:1 }}>🌐</span>
+                  <span style={{ fontSize: 16, position: "relative", zIndex: 1 }}>🌐</span>
                 </div>
               ),
             },
@@ -2289,8 +2281,8 @@ export default function HomePage() {
               desc: "Run ultra-personalized, deliverability-optimized email sequences with domain warmup, real-time MX validation, and automated reply sentiment analysis.",
               bullets: ["Mailbox rotation & daily sending caps", "One-click unsubscribe compliance", "Automated positive reply routing to CRM"],
               microEl: (
-                <div style={{ width:48, height:32, position:"relative", overflow:"hidden" }}>
-                  <div style={{ position:"absolute", left:0, top:"50%", transform:"translateY(-50%)", fontSize:20, animation:"envelope-fly 2.2s ease-in-out infinite" }}>✉️</div>
+                <div style={{ width: 48, height: 32, position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", fontSize: 20, animation: "envelope-fly 2.2s ease-in-out infinite" }}>✉️</div>
                 </div>
               ),
             },
@@ -2300,8 +2292,8 @@ export default function HomePage() {
               desc: "Plan high-retention video scripts for YouTube, TikTok, and Instagram Reels. Hook libraries, pacing indicators, and visual cue annotations included.",
               bullets: ["Script to multi-format repurposing", "Automated description & tag generator", "Visual storyboard direction"],
               microEl: (
-                <div style={{ width:52, height:10, background:"rgba(255,255,255,0.08)", borderRadius:5, overflow:"hidden", position:"relative" }}>
-                  <div style={{ position:"absolute", top:0, left:0, height:"100%", background:`linear-gradient(90deg,${T.blue},${T.violet})`, borderRadius:5, animation:"timeline-scrub 2.4s linear infinite" }} />
+                <div style={{ width: 52, height: 10, background: "rgba(255,255,255,0.08)", borderRadius: 5, overflow: "hidden", position: "relative" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, height: "100%", background: `linear-gradient(90deg,${T.blue},${T.violet})`, borderRadius: 5, animation: "timeline-scrub 2.4s linear infinite" }} />
                 </div>
               ),
             },
@@ -2311,7 +2303,7 @@ export default function HomePage() {
               desc: "Enforce brand guidelines across every channel. Set banned phrases, target persona criteria, and unique value propositions so all content matches your tone exactly.",
               bullets: ["Centralized Brand Profile & Tone matrix", "Automated banned phrase filter", "Customer persona tailored messaging"],
               microEl: (
-                <div style={{ fontSize:24, animation:"shield-check 2.6s ease-in-out infinite", display:"inline-block" }}>🛡️</div>
+                <div style={{ fontSize: 24, animation: "shield-check 2.6s ease-in-out infinite", display: "inline-block" }}>🛡️</div>
               ),
             },
             {
@@ -2320,9 +2312,9 @@ export default function HomePage() {
               desc: "Track clicks, conversions, and client acquisitions across social posts, SEO pages, and cold email campaigns with unified first-party tracking links.",
               bullets: ["Custom shortlink redirect router (/r/code)", "Real-time conversion funnel tracking", "Executive revenue & pipeline dashboards"],
               microEl: (
-                <div style={{ display:"flex", alignItems:"flex-end", gap:3, height:28 }}>
-                  {[40,65,50,80,70,100].map((h, i) => (
-                    <div key={i} style={{ width:5, borderRadius:3, background:`linear-gradient(to top,${T.teal},${T.cyan})`, height:`${h}%`, animation:`bars-rise 2s ease-in-out ${i*0.15}s infinite` }} />
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 28 }}>
+                  {[40, 65, 50, 80, 70, 100].map((h, i) => (
+                    <div key={i} style={{ width: 5, borderRadius: 3, background: `linear-gradient(to top,${T.teal},${T.cyan})`, height: `${h}%`, animation: `bars-rise 2s ease-in-out ${i * 0.15}s infinite` }} />
                   ))}
                 </div>
               ),
@@ -2334,7 +2326,7 @@ export default function HomePage() {
                   style={{ background: grad, boxShadow: `0 4px 20px ${glow}44` }}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex items-center justify-center" style={{ minWidth:52, minHeight:32 }}>
+                <div className="flex items-center justify-center" style={{ minWidth: 52, minHeight: 32 }}>
                   {microEl}
                 </div>
               </div>
@@ -2352,17 +2344,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════════
-          INFRASTRUCTURE TELEMETRY — Enhanced
-      ══════════════════════════════════════════════════════════ */}
-      <TelemetrySection
-        health={health}
-        isBackendOk={isBackendOk}
-        isDbOk={isDbOk}
-        pingLatency={pingLatency}
-        loadingHealth={loadingHealth}
-        checkConnection={checkConnection}
-      />
 
       {/* ══════════════════════════════════════════════════════════
           COMPARISON TABLE — Premium with Save counter + animated rows
@@ -2510,7 +2491,8 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════════════
           GLOBAL KEYFRAME ANIMATIONS
       ══════════════════════════════════════════════════════════ */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after {
             animation-duration: 0.01ms !important;
