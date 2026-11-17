@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Bot,
   CheckCircle2,
+  Clock,
   Database,
   ExternalLink,
   Flame,
@@ -137,132 +138,60 @@ function useTyping(texts: string[], speed = 38, pause = 2800) {
 ═══════════════════════════════════════════════════════════════ */
 const PHONES = [
   {
-    id: "instagram",
-    label: "Instagram",
-    color: T.pink,
-    glow: "rgba(255,61,139,0.55)",
-    cardGrad: `linear-gradient(160deg, #2d0022 0%, #1a0030 50%, #0a0015 100%)`,
-    rot: -16,
-    vy: 28,
+    id: "youtube",
+    label: "YouTube",
+    color: "#FF0000",
+    glow: "rgba(255,0,0,0.45)",
+    cardGrad: `linear-gradient(160deg, #200000 0%, #120000 50%, #080000 100%)`,
+    rot: -8,
+    vy: 14,
     floatAnim: "float-a",
     delay: 0,
-    post: {
-      avatar: "🏢",
-      handle: "@getyourclients",
-      time: "2m ago",
-      texts: [
-        "5 ways agencies land clients on autopilot 🤖",
-        "Zero cold calls. Zero manual outreach.",
-        "Just pure autonomous growth systems.",
-      ],
-      hashtags: "#B2BGrowth #AgencyLife #Automation",
-      likes: 847,
-      comments: 134,
-      type: "carousel",
-      slides: ["01/05", "02/05"],
-    },
+    image: "/screenshots/youtubephone.png",
+    schedule: "Scheduled 4 PM",
+    leads: "+1 lead",
+  },
+  {
+    id: "twitter",
+    label: "X (Twitter)",
+    color: "#1D9BF0",
+    glow: "rgba(29,155,240,0.45)",
+    cardGrad: `linear-gradient(160deg, #0d1829 0%, #070d18 50%, #03060a 100%)`,
+    rot: -2.5,
+    vy: 0,
+    floatAnim: "float-b",
+    delay: 0.6,
+    image: "/screenshots/twitterphone.png",
+    schedule: "Scheduled 4 PM",
+    leads: "+1 lead",
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    color: "#E1306C",
+    glow: "rgba(225,48,108,0.45)",
+    cardGrad: `linear-gradient(160deg, #2d0022 0%, #1a0030 50%, #0a0015 100%)`,
+    rot: 2.5,
+    vy: 0,
+    floatAnim: "float-c",
+    delay: 1.2,
+    image: "/screenshots/instagramphone.png",
+    schedule: "Scheduled 4 PM",
+    leads: "+1 lead",
   },
   {
     id: "facebook",
     label: "Facebook",
-    color: "#4267B2",
-    glow: "rgba(66,103,178,0.55)",
+    color: "#1877F2",
+    glow: "rgba(24,119,242,0.45)",
     cardGrad: `linear-gradient(160deg, #001233 0%, #0a1628 50%, #050d1a 100%)`,
-    rot: -7,
-    vy: 10,
-    floatAnim: "float-b",
-    delay: 0.6,
-    post: {
-      avatar: "🚀",
-      handle: "GrowthEngine B2B",
-      time: "15 min ago",
-      texts: [
-        "How top B2B agencies automate client acquisition with zero manual ad spend 👇",
-        "We ran this for 47 agencies. Results were insane.",
-      ],
-      hashtags: "",
-      likes: 1240,
-      comments: 89,
-      type: "page",
-      slides: [],
-    },
-  },
-  {
-    id: "linkedin",
-    label: "LinkedIn",
-    color: "#0A66C2",
-    glow: "rgba(10,102,194,0.55)",
-    cardGrad: `linear-gradient(160deg, #001a33 0%, #002244 50%, #00111f 100%)`,
-    rot: 1,
-    vy: -8,
-    floatAnim: "float-c",
-    delay: 1.2,
-    post: {
-      avatar: "👔",
-      handle: "Alex Chen • CEO",
-      time: "1h ago",
-      texts: [
-        "The playbook we used to scale 15 client accounts past $50k MRR 🧵",
-        "Thread: Autonomous content + SEO + cold outreach = compound growth.",
-      ],
-      hashtags: "#LinkedInMarketing #B2B #AgencyGrowth",
-      likes: 3410,
-      comments: 287,
-      type: "founder",
-      slides: [],
-    },
-  },
-  {
-    id: "twitter",
-    label: "X",
-    color: "#E7E9EA",
-    glow: "rgba(231,233,234,0.35)",
-    cardGrad: `linear-gradient(160deg, #0d0d0d 0%, #111111 50%, #080808 100%)`,
-    rot: 9,
-    vy: 10,
+    rot: 8,
+    vy: 14,
     floatAnim: "float-a",
     delay: 1.8,
-    post: {
-      avatar: "⚡",
-      handle: "@growthengine",
-      time: "3h ago",
-      texts: [
-        "3 AI automation tools every agency owner must deploy in 2026 🧵",
-        "1/ Autonomous social publishing — set it once, it posts forever.",
-        "2/ Programmatic SEO — 1,480 pages, all ranking.",
-      ],
-      hashtags: "",
-      likes: 2187,
-      comments: 341,
-      type: "thread",
-      slides: [],
-    },
-  },
-  {
-    id: "youtube",
-    label: "YouTube",
-    color: "#FF0000",
-    glow: "rgba(255,0,0,0.5)",
-    cardGrad: `linear-gradient(160deg, #1a0000 0%, #200000 50%, #0d0000 100%)`,
-    rot: 17,
-    vy: 28,
-    floatAnim: "float-b",
-    delay: 2.4,
-    post: {
-      avatar: "🎬",
-      handle: "GrowthEngine",
-      time: "2 days ago",
-      texts: [
-        "Cold email that books 5 meetings/week",
-        "In under 30 seconds ⏱️",
-        "Watch how we automate the entire sequence.",
-      ],
-      hashtags: "#Shorts #ColdEmail #B2BMarketing",
-      likes: 18400,
-      comments: 923,
-      type: "shorts",
-      slides: [],
-    },
+    image: "/screenshots/facebookphone.png",
+    schedule: "Scheduled 4 PM",
+    leads: "+1 lead",
   },
 ];
 
@@ -273,59 +202,56 @@ function PhoneMockup({
   phone,
   isHovered,
   isActive,
+  onHover,
+  onLeave,
 }: {
   phone: (typeof PHONES)[0];
   isHovered: boolean;
   isActive: boolean;
+  onHover?: () => void;
+  onLeave?: () => void;
 }) {
-  const [likes, setLikes] = useState(phone.post.likes);
   const [showToast, setShowToast] = useState(false);
-  const { display, done } = useTyping(phone.post.texts, 36, 2600);
 
-  /* Tick likes every 3-7s when active */
+  /* Trigger "Published ✓" toast periodically or on hover */
   useEffect(() => {
     if (!isActive) return;
     const interval = setInterval(() => {
-      setLikes((l) => l + Math.floor(Math.random() * 3 + 1));
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [isActive]);
-
-  /* Show "Published ✓" toast when typing completes */
-  useEffect(() => {
-    if (done) {
       setShowToast(true);
-      const t = setTimeout(() => setShowToast(false), 2200);
+      const t = setTimeout(() => setShowToast(false), 2400);
       return () => clearTimeout(t);
-    }
-  }, [done]);
+    }, 6000 + phone.delay * 1200);
+    return () => clearInterval(interval);
+  }, [isActive, phone.delay]);
 
   const rot = isHovered ? 0 : phone.rot;
-  const vy = isHovered ? -20 : phone.vy;
-  const sc = isHovered ? 1.08 : 1;
+  const vy = isHovered ? -16 : phone.vy;
+  const sc = isHovered ? 1.05 : 1;
 
   return (
     <div
-      className="relative flex-shrink-0"
+      className="relative flex-shrink-0 group cursor-pointer"
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
       style={{
-        width: 185,
+        width: 205,
         zIndex: isHovered ? 30 : 10,
         transform: `rotate(${rot}deg) translateY(${vy}px) scale(${sc})`,
         transition: "transform 0.55s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease",
         animation: isHovered
           ? "none"
-          : `${phone.floatAnim} ${6.2 + phone.delay * 0.3}s ease-in-out ${phone.delay}s infinite`,
+          : `${phone.floatAnim} ${6.5 + phone.delay * 0.4}s ease-in-out ${phone.delay}s infinite`,
       }}
     >
       {/* Published toast */}
       {showToast && (
         <div
-          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap z-50 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5"
+          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap z-50 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg"
           style={{
             background: "linear-gradient(135deg,#22c55e,#16a34a)",
             color: "#fff",
-            boxShadow: "0 4px 20px rgba(34,197,94,0.5)",
-            animation: "toast-pop 2.2s ease forwards",
+            boxShadow: "0 4px 20px rgba(34,197,94,0.45)",
+            animation: "toast-pop 2.4s ease forwards",
           }}
         >
           <CheckCircle2 size={12} />
@@ -333,321 +259,104 @@ function PhoneMockup({
         </div>
       )}
 
-      {/* Floating notification chips */}
-      {isActive && (
-        <>
-          <div
-            className="absolute -right-14 top-10 whitespace-nowrap px-2 py-1 rounded-full text-[10px] font-bold border z-40"
-            style={{
-              background: "rgba(124,92,255,0.15)",
-              borderColor: "rgba(124,92,255,0.4)",
-              color: T.lavender,
-              animation: "chip-orbit 4s ease-in-out infinite",
-            }}
-          >
-            +1 lead 🎯
-          </div>
-          <div
-            className="absolute -left-16 bottom-16 whitespace-nowrap px-2 py-1 rounded-full text-[10px] font-bold border z-40"
-            style={{
-              background: "rgba(34,211,238,0.12)",
-              borderColor: "rgba(34,211,238,0.35)",
-              color: T.teal,
-              animation: "chip-orbit 5s ease-in-out 1.5s infinite reverse",
-            }}
-          >
-            Scheduled 4 PM 📅
-          </div>
-        </>
-      )}
+      {/* Platform chip at top */}
+      <div className="flex justify-center mb-2.5">
+        <div
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide transition-all duration-300"
+          style={{
+            background: `${phone.color}18`,
+            color: phone.color === "#E7E9EA" ? "#FFFFFF" : phone.color,
+            border: `1px solid ${phone.color}40`,
+            boxShadow: isHovered ? `0 0 16px ${phone.color}40` : "none",
+          }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: phone.color }} />
+          {phone.label}
+        </div>
+      </div>
 
-      {/* Card wrapper */}
+      {/* Realistic Smartphone Chassis */}
       <div
-        className="relative rounded-[28px] p-[2px]"
+        className="relative rounded-[36px] p-[3px] transition-all duration-500"
         style={{
           background: isHovered
             ? `conic-gradient(from 0deg, ${phone.color}, ${T.violet}, ${T.cyan}, ${phone.color})`
-            : `linear-gradient(135deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 100%)`,
+            : "linear-gradient(145deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.15) 100%)",
           boxShadow: isHovered
-            ? `0 32px 80px ${phone.glow}, 0 8px 24px rgba(0,0,0,0.7)`
-            : `0 16px 40px rgba(0,0,0,0.6)`,
-          transition: "box-shadow 0.4s ease",
+            ? `0 24px 60px ${phone.glow}, 0 10px 30px rgba(0,0,0,0.8)`
+            : "0 18px 45px rgba(0,0,0,0.65), 0 2px 10px rgba(0,0,0,0.5)",
         }}
       >
-        {/* Card background */}
+        {/* Hardware side buttons */}
+        {/* Left volume buttons */}
+        <div className="absolute -left-[3px] top-28 w-[3px] h-7 bg-neutral-600 rounded-l-sm opacity-80" />
+        <div className="absolute -left-[3px] top-28 w-[3px] h-7 bg-neutral-600 rounded-l-sm opacity-80" />
+        {/* Right power button */}
+        <div className="absolute -right-[3px] top-24 w-[3px] h-10 bg-neutral-600 rounded-r-sm opacity-80" />
+
+        {/* Inner phone body / chassis bezel */}
+        <div className="rounded-[33px] p-[6px] bg-[#0c0d14] relative">
+          {/* Phone Screen Container */}
+          <div
+            className="relative rounded-[27px] overflow-hidden bg-black border border-neutral-800 shadow-inner"
+            style={{ height: 390 }}
+          >
+            {/* Top Dynamic Island Notch */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+              <div className="w-16 h-3.5 bg-black rounded-full border border-neutral-800/80 flex items-center justify-between px-2 shadow-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-neutral-900 border border-neutral-700/60" />
+                <div className="w-1 h-1 rounded-full bg-blue-950/80" />
+              </div>
+            </div>
+
+            {/* Real Screenshot Image */}
+            <img
+              src={phone.image}
+              alt={`${phone.label} real screen`}
+              className="w-full h-full object-cover object-top select-none pointer-events-none transition-transform duration-700 group-hover:scale-105"
+              loading="eager"
+            />
+
+            {/* Realistic glass reflection overlay */}
+            <div
+              className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/[0.03] to-white/[0.12] z-20"
+              style={{ mixBlendMode: "screen" }}
+            />
+
+            {/* Bottom Home Indicator Bar */}
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-16 h-1 bg-white/40 rounded-full z-20 pointer-events-none" />
+          </div>
+        </div>
+      </div>
+
+      {/* Badges BELOW each phone */}
+      <div className="mt-3.5 flex flex-col items-center gap-1.5 w-full">
+        {/* Schedule 4 PM Badge */}
         <div
-          className="rounded-[26px] p-3 pb-4"
-          style={{ background: phone.cardGrad, minHeight: 340 }}
+          className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-md transition-all duration-300"
+          style={{
+            background: "rgba(34, 211, 238, 0.08)",
+            borderColor: "rgba(34, 211, 238, 0.3)",
+            color: "#22D3EE",
+            boxShadow: isHovered ? "0 4px 16px rgba(34,211,238,0.2)" : "0 2px 8px rgba(0,0,0,0.3)",
+          }}
         >
-          {/* Platform label chip */}
-          <div
-            className="mb-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold"
-            style={{ background: `${phone.color}22`, color: phone.color, border: `1px solid ${phone.color}44` }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: phone.color }} />
-            {phone.label}
-          </div>
+          <Clock className="w-3.5 h-3.5 text-[#22D3EE]" />
+          <span>Scheduled 4 PM</span>
+        </div>
 
-          {/* Phone body */}
-          <div
-            className="rounded-[20px] overflow-hidden"
-            style={{
-              background: phone.id === "twitter" ? "#000" : phone.id === "youtube" ? "#0f0f0f" : "#fff",
-              minHeight: 260,
-            }}
-          >
-            {/* Platform-specific screen */}
-            {phone.id === "instagram" && <IGScreen phone={phone} display={display} likes={likes} />}
-            {phone.id === "facebook" && <FBScreen phone={phone} display={display} likes={likes} />}
-            {phone.id === "linkedin" && <LIScreen phone={phone} display={display} likes={likes} />}
-            {phone.id === "twitter" && <XScreen phone={phone} display={display} likes={likes} />}
-            {phone.id === "youtube" && <YTScreen phone={phone} display={display} likes={likes} />}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Instagram Screen ───────────────────────────────────────── */
-function IGScreen({ phone, display, likes }: { phone: (typeof PHONES)[0]; display: string; likes: number }) {
-  return (
-    <div className="bg-white text-black" style={{ fontSize: 9 }}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-2.5 pt-2 pb-1.5 border-b border-gray-100">
-        <div className="flex items-center gap-1.5">
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs" style={{ background: "linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)" }}>
-            <span className="text-white text-[8px]">🏢</span>
-          </div>
-          <div>
-            <div className="font-bold text-[9px]">getyourclients</div>
-            <div className="text-gray-400 text-[7px]">Sponsored</div>
-          </div>
-        </div>
-        <MoreHorizontal size={10} className="text-gray-400" />
-      </div>
-      {/* Post image placeholder */}
-      <div className="relative mx-2 mt-1.5 rounded-lg overflow-hidden" style={{ height: 90, background: "linear-gradient(135deg,#7C5CFF22,#FF3D8B22)", border: "1px solid rgba(124,92,255,0.2)" }}>
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-          <div className="text-[18px]">📊</div>
-          <div className="text-[8px] font-bold text-gray-700 text-center px-2">5 Automation Strategies</div>
-        </div>
-        <div className="absolute top-1.5 right-1.5 bg-black/60 text-white text-[7px] px-1.5 py-0.5 rounded">
-          {phone.post.slides?.[0] || "1/5"}
-        </div>
-      </div>
-      {/* Actions */}
-      <div className="flex items-center gap-2.5 px-2.5 py-1.5">
-        <Heart size={11} className="text-rose-500" />
-        <MessageCircle size={11} className="text-gray-600" />
-        <Send size={11} className="text-gray-600" />
-        <BookmarkPlus size={11} className="ml-auto text-gray-600" />
-      </div>
-      {/* Likes */}
-      <div className="px-2.5 pb-1">
-        <span className="font-bold text-[9px]">{likes.toLocaleString()} likes</span>
-      </div>
-      {/* Caption */}
-      <div className="px-2.5 pb-2">
-        <span className="font-bold text-[8px]">getyourclients </span>
-        <span className="text-[8px] text-gray-700">{display}</span>
-        <span className="inline-block w-[1px] h-[9px] bg-gray-800 align-middle animate-pulse ml-px" />
-        <div className="text-[7px] text-blue-500 mt-0.5">{phone.post.hashtags}</div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Facebook Screen ────────────────────────────────────────── */
-function FBScreen({ phone, display, likes }: { phone: (typeof PHONES)[0]; display: string; likes: number }) {
-  return (
-    <div className="bg-white text-black" style={{ fontSize: 9 }}>
-      {/* Header */}
-      <div className="flex items-center gap-1.5 px-2.5 pt-2 pb-1.5">
-        <div className="w-6 h-6 rounded-full bg-white/10 border border-white/20 p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0">
-          <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
-        </div>
-        <div>
-          <div className="font-bold text-[9px]">{phone.post.handle}</div>
-          <div className="flex items-center gap-1 text-gray-400 text-[7px]">
-            <span>{phone.post.time}</span>
-            <span>· 🌐</span>
-          </div>
-        </div>
-        <MoreHorizontal size={10} className="ml-auto text-gray-400" />
-      </div>
-      {/* Post text */}
-      <div className="px-2.5 pb-2 text-[8px] text-gray-800 leading-relaxed">
-        {display}
-        <span className="inline-block w-[1px] h-[9px] bg-gray-700 align-middle animate-pulse ml-px" />
-      </div>
-      {/* Image */}
-      <div className="relative mx-0 overflow-hidden" style={{ height: 72, background: "linear-gradient(135deg,#4267B222,#1a3a6e33)" }}>
-        <div className="absolute inset-0 flex items-center justify-center gap-2">
-          <span className="text-[20px]">🤖</span>
-          <span className="text-[8px] font-bold text-gray-700">Client Acquisition Playbook</span>
-        </div>
-      </div>
-      {/* Reactions */}
-      <div className="flex items-center justify-between px-2.5 py-1.5 border-t border-gray-100 text-[8px] text-gray-500">
-        <span>❤️👍 {likes.toLocaleString()}</span>
-        <span>{phone.post.comments} comments</span>
-      </div>
-      {/* Action bar */}
-      <div className="flex items-center justify-around px-1 py-1 border-t border-gray-100">
-        {["👍 Like", "💬 Comment", "↗ Share"].map((a) => (
-          <span key={a} className="text-[7px] text-gray-500 font-semibold">{a}</span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ─── LinkedIn Screen ────────────────────────────────────────── */
-function LIScreen({ phone, display, likes }: { phone: (typeof PHONES)[0]; display: string; likes: number }) {
-  return (
-    <div className="bg-[#f3f2ef] text-black" style={{ fontSize: 9 }}>
-      {/* Header */}
-      <div className="bg-white px-2.5 pt-2 pb-1.5 flex items-start gap-1.5">
-        <div className="w-7 h-7 rounded-full bg-[#0A66C2] flex items-center justify-center text-white font-bold text-[9px] flex-shrink-0">AC</div>
-        <div className="flex-1 min-w-0">
-          <div className="font-bold text-[9px] truncate">{phone.post.handle}</div>
-          <div className="text-gray-500 text-[7px]">CEO • 500+ connections</div>
-          <div className="text-gray-400 text-[7px]">{phone.post.time} · 🌐</div>
-        </div>
-        <ChevronRight size={9} className="text-[#0A66C2]" />
-      </div>
-      {/* Post */}
-      <div className="bg-white px-2.5 py-1.5 text-[8px] leading-relaxed text-gray-800">
-        {display}
-        <span className="inline-block w-[1px] h-[9px] bg-gray-700 align-middle animate-pulse ml-px" />
-        {phone.post.hashtags && (
-          <div className="text-[#0A66C2] text-[7px] mt-0.5">{phone.post.hashtags}</div>
-        )}
-      </div>
-      {/* Stats */}
-      <div className="bg-white px-2.5 py-1 text-gray-500 text-[7px] border-t border-gray-100">
-        👍❤️ {likes.toLocaleString()} · {phone.post.comments} comments
-      </div>
-      {/* Actions */}
-      <div className="bg-white flex items-center justify-around py-1 border-t border-gray-100">
-        {[
-          { icon: ThumbsUp, label: "Like" },
-          { icon: MessageCircle, label: "Comment" },
-          { icon: Repeat2, label: "Repost" },
-          { icon: Send, label: "Send" },
-        ].map(({ icon: Icon, label }) => (
-          <div key={label} className="flex flex-col items-center gap-0.5">
-            <Icon size={9} className="text-gray-500" />
-            <span className="text-[6px] text-gray-500">{label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ─── X (Twitter) Screen ─────────────────────────────────────── */
-function XScreen({ phone, display, likes }: { phone: (typeof PHONES)[0]; display: string; likes: number }) {
-  return (
-    <div className="bg-black text-white" style={{ fontSize: 9 }}>
-      {/* Tweet */}
-      <div className="px-2.5 pt-2 pb-1.5">
-        <div className="flex gap-1.5">
-          <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-[9px] flex-shrink-0">⚡</div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1">
-              <span className="font-bold text-[9px]">GrowthEngine</span>
-              <span className="text-gray-500 text-[7px]">· {phone.post.time}</span>
-            </div>
-            <span className="text-[8px] text-gray-400">@growthengine</span>
-          </div>
-        </div>
-        <div className="mt-1.5 text-[8px] text-white leading-relaxed">
-          {display}
-          <span className="inline-block w-[1px] h-[9px] bg-gray-200 align-middle animate-pulse ml-px" />
-        </div>
-        {/* Thread indicator */}
-        <div className="mt-1.5 text-[7px] text-[#1d9bf0] font-semibold">Show this thread</div>
-      </div>
-      {/* Actions */}
-      <div className="px-2.5 pb-2 flex items-center justify-between border-t border-gray-800 pt-1.5">
-        <div className="flex items-center gap-0.5 text-gray-500">
-          <MessageCircle size={8} /><span className="text-[7px] ml-0.5">{phone.post.comments}</span>
-        </div>
-        <div className="flex items-center gap-0.5 text-gray-500">
-          <Repeat2 size={8} /><span className="text-[7px] ml-0.5">841</span>
-        </div>
-        <div className="flex items-center gap-0.5 text-rose-400">
-          <Heart size={8} /><span className="text-[7px] ml-0.5">{likes.toLocaleString()}</span>
-        </div>
-        <div className="flex items-center gap-0.5 text-gray-500">
-          <Eye size={8} /><span className="text-[7px] ml-0.5">48K</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── YouTube Shorts Screen ──────────────────────────────────── */
-function YTScreen({ phone, display, likes }: { phone: (typeof PHONES)[0]; display: string; likes: number }) {
-  const [progress, setProgress] = useState(0.3);
-  useEffect(() => {
-    const iv = setInterval(() => setProgress((p) => (p >= 1 ? 0 : p + 0.004)), 100);
-    return () => clearInterval(iv);
-  }, []);
-
-  return (
-    <div className="bg-[#0f0f0f] text-white relative overflow-hidden" style={{ minHeight: 260, fontSize: 9 }}>
-      {/* Video BG */}
-      <div
-        className="absolute inset-0 flex flex-col items-center justify-center"
-        style={{ background: "linear-gradient(180deg,#1a0000 0%,#330000 50%,#0d0000 100%)" }}
-      >
-        <span className="text-[32px]">🎬</span>
-        <div className="text-[8px] text-gray-300 mt-1 text-center px-3 font-semibold leading-tight">
-          {display}
-          <span className="inline-block w-[1px] h-[9px] bg-gray-100 align-middle animate-pulse ml-px" />
-        </div>
-      </div>
-
-      {/* Right action bar */}
-      <div className="absolute right-2 bottom-16 flex flex-col items-center gap-3">
-        {[
-          { icon: Heart, val: (likes / 1000).toFixed(1) + "K", cls: "text-white" },
-          { icon: MessageCircle, val: phone.post.comments, cls: "text-white" },
-          { icon: Repeat2, val: "Share", cls: "text-white" },
-        ].map(({ icon: Icon, val, cls }) => (
-          <div key={String(val)} className="flex flex-col items-center gap-0.5">
-            <div className="w-6 h-6 rounded-full bg-black/40 flex items-center justify-center">
-              <Icon size={9} className={cls} />
-            </div>
-            <span className="text-[6px] text-white">{val}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Bottom overlay */}
-      <div className="absolute bottom-0 left-0 right-0 p-2" style={{ background: "linear-gradient(to top,rgba(0,0,0,0.9),transparent)" }}>
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <div className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center">
-            <Play size={7} className="text-white fill-white" />
-          </div>
-          <span className="text-[8px] font-semibold">GrowthEngine</span>
-          <span className="ml-auto text-[7px] bg-white/90 text-black px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5">
-            <Bell size={6} />Subscribe
-          </span>
-        </div>
-        {/* Progress bar */}
-        <div className="w-full h-[3px] bg-white/20 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${progress * 100}%`, background: "#FF0000" }}
-          />
-        </div>
-        <div className="flex justify-between text-[6px] text-gray-300 mt-0.5">
-          <span>0:{Math.floor(progress * 30).toString().padStart(2, "0")}</span>
-          <span>0:30</span>
+        {/* Leads Badge */}
+        <div
+          className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border backdrop-blur-md transition-all duration-300"
+          style={{
+            background: "rgba(124, 92, 255, 0.12)",
+            borderColor: "rgba(124, 92, 255, 0.35)",
+            color: "#C9B8FF",
+            boxShadow: isHovered ? "0 4px 16px rgba(124,92,255,0.25)" : "0 2px 8px rgba(0,0,0,0.3)",
+          }}
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="font-bold text-white">+1 lead</span>
         </div>
       </div>
     </div>
@@ -2081,29 +1790,23 @@ export default function HomePage() {
             </span>
           </h2>
           <p className="reveal-up mt-4 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: T.muted }}>
-            Watch the engine auto-generate and publish B2B content across all five platforms simultaneously.
+            Watch the engine auto-generate and publish B2B content across YouTube, X, Instagram, and Facebook simultaneously.
           </p>
         </div>
 
         {/* Rail */}
-        <div className="relative flex items-end justify-center gap-4 md:gap-6 overflow-visible px-4"
-          style={{ minHeight: 440 }}>
+        <div
+          className="relative flex items-end justify-start md:justify-center gap-4 sm:gap-6 overflow-x-auto md:overflow-visible px-4 pt-4 pb-6 scrollbar-none"
+          style={{ minHeight: 570 }}
+        >
           {PHONES.map((phone, i) => (
             <PhoneMockup
               key={phone.id}
               phone={phone}
               isHovered={hoveredPhone === i}
               isActive={hoveredPhone === null || hoveredPhone === i}
-            // @ts-ignore — event delegation via wrapper
-            />
-          ))}
-          {/* Invisible hover zones */}
-          {PHONES.map((_, i) => (
-            <div key={i}
-              className="absolute inset-y-0"
-              style={{ left: `${(i / PHONES.length) * 100}%`, width: `${100 / PHONES.length}%`, cursor: "pointer" }}
-              onMouseEnter={() => setHoveredPhone(i)}
-              onMouseLeave={() => setHoveredPhone(null)}
+              onHover={() => setHoveredPhone(i)}
+              onLeave={() => setHoveredPhone(null)}
             />
           ))}
         </div>
