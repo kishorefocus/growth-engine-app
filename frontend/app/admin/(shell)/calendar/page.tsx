@@ -576,8 +576,8 @@ export default function CalendarPage() {
                     {post.platform === "x" && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
-                            GC
+                          <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center p-1 overflow-hidden">
+                            <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
                           </div>
                           <div>
                             <div className="flex items-center gap-1">
@@ -601,8 +601,8 @@ export default function CalendarPage() {
                     {post.platform === "linkedin" && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-xs font-bold text-white">
-                            GC
+                          <div className="w-8 h-8 rounded bg-slate-900 border border-white/10 flex items-center justify-center p-1 overflow-hidden">
+                            <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
                           </div>
                           <div>
                             <span className="text-xs font-bold text-white">GetyourclientsB2B</span>
@@ -623,8 +623,8 @@ export default function CalendarPage() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-pink-500 p-0.5">
-                            <div className="w-full h-full bg-black rounded-full flex items-center justify-center text-[10px] font-bold text-white">
-                              GC
+                            <div className="w-full h-full bg-black rounded-full flex items-center justify-center p-1 overflow-hidden">
+                              <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
                             </div>
                           </div>
                           <span className="text-xs font-bold text-white">getyourclientsb2b</span>
@@ -639,8 +639,8 @@ export default function CalendarPage() {
                     {post.platform === "facebook" && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">
-                            f
+                          <div className="w-8 h-8 rounded-full bg-slate-900 border border-white/10 flex items-center justify-center p-1 overflow-hidden">
+                            <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
                           </div>
                           <span className="text-xs font-bold text-white">GetyourclientsB2B</span>
                         </div>

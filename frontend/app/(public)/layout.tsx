@@ -57,11 +57,11 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           <div className="flex items-center gap-6 lg:gap-8">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-500 via-pink-500 to-green-500 flex items-center justify-center font-black text-white text-sm shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 group-hover:scale-105 transition-all">
-                G
+              <div className="w-9 h-9 rounded-2xl bg-slate-900/5 dark:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center p-1.5 shadow-lg shadow-blue-500/10 group-hover:shadow-blue-500/25 group-hover:scale-105 transition-all overflow-hidden">
+                <img src="/images/logo.png" alt="GetYourClientsB2B Logo" className="w-full h-full object-contain" />
               </div>
               <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
-                GlobalReach
+                GetYourClientsB2B
               </span>
             </Link>
 
@@ -152,14 +152,16 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 via-pink-500 to-green-500 flex items-center justify-center font-black text-xs text-white shadow-md shadow-blue-500/20">G</div>
-              <span className="font-extrabold text-slate-900 dark:text-white">GlobalReach</span>
+              <div className="w-8 h-8 rounded-xl bg-slate-900/5 dark:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center p-1 shadow-md shadow-blue-500/10 overflow-hidden">
+                <img src="/images/logo.png" alt="GetYourClientsB2B Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="font-extrabold text-slate-900 dark:text-white">GetYourClientsB2B</span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">
               Automated B2B client acquisition engine with real-time contact verification, compliant email sequencing, and multi-channel content planning.
             </p>
             <p className="text-xs text-slate-400 dark:text-slate-600">
-              © {new Date().getFullYear()} GlobalReach Inc. All rights reserved.
+              © {new Date().getFullYear()} GetYourClientsB2B Inc. All rights reserved.
             </p>
           </div>
 

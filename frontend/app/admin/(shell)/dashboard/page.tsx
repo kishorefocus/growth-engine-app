@@ -1080,7 +1080,10 @@ export default function DashboardPage() {
                 <span>↵ to select</span>
                 <span>ESC to close</span>
               </div>
-              <span className="text-violet-400 font-mono">GetYourClientsB2B v2.0</span>
+              <span className="text-violet-400 font-mono inline-flex items-center gap-1.5">
+                <img src="/images/logo.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                GetYourClientsB2B v2.0
+              </span>
             </div>
           </div>
         </div>

@@ -464,7 +464,9 @@ function FBScreen({ phone, display, likes }: { phone: (typeof PHONES)[0]; displa
     <div className="bg-white text-black" style={{ fontSize: 9 }}>
       {/* Header */}
       <div className="flex items-center gap-1.5 px-2.5 pt-2 pb-1.5">
-        <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[9px] font-bold">G</div>
+        <div className="w-6 h-6 rounded-full bg-white/10 border border-white/20 p-0.5 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
+        </div>
         <div>
           <div className="font-bold text-[9px]">{phone.post.handle}</div>
           <div className="flex items-center gap-1 text-gray-400 text-[7px]">
@@ -976,7 +978,7 @@ function DashboardPreview(_props: DashboardPreviewProps) {
                 className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono"
                 style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "#A1A6C0", minWidth: 320 }}
               >
-                <span className="text-emerald-400 text-[10px]">🔒</span>
+                <img src="/images/logo.png" alt="" className="w-3.5 h-3.5 object-contain" />
                 <span>growth.getyourclientsb2b.com</span>
                 <span style={{ color: "rgba(161,166,192,0.5)" }}>/admin/dashboard</span>
               </div>
@@ -1632,7 +1634,8 @@ function ComparisonTable() {
           </div>
           <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mb-3 tracking-tight leading-[1.12]">
             Why Agencies Choose{" "}
-            <span className="gradient-text italic font-display">
+            <span className="gradient-text italic font-display inline-flex items-center gap-2">
+              <img src="/images/logo.png" alt="" className="w-8 h-8 object-contain inline-block align-middle" />
               GetYourClientsB2B
             </span>
           </h2>
@@ -1917,10 +1920,10 @@ export default function HomePage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3" style={{ animation: "fade-slide-right 0.6s ease-out both" }}>
-            <div className="relative w-10 h-10 rounded-2xl flex items-center justify-center"
-              style={{ background: T.grad, boxShadow: `0 0 24px rgba(124,92,255,0.5)` }}>
-              <TrendingUp className="w-5 h-5 text-white" />
+          <Link href="/" className="flex items-center gap-3" style={{ animation: "fade-slide-right 0.6s ease-out both" }}>
+            <div className="relative w-10 h-10 rounded-2xl flex items-center justify-center p-1.5 overflow-hidden"
+              style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.15)", boxShadow: `0 0 24px rgba(124,92,255,0.3)` }}>
+              <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -1934,7 +1937,7 @@ export default function HomePage() {
               </div>
               <p className="text-[11px] hidden sm:block" style={{ color: T.muted }}>Social Automation · SEO · Cold Outreach</p>
             </div>
-          </div>
+          </Link>
 
           {/* Nav */}
           <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold">
@@ -2441,8 +2444,10 @@ export default function HomePage() {
           {/* Row 1: Brand */}
           <div className="flex flex-col items-center text-center mb-10">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm"
-                style={{ background: T.grad, boxShadow: "0 0 20px rgba(124,92,255,0.5)" }}>G</div>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center p-1.5 overflow-hidden"
+                style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.15)", boxShadow: "0 0 20px rgba(124,92,255,0.3)" }}>
+                <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
+              </div>
               <span className="font-display font-bold text-white text-lg tracking-tight">
                 GetYourClientsB2B Growth Engine
               </span>

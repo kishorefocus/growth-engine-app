@@ -25,6 +25,11 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "GetyourclientsB2B Growth Engine",
   description: "Internal admin for GetyourclientsB2B — cold email, social content, SEO, and launch tracking.",
+  icons: {
+    icon: "/images/logo.png",
+    shortcut: "/images/logo.png",
+    apple: "/images/logo.png",
+  },
 };
 
 export default function RootLayout({

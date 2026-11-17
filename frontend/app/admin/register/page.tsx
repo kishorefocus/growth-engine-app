@@ -257,9 +257,11 @@ export default function RegisterPage() {
 
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: T.grad, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 16, boxShadow: `0 4px 16px ${T.violet}50` }}>G</div>
+          <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", padding: 5, boxShadow: `0 4px 16px ${T.violet}40`, overflow: "hidden" }}>
+            <img src="/images/logo.png" alt="GetYourClientsB2B" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
           <div>
-            <div style={{ color: "#fff", fontWeight: 800, fontSize: 13, fontFamily: "'Space Grotesk',sans-serif" }}>GetYourClientsB2B Growth Engine</div>
+            <div style={{ color: "#fff", fontWeight: 800, fontSize: 13.5, fontFamily: "'Space Grotesk',sans-serif" }}>GetYourClientsB2B Growth Engine</div>
             <div style={{ color: T.muted, fontSize: 11 }}>New Client Setup</div>
           </div>
           <a href="/admin/login" style={{ marginLeft: "auto", color: T.lavender, fontSize: 12, fontWeight: 600, textDecoration: "none" }}>Sign in →</a>

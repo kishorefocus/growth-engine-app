@@ -133,9 +133,11 @@ function LoginForm() {
         >
           {/* Logo */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: T.grad, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, color: "#fff", fontSize: 18, boxShadow: `0 4px 20px ${T.violet}60` }}>G</div>
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", padding: 6, boxShadow: `0 4px 20px ${T.violet}40`, overflow: "hidden" }}>
+              <img src="/images/logo.png" alt="GetYourClientsB2B" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            </div>
             <div>
-              <div style={{ color: "#fff", fontWeight: 800, fontSize: 14, fontFamily: "'Space Grotesk',sans-serif" }}>GetYourClientsB2B</div>
+              <div style={{ color: "#fff", fontWeight: 800, fontSize: 15, fontFamily: "'Space Grotesk',sans-serif" }}>GetYourClientsB2B</div>
               <div style={{ display: "inline-flex", alignItems: "center", marginTop: 2, padding: "1px 8px", borderRadius: 999, fontSize: 10, fontWeight: 700, background: `${T.violet}22`, border: `1px solid ${T.violet}44`, color: T.lavender }}>Growth Engine v2.0</div>
             </div>
           </div>

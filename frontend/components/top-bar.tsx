@@ -55,8 +55,9 @@ export function TopBar({ onMenuClick }: TopBarProps) {
         </button>
 
         <div className="flex items-center gap-2.5">
+          <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-5 h-5 object-contain md:hidden" />
           <div
-            className="w-1.5 h-5 rounded-full"
+            className="w-1.5 h-5 rounded-full hidden md:block"
             style={{ background: "linear-gradient(180deg, #7C5CFF, #22D3EE)" }}
           />
           <h1

@@ -80,23 +80,24 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         >
           <Link href="/admin/dashboard" className="flex items-center gap-3 group">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-base shadow-lg transition-transform group-hover:scale-105"
+              className="w-9 h-9 rounded-xl flex items-center justify-center p-1.5 shadow-lg transition-transform group-hover:scale-105 overflow-hidden"
               style={{
-                background: "linear-gradient(135deg, #7C5CFF 0%, #3B82F6 50%, #22D3EE 100%)",
-                boxShadow: "0 0 20px rgba(124, 92, 255, 0.45)",
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                boxShadow: "0 0 20px rgba(124, 92, 255, 0.35)",
               }}
             >
-              G
+              <img src="/images/logo.png" alt="GetYourClientsB2B" className="w-full h-full object-contain" />
             </div>
             <div>
               <span
                 className="font-extrabold text-sm text-white block tracking-tight leading-none"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                GrowthEngine
+                GetYourClientsB2B
               </span>
               <span className="text-[10px] font-medium text-[#A1A6C0] tracking-wider block mt-0.5">
-                AUTONOMOUS B2B
+                GROWTH ENGINE
               </span>
             </div>
           </Link>
